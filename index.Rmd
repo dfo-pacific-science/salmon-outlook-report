@@ -41,7 +41,7 @@ french_abstract: |
 citation_french: "Last, F.M. et Smith, A.B. 2022. Titre ici (Nom d'espèce latin). Rapp. tech. can. sci. halieut. aquat. nnn : v + 18 p. https://doi.org/##.####/xxxxx"
 show_continued_text: true
 output:
- csasdown::techreport_word:
+ csasdown::techreport_pdf:
    french: false
    # copy_sty is a toggle to copy the style file from the csasdown package every time you compile
    # the document. If false, any changes you have made to the style file in your project
@@ -83,8 +83,6 @@ header-includes:
 
 ```{r setup, echo=FALSE, cache=FALSE, message=FALSE, results='hide', warning=FALSE}
 library(knitr)
-library(flextable)
-library(officer)
 if (is_latex_output()) {
   knitr_figs_dir <- "knitr-figs-pdf/"
   knitr_cache_dir <- "knitr-cache-pdf/"

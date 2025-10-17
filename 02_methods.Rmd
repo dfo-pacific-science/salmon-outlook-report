@@ -124,68 +124,6 @@ read_csv(file.path("data", "multirow.csv")) |>
 
 ```
 
-
-```{r table-narrative, results='asis'}
-library(flextable)
-library(officer)
-
-# Fake narrative text (~250 words)
-narrative_text <- paste(
-  rep("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ", 20),
-  collapse = " "
-)
-
-# --- Main data table (7 cols) ---
-df <- data.frame(
-  Resolution       = c("SMU", "Other"),
-  Name             = c("WCVI Chinook", "Conuma River"),
-  `Avg Run/Avg Spawners` = c("-", "50,000"),
-  `LRP/LBB`        = c("-", "n/a"),
-  `Mgmt Target`    = c("Maximum escapement: 40,000", "10,000"),
-  `Prelim Forecast`= c("-", "58,000"),
-  `Outlook Category` = c("1", "4"),
-  check.names = FALSE, stringsAsFactors = FALSE
-)
-
-ft <- flextable(df) %>%
-  theme_vanilla() %>%
-  bold(part = "header") %>%
-  color(part = "header", color = "black") %>%
-  bg(part = "header", bg = "grey90") %>%
-  border_remove() %>%
-  border_outer(border = officer::fp_border(color = "black", width = 1)) %>%
-  border_inner_h(border = officer::fp_border(color = "black", width = 0.5)) %>%
-  border_inner_v(border = officer::fp_border(color = "black", width = 0.5)) %>%
-  autofit() %>%
-  set_table_properties(layout = "autofit", width = 1)
-
-
-
-# --- Add top block values (plain text row) ---
-ft <- add_header_row(
-  x = ft,
-  values = c("WCVI Chinook (includes 3 CUs)", narrative_text),
-  colwidths = c(1, 6)
-)
-
-ft <- bold(ft, i = 1, part = "header", bold = FALSE)
-ft <- bg(ft, i = 1, part = "header", bg = "white")
-
-# --- Add top row (SMU / Narrative) ---
-ft <- add_header_row(
-  x = ft,
-  values = c("SMU", "Narrative"),
-  colwidths = c(1, 6)
-)
-ft <- bold(ft, i = 1, part = "header", bold = TRUE)
-ft <- bg(ft, i = 1, part = "header", bg = "grey90")
-ft <- color(ft, i = 1, part = "header", color = "black")
-
-ft
-
-```
-
-
 While building complex tables you must take an iterative approach once you've made the basic table and want to add detailed elements: add one element; test; fix errors; fix logic/design issues; repeat. In the construction of Table \@ref(tab:multi-row-table), one line of code at a time was added with the results checked and made sure to be correct before adding the next line of code.
 
 On the following pages we have an example of a long and wide table which is in landscape mode. This is accomplished by setting `landscape = TRUE` in the `csas_table()` call. You can change the font size if the table it still too large and overlaps the header and footer lines.
