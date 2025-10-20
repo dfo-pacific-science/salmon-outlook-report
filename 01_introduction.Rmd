@@ -27,87 +27,41 @@ For salmon, the working definition of a 'stock management unit' (SMU) is a 'grou
 
 ### Biological and Management References
 
-The purpose of a stock forecast or outlook is to provide information to harvest managers to potentially adjust harvest plans according to the expected stock abundance. Ideally in that regard, the status of the stock management unit (or sub-unit) is assessed against specified limits and targets and pre-defined harvest strategies (or harvest control rules) are in place that define the actions required to meet targets and avoid limits.\
+The purpose of a stock forecast or outlook is to provide information to harvest managers to potentially adjust harvest plans according to the expected stock abundance. Ideally in that regard, the status of the stock management unit (or sub-unit) is assessed against specified limits and targets and pre-defined harvest strategies (or harvest control rules) are in place that define the actions required to meet targets and avoid limits.
+
 Therefore, where biological benchmarks and/or limit reference points are defined for CUs or SMUs, respectively, they are noted in the Outlook/Forecast tables below. Similarly, if management targets are in place they are identified. Lack of these references is a gap and work is on-going to develop methods and complete the analyses to define these references. The summary below describes how these biological and management references are applied and interpreted.
 
 ### WSP Lower Biological Benchmarks and Limit Reference Points (LRPs)
 
 For implementation of the Wild Salmon Policy, the status of salmon Conservation Units (CU) is assessed against 'biological benchmarks'. The lower biological benchmark allows for substantial buffer between it and the level of abundance at which the stock would be considered at risk of extinction and is generally estimated as S~GEN~. The upper biological benchmark delineates the 'amber' from 'green' WSP status zone and is generally estimated as .80 S~MSY~. For more data-limited systems (i.e. where it is not possible to numerically estimate stock-recruit parameters), proxies for lower and upper biological benchmarks may be applied. For example, the lower and upper biological benchmarks are estimated as .25 and .60 percentiles of the long-term observed spawning abundance.
 
-```{r benchmarks, out.width = "100%", fig.cap = "Benchmarks and biological status zones for CU assessments.", echo=FALSE}
-knitr::include_graphics("data/figure1benchmarks.png")
+```{r benchmarks, out.width = "70%", fig.cap = "Benchmarks and biological status zones for CU assessments.", echo=F}
+knitr::include_graphics("data/benchmarks.png")
 ```
 
+Under DFO’s Precautionary Approach (PA), the stock management unit (SMU) limit reference point (LRP) is a biologically defined reference that delineates the ‘critical zone’ from the ‘cautious zone’ for harvest management.  It represents the status below which serious harm is occurring to the stock. There may also be resultant impacts to the ecosystem, associated species and a long-term loss of harvest opportunities.
 
-
-```{r para-chap01-1-en, eval=!fr(), results = 'asis'}
-cat("Welcome to report generation using `csasdown`. Included in this example document are many useful bits of information on how to write a reproducible report document using  the `csasdown` package, which is based on [Rmarkdown](https://rmarkdown.rstudio.com/) and [Bookdown](https://bookdown.org/). The information given in this example document should be used with all three `csasdown` document types: Research Document (`resdoc`), Science Response (`sr`), and Technical Report (`techreport`).")
+```{r precautionary, out.width = "70%", fig.cap = "Schematic of a generalized harvest strategy under DFO’s PA.", echo=F}
+knitr::include_graphics("data/precautionaryApproach.png")
 ```
 
-```{r para-chap01-1-fr, eval=fr(), results = 'asis', needs_trans = FALSE}
-cat("(This is where you would place the French translation of the paragraph. Once you do, set needs_trans to FALSE in the chunk header) Bienvenue dans la génération de rapports à l'aide de `csasdown`. Ce document d'exemple contient de nombreuses informations utiles sur la façon d'écrire un rapport reproductible à l'aide du paquetage `csasdown`, qui est basé sur [Rmarkdown] (https://rmarkdown.rstudio.com/) et [Bookdown] (https://bookdown.org/). Les informations données dans cet exemple doivent être utilisées avec les trois types de documents `csasdown` : Document de recherche (`resdoc`), Réponse scientifique (`sr`), et Rapport technique (`techreport`).
+Given the intent is similar between the WSP and DFO’s PA, it is practical to equate the SMU LRPs with lower biological benchmarks at the CU level. However, the WSP recognizes that serious harm to species occurs when CUs are depleted or lost.  Therefore, to be consistent with the WSP, LRPs at the SMU scale should consider CU-scale biodiversity.  Methodological approaches for defining LRPs are being developed to ensure CU-level biodiversity is considered and for both data-rich and data-limited assessment systems.   
 
-Traduit avec www.DeepL.com/Translator (version gratuite)")
-```
+### Management Targets and Operational Control Points
 
-```{r para-chap02-1-en, eval=!fr(), results = 'asis'}
-cat("
-If you get stuck on anything, read the `csasdown` [README](https://github.com/pbs-assess/csasdown/blob/master/README.md) carefully and all the [Wiki pages](https://github.com/pbs-assess/csasdown/wiki). There are many tips and tricks located in those pages. 
+While management targets or operational control points are often informed by biological benchmarks and stock-recruit reference points, they also consider other objectives such as maximizing sustainable harvest, avoiding over-fishing, maintaining stable access and opportunity, allocation objectives such as how catch is distributed among harvesters, etc.  As such, they are tightly linked to the harvest strategy and fishery management measures.  
 
-Inserting a hyperlink in Rmarkdown is easy, just look at the code for the paragraph above. It is located in **01_introduction.Rmd**
+In some cases, the management target may be a simple trigger such as when a ‘surplus-to-escapement-target’ harvest control rule is in place.  In other cases, there may be multiple management targets (or operational control points) used to adjust the harvest control rule at different levels of abundance.   
 
-Include references in the **bib/refs.bib** file in the same format as the example that is already in the file. This is called *BiBLaTeX* format. Once you have added the reference, you can cite it using Rmarkdown in the following ways:
+Note that an SMU can be below its management target (and therefore subject to some level of harvest restriction as per the harvest control strategy), but well above levels that represent a serious conservation concern (i.e. the LRP or LBB).  In other situations, an SMU may be well above its target but subject to harvest restrictions because the stock rears or co-migrates in mixed-stock fishing areas with other SMUs (or CUs) that are near or below their LRP (or LBB).
 
-1. In parentheses: `[@edwards2013]` - renders as: [@edwards2013]
-2. Inline: `@edwards2013` - renders as: @edwards2013
-3. Without author: `[-@edwards2013]` - renders as: [-@edwards2013]
+## Stock Outlooks
 
-Some references: [@francis2011, @edwards2013, @swainbenoit2015].
+### Categorical Stock Outlooks
 
-Note that the year part of the citation is clickable and will take you directly to the reference in the References section.
+For the ‘Preliminary Outlook’ and for those SMUs for which statistical forecasts are not produced, either because the SMU is not intensively managed and/or is more data limited, categorical ‘outlooks’ are assigned.  These outlooks are based on expert opinion qualified with information from monitoring programs.  For each stock grouping an outlook of expected spawning abundance is assigned based on a scale of 1 to 4.
 
-Here is an example equation with the code used to generate it. Note that `csasdown` automatically numbers it on the right-hand side of the page. It does this consecutively throughout the document sections, but appendices are each numbered on their own, e.g. A.1, A.2, ... for Appendix A, and B.1, B.2, ... for Appendix B.")
-```
+For CUs or SMUs with references in place (i.e. either lower (LBB) and upper biological benchmarks (UBB) and/or lower reference points (LRP) and upper stock references (USR) and Target Reference Point (TRP), these references are used to assign Outlook category.  For more data-limited CUs or SMUs (i.e. those without defined stock or management references), expected spawning abundance is compared to average or median abundance based on available information.
 
-```{r para-chap02-1-fr, eval = fr(), results = 'asis', needs_trans = TRUE}
-<<para-chap02-1-en>>
-```
+SMUs for which insufficient data area available to determine an Outlook are noted as ‘Data Deficient’.
 
-```{=tex}
-\begin{equation}
-  1 + 1
-  \label{eq:test}
-\end{equation}
-```
-A reference can be included anywhere in the text, to refer to a section or appendix. For the first appendix in this document, the code looks like this: `\@ref(app:first-appendix)`. Adding that code inline will create a clickable link in the output file: See Appendix \@ref(app:first-appendix).
-
-The code inside the parentheses comes from the tag after the header for the section. For the appendix, the whole header line looks like:
-
-`# THE FIRST APPENDIX {#app:first-appendix}`
-
-Everything in the curly braces except for the hash sign is the tag you use to reference a section.
-
-This section's header line looks like this:
-
-`# Introduction {#sec:introduction}`
-
-And can be referenced like this: `\@ref(sec:introduction)` which renders to this: Section \@ref(sec:introduction).
-
-A reference to the equation above looks like this: `\@ref(eq:test)` and renders to this: Figure \@ref(eq:test). The labels for any type of reference (except for bibliography citations) are shown in Table \@ref(tab:ref-tab).
-
-```{r ref-tab}
-refs_tab <- tribble(
-     ~`Reference type`,                    ~`Rmarkdown code`,
-             "Section",        "`\\@ref(sec:section-label)`",
-          "Subsection",  "`\\@ref(subsec:subsection-label)`",
-            "Appendix",       "`\\@ref(app:appendix-label)`",
-            "Equation",        "`\\@ref(eq:equation-label)`",
-              "Figure",         "`\\@ref(fig:figure-label)`",
-               "Table",          "`\\@ref(tab:table-label)`")
-
-csasdown::csas_table(refs_tab,
-  align = c("r", "r"),
-  caption = ifelse(fr(),
-                   "French goes here",
-                   "Reference types and their Rmarkdown reference codes."))
-```
