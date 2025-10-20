@@ -2,6 +2,38 @@
 
 <!-- An example of how to include text based on the language. The two chunks below shows how switching the toggle in the YAML header for french allows inclusion/rejection of a paragraph. -->
 
+## PURPOSE
+
+The purpose of this document is to provide an 'Outlook' of expected abundance of salmon in 2025 to inform the harvest planning process.
+
+The Outlook provides either an expected abundance for those stocks with statistical forecasts or a categorical abundance expectation based expert opinion.
+
+## OUTLOOK FORMAT
+
+The Outlook document contains:
+
+1.  CU groupings with stock management units (SMUs) to better inform decision-making consistent with Fishery Act and IFMP requirements.
+2.  SMUs with statistical forecasts, which are consolidated and reported in the Outlook Document.
+3.  SMUs without statistical forecasts, have a standardized interpretation of SMU status in relation to outlook categories.
+4.  Information on SMU biological benchmarks and management references (where defined) for additional context.
+
+## BACKGROUND
+
+### Stock Management Units
+
+For the 2025 Outlook, 'Stock Management Units' (SMUs) are used to describe stock aggregates that inform development of Integrated Fisheries Management Plans (IFMPs) for salmon. This is required for implementation of the fisheries-related revisions to the *Fishery Act*.
+
+For salmon, the working definition of a 'stock management unit' (SMU) is a 'group of one or more conservation units (CUs) that are managed together with the objective of achieving a joint status', meaning harvest control rules would apply to the aggregate, at least in a coarse sense. Use of SMUs does not preclude considerations related to conserving CU-level diversity, but rather is a practical aggregation of CUs for harvest planning and reporting purposes. That is, it is the scale at which harvest management plans, or better, management and assessment procedures, are developed in Integrated Fisheries Management Plans (IFMPs). In many cases, elements of the Precautionary Approach are implemented at finer scales of organization within a SMU.
+
+### Biological and Management References
+
+The purpose of a stock forecast or outlook is to provide information to harvest managers to potentially adjust harvest plans according to the expected stock abundance. Ideally in that regard, the status of the stock management unit (or sub-unit) is assessed against specified limits and targets and pre-defined harvest strategies (or harvest control rules) are in place that define the actions required to meet targets and avoid limits.\
+Therefore, where biological benchmarks and/or limit reference points are defined for CUs or SMUs, respectively, they are noted in the Outlook/Forecast tables below. Similarly, if management targets are in place they are identified. Lack of these references is a gap and work is on-going to develop methods and complete the analyses to define these references. The summary below describes how these biological and management references are applied and interpreted.
+
+### WSP Lower Biological Benchmarks and Limit Reference Points (LRPs)
+
+For implementation of the Wild Salmon Policy, the status of salmon Conservation Units (CU) is assessed against 'biological benchmarks'. The lower biological benchmark allows for substantial buffer between it and the level of abundance at which the stock would be considered at risk of extinction and is generally estimated as S~GEN~. The upper biological benchmark delineates the 'amber' from 'green' WSP status zone and is generally estimated as .80 S~MSY~. For more data-limited systems (i.e. where it is not possible to numerically estimate stock-recruit parameters), proxies for lower and upper biological benchmarks may be applied. For example, the lower and upper biological benchmarks are estimated as .25 and .60 percentiles of the long-term observed spawning abundance.
+
 ```{r para-chap01-1-en, eval=!fr(), results = 'asis'}
 cat("Welcome to report generation using `csasdown`. Included in this example document are many useful bits of information on how to write a reproducible report document using  the `csasdown` package, which is based on [Rmarkdown](https://rmarkdown.rstudio.com/) and [Bookdown](https://bookdown.org/). The information given in this example document should be used with all three `csasdown` document types: Research Document (`resdoc`), Science Response (`sr`), and Technical Report (`techreport`).")
 ```
@@ -35,18 +67,19 @@ Here is an example equation with the code used to generate it. Note that `csasdo
 <<para-chap02-1-en>>
 ```
 
-````
+```         
 \begin{equation}
   1 + 1
   \label{eq:test}
 \end{equation}
-````
+```
 
+```{=tex}
 \begin{equation}
   1 + 1
   \label{eq:test}
 \end{equation}
-
+```
 A reference can be included anywhere in the text, to refer to a section or appendix. For the first appendix in this document, the code looks like this: `\@ref(app:first-appendix)`. Adding that code inline will create a clickable link in the output file: See Appendix \@ref(app:first-appendix).
 
 The code inside the parentheses comes from the tag after the header for the section. For the appendix, the whole header line looks like:
