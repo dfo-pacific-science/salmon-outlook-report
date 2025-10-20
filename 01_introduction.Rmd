@@ -34,6 +34,12 @@ Therefore, where biological benchmarks and/or limit reference points are defined
 
 For implementation of the Wild Salmon Policy, the status of salmon Conservation Units (CU) is assessed against 'biological benchmarks'. The lower biological benchmark allows for substantial buffer between it and the level of abundance at which the stock would be considered at risk of extinction and is generally estimated as S~GEN~. The upper biological benchmark delineates the 'amber' from 'green' WSP status zone and is generally estimated as .80 S~MSY~. For more data-limited systems (i.e. where it is not possible to numerically estimate stock-recruit parameters), proxies for lower and upper biological benchmarks may be applied. For example, the lower and upper biological benchmarks are estimated as .25 and .60 percentiles of the long-term observed spawning abundance.
 
+```{r benchmarks, out.width = "100%", fig.cap = "Benchmarks and biological status zones for CU assessments.", echo=FALSE}
+knitr::include_graphics("data/figure1benchmarks.png")
+```
+
+
+
 ```{r para-chap01-1-en, eval=!fr(), results = 'asis'}
 cat("Welcome to report generation using `csasdown`. Included in this example document are many useful bits of information on how to write a reproducible report document using  the `csasdown` package, which is based on [Rmarkdown](https://rmarkdown.rstudio.com/) and [Bookdown](https://bookdown.org/). The information given in this example document should be used with all three `csasdown` document types: Research Document (`resdoc`), Science Response (`sr`), and Technical Report (`techreport`).")
 ```
@@ -65,13 +71,6 @@ Here is an example equation with the code used to generate it. Note that `csasdo
 
 ```{r para-chap02-1-fr, eval = fr(), results = 'asis', needs_trans = TRUE}
 <<para-chap02-1-en>>
-```
-
-```         
-\begin{equation}
-  1 + 1
-  \label{eq:test}
-\end{equation}
 ```
 
 ```{=tex}
