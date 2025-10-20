@@ -2,23 +2,20 @@
 
 When considering the term "target" used for defining outlook categories, we considered upper WSP benchmarks to be the target (not the lower benchmark).
 
-* Outlook status 1: population/CU is below the lower WSP benchmark
-* Outlook status 2: population/CU is above the lower benchmark, but less than 50% of the upper benchmark
-* Outlook status 3: population/CU is between 50-75% of the upper benchmark
-* Outlook status 4: population/CU is over 75% of the upper benchmark
+-   Outlook status 1: population/CU is below the lower WSP benchmark
+-   Outlook status 2: population/CU is above the lower benchmark, but less than 50% of the upper benchmark
+-   Outlook status 3: population/CU is between 50-75% of the upper benchmark
+-   Outlook status 4: population/CU is over 75% of the upper benchmark
 
 Details on how each metric was calculated or obtained for comparison.
 
-* Long-term average EFS was calculated from the start date identified in Grant et al (2020) up to and including the brood year of interest (for the 2022 outlook, that would be 2018). This obviously may not hold true for stocks with predominantly 3- or 5-year old cohorts, but it is not expected to change the outcome drastically.
-  * For cyclical stocks, long-term average EFS was calculated based on the cycle line average EFS. For example, for Seymour River, the long-term average EFS is the average of the 2022 cycle line escapements from 1950-2018.
-  * For non-cyclical stocks, long-term average EFS was calculated across all years in the time series. For example, Harrison River long term average EFS is the average of each year's EFS from 1948-2018.
-* Most systems compare the average EFS of the 4 year old component (2018) to the long term average EFS and benchmarks. However, it is prudent to consider 3- and 5-year old components for some stocks. These stocks were identified visually using the PSC Age Composition Comparison App online (Brkic 2020). Note that for some cyclical stocks, this will have to be revisited in future years depending on the cycle line. For example, Mitchell and Horsefly Rivers (Quesnel-Summer) have much lower 4 year old contribution on the 2019 cycle line.
-* Escapement benchmarks were manually compiled from Grant et al 2020. Note that this deals with CUs; while Scotch and Seymour are reported separately here, they are part of the same CU and so have the same 4-year median and benchmarks. These need to be updated annually for cyclical stocks as each cycle line has its own benchmarks.
-* Effective total spawners (ETS) was calculated to compare to the Wild Salmon Policy (WSP) benchmarks as those are calculated in terms of ETS (apples to apples). Grant et al 2020 outlines how ETS is calculated; briefly, ETS=(annual_male_escapement + annual_female_escapement)*annual_spawn_success, where spawn success is the spawn success of the females (based on egg retention in carcasses).
-* Outlook status ranges from 1-4, with 1 being the poorest outlook/lowest return, and 4 being the highest. They are informed by the status definitions in FRAFS (2018) with slight modifications to this specific document. Note some populations/CUs may receive dual statuses to represent uncertainty in data and/or evidence for multiple status categories (including the potential for multiple age classes). Status designation is determined by comparing brood-year effective total spawners (ETS) to the WSP benchmarks for ETS. If no benchmarks are available, it is manually/qualitatively assigned by comparing brood-year effective female spawners (EFS) to long-term and recent average EFS. In a case where benchmark rule is not consistent with brood-year EFS relative to the historical data, the outlook status conforms to the former one.
-
-
-
+-   Long-term average EFS was calculated from the start date identified in Grant et al. [-@grant2020] up to and including the brood year of interest (for the 2022 outlook, that would be 2018). This obviously may not hold true for stocks with predominantly 3- or 5-year old cohorts, but it is not expected to change the outcome drastically.
+    -   For cyclical stocks, long-term average EFS was calculated based on the cycle line average EFS. For example, for Seymour River, the long-term average EFS is the average of the 2022 cycle line escapements from 1950-2018.
+    -   For non-cyclical stocks, long-term average EFS was calculated across all years in the time series. For example, Harrison River long term average EFS is the average of each year's EFS from 1948-2018.
+-   Most systems compare the average EFS of the 4 year old component (2018) to the long term average EFS and benchmarks. However, it is prudent to consider 3- and 5-year old components for some stocks. These stocks were identified visually using the PSC Age Composition Comparison App online [@brkic2022]. Note that for some cyclical stocks, this will have to be revisited in future years depending on the cycle line. For example, Mitchell and Horsefly Rivers (Quesnel-Summer) have much lower 4 year old contribution on the 2019 cycle line.
+-   Escapement benchmarks were manually compiled from Grant et al. [-@grant2020]. Note that this deals with CUs; while Scotch and Seymour are reported separately here, they are part of the same CU and so have the same 4-year median and benchmarks. These need to be updated annually for cyclical stocks as each cycle line has its own benchmarks.
+-   Effective total spawners (ETS) was calculated to compare to the Wild Salmon Policy (WSP) benchmarks as those are calculated in terms of ETS (apples to apples). Grant et al. [-@grant2020] outlines how ETS is calculated; briefly, ETS=(annual_male_escapement + annual_female_escapement)\*annual_spawn_success, where spawn success is the spawn success of the females (based on egg retention in carcasses).
+-   Outlook status ranges from 1-4, with 1 being the poorest outlook/lowest return, and 4 being the highest. They are informed by the status definitions in FRAFS (2018) with slight modifications to this specific document. Note some populations/CUs may receive dual statuses to represent uncertainty in data and/or evidence for multiple status categories (including the potential for multiple age classes). Status designation is determined by comparing brood-year effective total spawners (ETS) to the WSP benchmarks for ETS. If no benchmarks are available, it is manually/qualitatively assigned by comparing brood-year effective female spawners (EFS) to long-term and recent average EFS. In a case where benchmark rule is not consistent with brood-year EFS relative to the historical data, the outlook status conforms to the former one.
 
 <!-- At the end of your appendices add: -->
 
