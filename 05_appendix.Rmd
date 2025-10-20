@@ -1,79 +1,25 @@
-<!-- The following code should appear at the beginning of the first appendix.
-(if you have one)
-After that, all subsequent sections will be turned into appendices. -->
+# APPENDIX - SOCKEYE
 
-`r if(knitr:::is_latex_output()) '% begin csasdown appendix'`
-`r if(!knitr:::is_latex_output()) '# (APPENDIX) Appendix {-}'`
+When considering the term "target" used for defining outlook categories, we considered upper WSP benchmarks to be the target (not the lower benchmark).
 
-\clearpage
+* Outlook status 1: population/CU is below the lower WSP benchmark
+* Outlook status 2: population/CU is above the lower benchmark, but less than 50% of the upper benchmark
+* Outlook status 3: population/CU is between 50-75% of the upper benchmark
+* Outlook status 4: population/CU is over 75% of the upper benchmark
 
-# THE FIRST APPENDIX {#app:first-appendix}
+Details on how each metric was calculated or obtained for comparison.
 
-Appendices can be in one file, or if they are larger than a couple of pages you should add a new file for each new appendix. In the first appendix, you **must** include two special lines of code at the top to tell `csasdown` that you are now numbering sections as appendices. Look in `05_appendices.Rmd` to see these. The last line of your last appendix **must** be another special line of code which tells `csasdown` to end the appendices sections. In this document it can be found at the end of `05_appendices.Rmd`.
+* Long-term average EFS was calculated from the start date identified in Grant et al (2020) up to and including the brood year of interest (for the 2022 outlook, that would be 2018). This obviously may not hold true for stocks with predominantly 3- or 5-year old cohorts, but it is not expected to change the outcome drastically.
+  * For cyclical stocks, long-term average EFS was calculated based on the cycle line average EFS. For example, for Seymour River, the long-term average EFS is the average of the 2022 cycle line escapements from 1950-2018.
+  * For non-cyclical stocks, long-term average EFS was calculated across all years in the time series. For example, Harrison River long term average EFS is the average of each year's EFS from 1948-2018.
+* Most systems compare the average EFS of the 4 year old component (2018) to the long term average EFS and benchmarks. However, it is prudent to consider 3- and 5-year old components for some stocks. These stocks were identified visually using the PSC Age Composition Comparison App online (Brkic 2020). Note that for some cyclical stocks, this will have to be revisited in future years depending on the cycle line. For example, Mitchell and Horsefly Rivers (Quesnel-Summer) have much lower 4 year old contribution on the 2019 cycle line.
+* Escapement benchmarks were manually compiled from Grant et al 2020. Note that this deals with CUs; while Scotch and Seymour are reported separately here, they are part of the same CU and so have the same 4-year median and benchmarks. These need to be updated annually for cyclical stocks as each cycle line has its own benchmarks.
+* Effective total spawners (ETS) was calculated to compare to the Wild Salmon Policy (WSP) benchmarks as those are calculated in terms of ETS (apples to apples). Grant et al 2020 outlines how ETS is calculated; briefly, ETS=(annual_male_escapement + annual_female_escapement)*annual_spawn_success, where spawn success is the spawn success of the females (based on egg retention in carcasses).
+* Outlook status ranges from 1-4, with 1 being the poorest outlook/lowest return, and 4 being the highest. They are informed by the status definitions in FRAFS (2018) with slight modifications to this specific document. Note some populations/CUs may receive dual statuses to represent uncertainty in data and/or evidence for multiple status categories (including the potential for multiple age classes). Status designation is determined by comparing brood-year effective total spawners (ETS) to the WSP benchmarks for ETS. If no benchmarks are available, it is manually/qualitatively assigned by comparing brood-year effective female spawners (EFS) to long-term and recent average EFS. In a case where benchmark rule is not consistent with brood-year EFS relative to the historical data, the outlook status conforms to the former one.
 
-Figures and tables will now be prepended with the appendix letter:
 
-(ref:test1) English version of the test1 figure caption
-
-(ref:test1-french) French goes here
-
-```{r test1, fig.cap=ifelse(fr(), "(ref:test1-french)", "(ref:test1)")}
-plot(1)
-```
-
-```{r test2, results='asis'}
-csasdown::csas_table(data.frame(x = c("a", "a", "b"),
-                                y = c(1, 2, 3)),
-                     caption = ifelse(fr(),
-                                      "French goes here",
-                                      "English verion of the test2 table caption"))
-```
-
-Here's an equation. Note that it is automatically given a label on the right side of the page as in the main document, but it has the appendix letter before it. Each appendix will have its own set of equations starting at 1.
-
-\begin{equation}
-  1 + 1
-  \label{eq:test2}
-\end{equation}
-
-See Equation \@ref(eq:test2) for the example equation.
-
-See Figure \@ref(fig:test1) for the example appendix figure.
-
-See Table \@ref(tab:test2) for the example appendix table.
-
-\clearpage
-
-# THE SECOND APPENDIX, FOR FUN {#app:second-appendix}
-
-The label `#app:` in the appendix section headers tell `csasdown` to start a new appendix, and the next letter in the alphabet will be used for the appendix, and prepended to figure and table names. For example, this appendix's whole section header looks like:
-
-`# THE SECOND APPENDIX, FOR FUN {#app:second-appendix}`
-
-To illustrate the new labeling of appendices, here are a table and figure:
-
-(ref:test1b) English version of the test1b figure caption
-
-(ref:test1b-french) French goes here
-
-```{r test1b, fig.cap=ifelse(fr(), "(ref:test1b-french)", "(ref:test1b)")}
-plot(1)
-```
-
-```{r test2b, results='asis'}
-csasdown::csas_table(data.frame(x = c("a", "a", "b"),
-                                y = c(1, 2, 3)),
-                     caption = ifelse(fr(),
-                                      "French goes here",
-                                      "English verion of the test2b table caption"))
-```
-
-And references to them...
-
-See Figure \@ref(fig:test1b) for the example appendix figure.
-
-See Table \@ref(tab:test2b) for the example appendix table.
 
 
 <!-- At the end of your appendices add: -->
+
 `r if(knitr:::is_latex_output()) '% end csasdown appendix'`
