@@ -8,6 +8,8 @@
 
 # References
 
+<div id="refs" custom-style = "citation"></div>
+
 <!-- The following sets the appropriate indentation for the references -->
 \noindent
 \vspace{-2em}
