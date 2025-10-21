@@ -63,8 +63,6 @@ csasdown::csas_table(d1,
 
 
 ```{r table-narrative, results='asis'}
-library(flextable)
-library(officer)
 
 # Fake narrative text (~250 words)
 narrative_text <- paste(
