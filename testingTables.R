@@ -55,13 +55,19 @@ ft
 
 ####################################################################################
 
+library(dplyr)
+library(ggplot2)
+library(readr)
+library(tibble)
+library(rosettafish)
+library(csasdown)
+library(officer)
+library(flextable)
+library(readxl)
+library(purrr)
 
-library("purrr")
 
 dummyPath = "data/finnis_outlook_phase1_test_dummy_data_20250905.xlsx"
-
-# Locate the file by its relative path
-#file = doclib$get_item("General/Pacific Salmon Data Community of Practice/Projects & Task Teams/Reproducible Data Products/Salmon Outlook Reporting/Background Research/outlook_phase1_test_dummy_data_20250905.xlsx")
 
 
 # List all sheet names
@@ -123,6 +129,38 @@ other_outlook_records_enriched = other_outlook_records %>%
 stacked_df = bind_rows(Outlook_Repeat_Test, cu_outlook_records_enriched, other_outlook_records_enriched)
 
 
+#####
+
+df = cu_outlook_records_enriched
+
+df <- df %>%
+  group_by(smu_name) %>%
+  mutate(
+    Resolution = case_when(
+
+      # Case 1: Only one row for this SMU, and no CU info
+      # → standalone SMU (no CU breakdown)
+      n() == 1 & cu_count ==1 ~ "SMU",
+
+      # Case 2: Multiple rows for this SMU, and more than one CU per SMU
+      # → aggregate view across multiple CUs
+      n() > 1 & cu_count > 1 ~ "CU (aggregate)",
+
+      # Case 3: Multiple rows for this SMU, each representing a single CU
+      # → individual CU(s) listed separately
+      n() > 1 & cu_count == 1 ~ "CU (singular)",
+
+      # Case 4: Single SMU row, but cu_count is unexpectedly defined
+      # → flag as a potential data issue for review
+      n() == 1 & cu_count >1 ~ paste0(
+        "CHECK VALUE — single SMU but cu_count = ", cu_count
+      ),
+
+      # Catch-all: anything that doesn’t match expected patterns
+      TRUE ~ "CHECK VALUE — unexpected combination"
+    )
+  ) %>%
+  ungroup()
 
 
 
