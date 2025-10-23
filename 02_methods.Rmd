@@ -1,69 +1,7 @@
 # Methods
 
 
-
-```{r table-narrative, results='asis'}
-
-# Fake narrative text (~250 words)
-narrative_text <- paste(
-  rep("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ", 20),
-  collapse = " "
-)
-
-# --- Main data table (7 cols) ---
-df <- data.frame(
-  Resolution       = c("SMU", "Other"),
-  Name             = c("WCVI Chinook", "Conuma River"),
-  `Avg Run/Avg Spawners` = c("-", "50,000"),
-  `LRP/LBB`        = c("-", "n/a"),
-  `Mgmt Target`    = c("Maximum escapement: 40,000", "10,000"),
-  `Prelim Forecast`= c("-", "58,000"),
-  `Outlook Category` = c("1", "4"),
-  check.names = FALSE, stringsAsFactors = FALSE
-)
-
-ft <- flextable(df) %>%
-  theme_vanilla() %>%
-  bold(part = "header") %>%
-  color(part = "header", color = "black") %>%
-  bg(part = "header", bg = "grey90") %>%
-  border_remove() %>%
-  border_outer(border = officer::fp_border(color = "black", width = 1)) %>%
-  border_inner_h(border = officer::fp_border(color = "black", width = 0.5)) %>%
-  border_inner_v(border = officer::fp_border(color = "black", width = 0.5)) %>%
-  autofit() %>%
-  set_table_properties(layout = "autofit", width = 1)
-
-
-
-# --- Add top block values (plain text row) ---
-ft <- add_header_row(
-  x = ft,
-  values = c("WCVI Chinook (includes 3 CUs)", narrative_text),
-  colwidths = c(1, 6)
-)
-
-ft <- bold(ft, i = 1, part = "header", bold = FALSE)
-ft <- bg(ft, i = 1, part = "header", bg = "white")
-
-# --- Add top row (SMU / Narrative) ---
-ft <- add_header_row(
-  x = ft,
-  values = c("SMU", "Narrative"),
-  colwidths = c(1, 6)
-)
-ft <- bold(ft, i = 1, part = "header", bold = TRUE)
-ft <- bg(ft, i = 1, part = "header", bg = "grey90")
-ft <- color(ft, i = 1, part = "header", color = "black")
-
-ft
-
-```
-
-
-
-
-
+<!--
 
 Notice the difference in how the English and French captions are generated for tables compared to the way they are generated for figures.
 
@@ -153,6 +91,9 @@ csasdown::csas_table(widelong_df,
   bold_header = FALSE,
   font_size = 8)
 ```
+
+-->
+
 \end{landscapepage}
 \clearpage
 
