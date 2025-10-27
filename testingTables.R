@@ -165,7 +165,7 @@ df2 = df %>%
     `LRP/LBB`        = c("n/a"),
     `Mgmt Target`    = c("10,000"),
     `Narrative Text` = paste(
-      rep("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ", 5),
+      rep("Stephen slays the house down boots. ", 5),
       collapse = ""
     )
   )
@@ -195,17 +195,17 @@ library(flextable)
 library(dplyr)
 library(flextable)
 
-# Split df2 by smu_name
-df_list <- df2 %>%
-  group_split(smu_name)
 
-# Create flextables with correct header block and full black borders
+
+
+
+
+df_list <- df2 %>% group_split(smu_name)
+
 ft_list <- lapply(df_list, function(df_smu) {
-  # Extract values
   smu <- unique(df_smu$smu_name)
   narrative <- unique(df_smu$`Narrative Text`)
 
-  # Create the main table
   df3 <- df_smu %>%
     select(
       `Resolution`,
@@ -217,48 +217,42 @@ ft_list <- lapply(df_list, function(df_smu) {
       `cu_outlook_assignment`
     )
 
-  # Create flextable
+  # keep column count dynamic
+  n_cols <- ncol(df3)
+
   ft <- flextable(df3) %>%
 
-    # Add top block: SMU and Narrative values (plain row FIRST)
-    add_header_row(
-      values = c(smu, narrative),
-      colwidths = c(1, 6)
-    ) %>%
+    # Add header rows (values first, labels second so labels sit above values)
+    add_header_row(values = c(smu, narrative), colwidths = c(1, n_cols - 1)) %>%
+    add_header_row(values = c("SMU", "Narrative"), colwidths = c(1, n_cols - 1)) %>%
 
-    bold(i = 2, bold = TRUE, part = "header") %>%
-    bg(i = 2, bg = "grey90", part = "header") %>%
+    # Now style header rows AFTER both header rows exist:
+    # top header (labels) -> row 1: bold + grey background
+    bg(i = 1, bg = "grey90", part = "header") %>%
+    bold(i = 1, bold = TRUE, part = "header") %>%
+    color(i = 1, color = "black", part = "header") %>%
 
+    # second header (values) -> row 2: plain text, white background
+    bg(i = 2, bg = "white", part = "header") %>%
+    bold(i = 2, bold = FALSE, part = "header") %>%
 
-
-    # Add top block: SMU and Narrative labels (styled row SECOND)
-    add_header_row(
-      values = c("SMU", "Narrative"),
-      colwidths = c(1, 6)
-    ) %>%
-
-    bold(i = 1, bold = FALSE, part = "header") %>%
-    bg(i = 1, bg = "white", part = "header") %>%
-
-    bold(i = 2, bold = TRUE, part = "header") %>%
-    bg(i = 2, bg = "grey90", part = "header") %>%
-    color(i = 2, color = "black", part = "header") %>%
-
-    # Style the actual table header (starts at row 3)
-    bold(i = 3, bold = TRUE, part = "header") %>%
+    # third header row is the actual column names -> style as desired
     bg(i = 3, bg = "grey90", part = "header") %>%
-    color(i = 3, color = "black", part = "header") %>%
+    bold(i = 3, bold = TRUE, part = "header") %>%
 
-    # Apply full black borders to all cells
+    # Ensure all cells (header + body) have black borders
     border_remove() %>%
-    border_outer(border = officer::fp_border(color = "black", width = 1)) %>%
-    border_inner_h(border = officer::fp_border(color = "black", width = 1)) %>%
-    border_inner_v(border = officer::fp_border(color = "black", width = 1)) %>%
+    border_outer(border = fp_border(color = "black", width = 1), part = "all") %>%
+    border_inner_h(border = fp_border(color = "black", width = 1), part = "all") %>%
+    border_inner_v(border = fp_border(color = "black", width = 1), part = "all") %>%
 
-    # Final layout
     autofit() %>%
-    set_table_properties(layout = "autofit", width = 1)
+    set_table_properties(layout = "autofit")
+
+  ft
 })
+
+
 
 # Name each flextable by its SMU
 names(ft_list) <- sapply(df_list, function(x) unique(x$smu_name))
@@ -267,3 +261,5 @@ names(ft_list) <- sapply(df_list, function(x) unique(x$smu_name))
 for (ft in ft_list) {
   print(ft)
 }
+
+
