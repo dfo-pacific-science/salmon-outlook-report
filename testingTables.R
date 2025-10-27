@@ -185,66 +185,21 @@ df3 = df2 %>%
 
 
 
-# Split df3 into a list of dataframes by smu_name
-df_list <- df3 %>%
-  group_split(smu_name)
-
-# Create a named list of flextables
-ft_list <- lapply(df_list, function(df_smu) {
-  ft <- flextable(df_smu) %>%
-    theme_vanilla() %>%
-    bold(part = "header") %>%
-    color(part = "header", color = "black") %>%
-    bg(part = "header", bg = "grey90") %>%
-    border_remove() %>%
-    border_outer(border = officer::fp_border(color = "black", width = 1)) %>%
-    border_inner_h(border = officer::fp_border(color = "black", width = 0.5)) %>%
-    border_inner_v(border = officer::fp_border(color = "black", width = 0.5)) %>%
-    autofit() %>%
-    set_table_properties(layout = "autofit", width = 1)
-  return(ft)
-})
-
-# Optionally name each flextable by its SMU name
-names(ft_list) <- sapply(df_list, function(x) unique(x$smu_name))
+library(dplyr)
+library(flextable)
 
 
-# Print all flextables in the list
-for (ft in ft_list) {
-  print(ft)
-}
-
-ft <- flextable(df3) %>%
-  theme_vanilla() %>%
-  bold(part = "header") %>%
-  color(part = "header", color = "black") %>%
-  bg(part = "header", bg = "grey90") %>%
-  border_remove() %>%
-  border_outer(border = officer::fp_border(color = "black", width = 1)) %>%
-  border_inner_h(border = officer::fp_border(color = "black", width = 0.5)) %>%
-  border_inner_v(border = officer::fp_border(color = "black", width = 0.5)) %>%
-  autofit() %>%
-  set_table_properties(layout = "autofit", width = 1)
+###########################
 
 
-ft
-
-# --- Add top block values (plain text row) ---
-ft <- add_header_row(
-  x = ft,
-  values = header_values,
-  colwidths = c(1, 7)
-)
-
-
-
-
+library(dplyr)
+library(flextable)
 
 # Split df2 by smu_name
 df_list <- df2 %>%
   group_split(smu_name)
 
-# Create flextables with correct header block and full borders
+# Create flextables with correct header block and full black borders
 ft_list <- lapply(df_list, function(df_smu) {
   # Extract values
   smu <- unique(df_smu$smu_name)
@@ -265,28 +220,36 @@ ft_list <- lapply(df_list, function(df_smu) {
   # Create flextable
   ft <- flextable(df3) %>%
 
-    # Add top block: header labels
-    add_header_row(
-      values = c("SMU", "Narrative"),
-      colwidths = c(1, 6)
-    ) %>%
-    bold(i = 1, bold = TRUE, part = "header") %>%
-    bg(i = 1, bg = "grey90", part = "header") %>%
-
-    # Add top block: values
+    # Add top block: SMU and Narrative values (plain row FIRST)
     add_header_row(
       values = c(smu, narrative),
       colwidths = c(1, 6)
     ) %>%
-    bold(i = 2, bold = FALSE, part = "header") %>%
-    bg(i = 2, bg = "white", part = "header") %>%
 
-    # Style the actual table header
+    bold(i = 2, bold = TRUE, part = "header") %>%
+    bg(i = 2, bg = "grey90", part = "header") %>%
+
+
+
+    # Add top block: SMU and Narrative labels (styled row SECOND)
+    add_header_row(
+      values = c("SMU", "Narrative"),
+      colwidths = c(1, 6)
+    ) %>%
+
+    bold(i = 1, bold = FALSE, part = "header") %>%
+    bg(i = 1, bg = "white", part = "header") %>%
+
+    bold(i = 2, bold = TRUE, part = "header") %>%
+    bg(i = 2, bg = "grey90", part = "header") %>%
+    color(i = 2, color = "black", part = "header") %>%
+
+    # Style the actual table header (starts at row 3)
     bold(i = 3, bold = TRUE, part = "header") %>%
     bg(i = 3, bg = "grey90", part = "header") %>%
     color(i = 3, color = "black", part = "header") %>%
 
-    # Apply black borders to everything
+    # Apply full black borders to all cells
     border_remove() %>%
     border_outer(border = officer::fp_border(color = "black", width = 1)) %>%
     border_inner_h(border = officer::fp_border(color = "black", width = 1)) %>%
@@ -304,18 +267,3 @@ names(ft_list) <- sapply(df_list, function(x) unique(x$smu_name))
 for (ft in ft_list) {
   print(ft)
 }
-
-
-
-# Name each flextable by its SMU
-names(ft_list) <- sapply(df_list, function(x) unique(x$smu_name))
-
-# Print all tables
-for (ft in ft_list) {
-  print(ft)
-}
-
-
-
-
-
