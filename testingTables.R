@@ -128,7 +128,16 @@ stacked_df = bind_rows(Outlook_Repeat_Test, cu_outlook_records_enriched, other_o
 
 #####
 
-df = cu_outlook_records_enriched
+df = cu_outlook_records_enriched %>%
+  mutate(
+    `Avg Run/Avg Spawners` = "50,000",
+    `LRP/LBB`        = "n/a",
+    `Mgmt Target`    = "10,000",
+    `Narrative Text` = paste(
+      rep("Stephen slays the house down boots. ", 5),
+      collapse = ""
+    )
+  )
 
 df <- df %>%
   group_by(smu_name) %>%
@@ -180,15 +189,14 @@ df <- df %>%
 
 
 
-df2 = df %>%
+
+df2 = df2 %>%
   mutate(
-    `Avg Run/Avg Spawners` = "50,000",
-    `LRP/LBB`        = "n/a",
-    `Mgmt Target`    = "10,000",
-    `Narrative Text` = paste(
-      rep("Stephen slays the house down boots. ", 5),
-      collapse = ""
-    )
+    cu_prelim_forecast = cu_prelim_forecast %>%
+      # Replace hyphen with en dash
+      str_replace_all("-", "–") %>%
+      # Remove extra spaces around the dash
+      str_replace_all("\\s*–\\s*", "–")
   )
 
 
@@ -221,7 +229,13 @@ ft_list <- lapply(df_list, function(df_smu) {
       `Mgmt Target`,
       `cu_prelim_forecast`,
       `cu_outlook_assignment`
-    )
+    ) %>%
+
+  rename(
+    Forecast = cu_prelim_forecast,
+    Outlook = cu_outlook_assignment
+  )
+
 
   # keep column count dynamic
   n_cols <- ncol(df3)
