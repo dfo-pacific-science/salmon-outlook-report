@@ -10,6 +10,7 @@ library(officer)
 library(flextable)
 library(readxl)
 library(purrr)
+library(stringr)
 
 # Read raw sheet without interpreting the first row as names
 raw = read_excel("data/outlookClasses.xlsx", sheet = 1, col_names = FALSE)
@@ -154,16 +155,36 @@ df <- df %>%
 
       # Catch-all: anything that doesn’t match expected patterns
       TRUE ~ "CHECK VALUE — unexpected combination"
-    )
-  ) %>%
-  ungroup()
+    )) %>%
+
+  ungroup()%>%
+
+
+  mutate(
+
+    # Assign a name based on the resolution type
+    Name = case_when(
+
+      # If resolution is SMU, use the smu_name
+      Resolution == "SMU" ~ smu_name,
+
+      # If resolution is CU (aggregate) or CU (singular), use cu_outlook_selection
+      Resolution %in% c("CU (aggregate)", "CU (singular)") ~ cu_outlook_selection,
+
+      # If resolution is any kind of CHECK VALUE, assign a generic label
+      str_detect(Resolution, "CHECK VALUE") ~ "Check value",
+
+      # Fallback: assign NA if none of the above match
+      TRUE ~ NA_character_
+    ))
+
 
 
 df2 = df %>%
   mutate(
-    `Avg Run/Avg Spawners` = c("50,000"),
-    `LRP/LBB`        = c("n/a"),
-    `Mgmt Target`    = c("10,000"),
+    `Avg Run/Avg Spawners` = "50,000",
+    `LRP/LBB`        = "n/a",
+    `Mgmt Target`    = "10,000",
     `Narrative Text` = paste(
       rep("Stephen slays the house down boots. ", 5),
       collapse = ""
@@ -185,21 +206,6 @@ df3 = df2 %>%
 
 
 
-library(dplyr)
-library(flextable)
-
-
-###########################
-
-
-library(dplyr)
-library(flextable)
-
-
-
-
-
-
 df_list <- df2 %>% group_split(smu_name)
 
 ft_list <- lapply(df_list, function(df_smu) {
@@ -209,7 +215,7 @@ ft_list <- lapply(df_list, function(df_smu) {
   df3 <- df_smu %>%
     select(
       `Resolution`,
-      `smu_name`,
+      `Name`,
       `Avg Run/Avg Spawners`,
       `LRP/LBB`,
       `Mgmt Target`,
@@ -261,5 +267,5 @@ names(ft_list) <- sapply(df_list, function(x) unique(x$smu_name))
 for (ft in ft_list) {
   print(ft)
 }
-
+ft_list[3]
 
