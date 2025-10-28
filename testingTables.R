@@ -12,6 +12,9 @@ library(readxl)
 library(purrr)
 library(stringr)
 
+################################################################################
+## Code for making Table 1 with Outlook classes
+
 # Read raw sheet without interpreting the first row as names
 raw = read_excel("data/outlookClasses.xlsx", sheet = 1, col_names = FALSE)
 
@@ -54,20 +57,19 @@ ft = flextable(df_body) %>%
 ft
 
 #################################################################################
+################################################################################
+## Code for making tables that give outlooks/narratives for each SMU
 
+## Prep the data
+# Current format has the data in an Excel file divided into 3 sheets
+# One is data for each SMU, one is data for CUs, one is data for Other (hatchery/indicator)
+# These need to be merged together in various ways
 
-
-
-
-####################################################################################
-
-
-
-
+# For now, I have practice data stored here
 dummyPath = "data/finnis_outlook_phase1_test_dummy_data_20250905.xlsx"
 
 
-# List all sheet names
+# List all sheet names.
 sheet_names = readxl::excel_sheets(dummyPath)
 
 # Read each sheet and name the list elements
@@ -127,15 +129,19 @@ stacked_df = bind_rows(Outlook_Repeat_Test, cu_outlook_records_enriched, other_o
 
 
 ################################################################################
+## Prep the data a bit more to make tables for the report
+
+# Tables will be labelled by DFO Area and Species (for later reporting)
 
 # Add fake data to columns for final tables
-# These values will come from survey #2
+# These values will come from the second survey
 tabPrep = cu_outlook_records_enriched %>%
   mutate(
     `Avg Run/Avg Spawners` = "50,000",
     `LRP/LBB`        = "n/a",
     `Mgmt Target`    = "10,000"
     )
+
 
 
 
@@ -179,6 +185,8 @@ tabPrep <- tabPrep %>%
   )
 
 
+
+# Fix up the Forecasts
 tabPrep = tabPrep %>%
   mutate(
     Forecast = Forecast %>%
@@ -190,58 +198,57 @@ tabPrep = tabPrep %>%
 
 
 
-# Keep smu_name and Narrative for grouping and headers
-tabPrep <- tabPrep %>%
+# Prepare the data
+tabPrep = tabPrep %>%
   rename(Narrative = outlook_narrative) %>%
   select(
-    `Resolution`,
-    `Name`,
-    `smu_name`,
-    `Narrative`,
+    smu_area,
+    smu_species,
+    smu_name,
+    Narrative,
+    Resolution,
+    Name,
     `Avg Run/Avg Spawners`,
     `LRP/LBB`,
     `Mgmt Target`,
-    `Forecast`,
-    `Outlook`
+    Forecast,
+    Outlook
   )
 
-# Split the data by SMU
-tab_list <- tabPrep %>% group_split(smu_name)
+# Nest the data by smu_area and smu_species
+nested_tabs = tabPrep %>%
+  group_by(smu_area, smu_species, smu_name, Narrative) %>%
+  group_split()
 
 # Create flextables
-ft_list <- lapply(tab_list, function(df_smu) {
-  smu <- unique(df_smu$smu_name)
-  narrative <- unique(df_smu$Narrative)
+ft_list = lapply(nested_tabs, function(df_smu) {
+  smu = unique(df_smu$smu_name)
+  narrative = unique(df_smu$Narrative)
+  area = unique(df_smu$smu_area)
+  species = unique(df_smu$smu_species)
 
-  # Remove smu_name and Narrative before printing
-  df_smu <- df_smu %>% select(-smu_name, -Narrative)
+  df_smu_clean = df_smu %>% select(-smu_area, -smu_species, -smu_name, -Narrative)
+  n_cols = ncol(df_smu_clean)
 
-  n_cols <- ncol(df_smu)
-
-  ft <- flextable(df_smu) %>%
+  ft = flextable(df_smu_clean) %>%
     add_header_row(values = c(smu, narrative), colwidths = c(1, n_cols - 1)) %>%
     add_header_row(values = c("SMU", "Narrative"), colwidths = c(1, n_cols - 1)) %>%
-
     bg(i = 1, bg = "grey90", part = "header") %>%
     bold(i = 1, bold = TRUE, part = "header") %>%
     color(i = 1, color = "black", part = "header") %>%
-
     bg(i = 2, bg = "white", part = "header") %>%
     bold(i = 2, bold = FALSE, part = "header") %>%
-
     bg(i = 3, bg = "grey90", part = "header") %>%
     bold(i = 3, bold = TRUE, part = "header") %>%
-
     border_remove() %>%
     border_outer(border = fp_border(color = "black", width = 1), part = "all") %>%
     border_inner_h(border = fp_border(color = "black", width = 1), part = "all") %>%
     border_inner_v(border = fp_border(color = "black", width = 1), part = "all") %>%
-
     autofit() %>%
     set_table_properties(layout = "autofit")
 
-  ft
+  list(area = area, species = species, table = ft)
 })
 
 
-ft_list[1]
+
