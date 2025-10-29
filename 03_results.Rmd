@@ -58,3 +58,148 @@ ft
 
 ```
 
+
+```{r setup2, include=FALSE}
+library(flextable)
+library(glue)
+load("ft_list.RData")
+```
+
+```{r tab}
+ft2 <- ft_list[[1]]$table
+ft2
+```
+
+
+
+```{r setup3, include=FALSE}
+# Assume ft_list is already created
+areas <- c("Fraser and Interior", "North Coast", "South Coast", "Yukon Transboundary")
+species_list <- c("Chum", "Chinook", "Coho", "Pink-Even", "Sockeye Lake-Type", "Sockeye River-Type")
+```
+
+
+
+
+
+## Fraser and Interior Area
+
+### Chum
+
+
+### Chinook
+
+
+### Coho
+
+
+### Pink-Even
+
+
+### Sockeye Lake-Type
+
+
+
+### Sockeye River-Type
+
+
+
+
+
+
+
+## North Coast Area
+
+### Chum
+
+
+### Chinook
+
+
+### Coho
+
+
+### Pink-Even
+
+
+### Sockeye Lake-Type
+
+
+
+### Sockeye River-Type
+
+
+
+
+
+## South Coast Area
+
+### Chum
+```{r results3}
+
+filtered <- Filter(function(x) x$area == "SOUTH COAST" && x$species == "Chum", ft_list)
+
+for (item in filtered) {
+  print(item$table)
+}
+
+
+```
+
+### Chinook
+
+
+### Coho
+
+
+### Pink-Even
+
+
+### Sockeye Lake-Type
+
+
+
+### Sockeye River-Type
+
+
+
+
+## Yukon Transboundary
+
+### Chum
+
+
+### Chinook
+
+
+### Coho
+
+
+### Pink-Even
+
+
+### Sockeye Lake-Type
+
+
+
+### Sockeye River-Type
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
