@@ -143,6 +143,13 @@ tabPrep = cu_outlook_records_enriched %>%
     )
 
 
+#### STEPHEN REMOVE THIS BUT JUST FOR TESTING
+tabPrep = tabPrep%>%
+  mutate(
+    smu_area = "SOUTH COAST",
+    smu_species = "Chum"
+  )
+
 
 
 tabPrep <- tabPrep %>%
@@ -252,3 +259,62 @@ ft_list = lapply(nested_tabs, function(df_smu) {
 
 
 save(ft_list, file = "ft_list.RData")
+
+
+
+
+
+# Find the first match and extract its table
+areas = c("FRASER AND INTERIOR", "NORTH COAST", "SOUTH COAST", "YUKON")
+
+species_list = c("Chum", "Chinook", "Coho", "Pink-Even", "Sockeye (Lake Type)", "Sockeye (River Type)")
+
+
+filtered <- Filter(function(x) x$area == "FRASER AND INTERIOR" && x$species == "Chinook", ft_list)
+
+##########################
+
+
+# Combine flextables by Area and Species
+combined_ft_list <- ft_list %>%
+  # Group all elements by area + species
+  split(paste0(sapply(., `[[`, "area"), "_", sapply(., `[[`, "species"))) %>%
+  lapply(function(group_list) {
+    # Extract all flextables in this group
+    ft_subs <- lapply(group_list, `[[`, "table")
+
+    # If only one flextable, return it directly
+    if (length(ft_subs) == 1) return(ft_subs[[1]])
+
+    # Create a thick black separator line
+    sep_border <- fp_border(color = "black", width = 2)
+
+    # Build combined flextable by stacking them as HTML fragments
+    combined_ft <- ft_subs[[1]]
+    for (i in 2:length(ft_subs)) {
+      ft_subs[[i]] <- flextable::set_table_properties(ft_subs[[i]], layout = "autofit")
+      # add an empty row to act as spacing with a thick top border
+      combined_ft <- flextable::compose(
+        flextable::add_body_row(combined_ft, values = rep("", ncol_part(combined_ft))),
+        i = nrow_part(combined_ft),
+        j = 1
+      )
+      combined_ft <- flextable::set_table_properties(combined_ft, layout = "autofit")
+      # merge by stacking the data parts
+      combined_ft <- flextable::merge_v(combined_ft)
+      # append new flextable below (row binding)
+      combined_ft <- flextable::append_chunks(
+        combined_ft, ft_subs[[i]]$body$dataset
+      )
+    }
+
+    combined_ft
+  })
+
+# Name each combined table by Area and Species
+names(combined_ft_list) <- names(combined_ft_list)
+
+save(combined_ft_list, file = "combined_ft_list.RData")
+
+
+
