@@ -63,6 +63,7 @@ ft
 library(flextable)
 library(glue)
 load("ft_list.RData")
+load("combined_ft_list.RData")
 ```
 
 ```{r tab}
@@ -137,16 +138,22 @@ species_list <- c("Chum", "Chinook", "Coho", "Pink-Even", "Sockeye Lake-Type", "
 ### Chum
 ```{r results3}
 
-filtered <- Filter(function(x) x$area == "SOUTH COAST" && x$species == "Chum", ft_list)
+filtered <- Filter(function(x) x$area == "FRASER AND INTERIOR" && x$species == "Chinook", ft_list)
 
-for (item in filtered) {
-  print(item$table)
-}
+filtered[[1]]$table
 
 
 ```
 
 ### Chinook
+
+```{r results4}
+
+combined_ft_list[[1]]
+
+
+```
+
 
 
 ### Coho

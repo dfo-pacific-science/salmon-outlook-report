@@ -258,11 +258,13 @@ ft_list = lapply(nested_tabs, function(df_smu) {
 })
 
 
+
 save(ft_list, file = "ft_list.RData")
+save(tabPrep, file = "tabPrep.Rdata")
 
 
-
-
+flat_tables <- lapply(ft_list, function(x) x$table)
+save(flat_tables, file = "flat_tables.Rdata")
 
 # Find the first match and extract its table
 areas = c("FRASER AND INTERIOR", "NORTH COAST", "SOUTH COAST", "YUKON")
@@ -273,48 +275,155 @@ species_list = c("Chum", "Chinook", "Coho", "Pink-Even", "Sockeye (Lake Type)", 
 filtered <- Filter(function(x) x$area == "FRASER AND INTERIOR" && x$species == "Chinook", ft_list)
 
 ##########################
+####################################################
+# Load required libraries
 
 
-# Combine flextables by Area and Species
-combined_ft_list <- ft_list %>%
-  # Group all elements by area + species
-  split(paste0(sapply(., `[[`, "area"), "_", sapply(., `[[`, "species"))) %>%
-  lapply(function(group_list) {
-    # Extract all flextables in this group
-    ft_subs <- lapply(group_list, `[[`, "table")
 
-    # If only one flextable, return it directly
-    if (length(ft_subs) == 1) return(ft_subs[[1]])
-
-    # Create a thick black separator line
-    sep_border <- fp_border(color = "black", width = 2)
-
-    # Build combined flextable by stacking them as HTML fragments
-    combined_ft <- ft_subs[[1]]
-    for (i in 2:length(ft_subs)) {
-      ft_subs[[i]] <- flextable::set_table_properties(ft_subs[[i]], layout = "autofit")
-      # add an empty row to act as spacing with a thick top border
-      combined_ft <- flextable::compose(
-        flextable::add_body_row(combined_ft, values = rep("", ncol_part(combined_ft))),
-        i = nrow_part(combined_ft),
-        j = 1
-      )
-      combined_ft <- flextable::set_table_properties(combined_ft, layout = "autofit")
-      # merge by stacking the data parts
-      combined_ft <- flextable::merge_v(combined_ft)
-      # append new flextable below (row binding)
-      combined_ft <- flextable::append_chunks(
-        combined_ft, ft_subs[[i]]$body$dataset
-      )
-    }
-
-    combined_ft
-  })
-
-# Name each combined table by Area and Species
-names(combined_ft_list) <- names(combined_ft_list)
-
-save(combined_ft_list, file = "combined_ft_list.RData")
+library(dplyr)
+library(flextable)
+library(officer)
 
 
+
+# ---- Fake data with your exact column names ----
+tabPrep <- data.frame(
+  smu_name = c("North Coast – Chum", "North Coast – Chum",
+               "Central Coast – Chum", "Central Coast – Chum"),
+  Narrative = c("Another narrative for this SMU", "Another narrative for this SMU",
+                "Narrative for Central Coast", "Narrative for Central Coast"),
+  Resolution = c("SMU", "CU (...)", "SMU", "CU (...)"),
+  Name = c("Skeena", "Nass", "Bella Coola", "Ahta"),
+  `Avg Run/Avg Spawners` = c("48,000", "55,000", "22,000", "10,000"),
+  `LRP/LBB` = c("n/a", "n/a", "n/a", "n/a"),
+  `Mgmt Target` = c("9,000", "11,000", "5,000", "2,000"),
+  Forecast = c("Good", "Excellent", "Fair", "Poor"),
+  Outlook = c("Neutral", "Optimistic", "Cautious", "Pessimistic"),
+  stringsAsFactors = FALSE,
+  check.names = FALSE
+)
+
+# ---- Split into SMU blocks ----
+smu_list <- split(tabPrep, tabPrep$smu_name)
+
+# ---- Build each SMU block as a data frame with fake header rows ----
+build_block <- function(df_smu) {
+
+  smu <- unique(df_smu$smu_name)
+  narr <- unique(df_smu$Narrative)
+
+  # Row 1: SMU | Narrative label row
+  row1 <- data.frame(
+    Resolution = "SMU",
+    Name = "Narrative",
+    `Avg Run/Avg Spawners` = "",
+    `LRP/LBB` = "",
+    `Mgmt Target` = "",
+    Forecast = "",
+    Outlook = "",
+    check.names = FALSE
+  )
+
+  # Row 2: SMU value | Narrative value
+  row2 <- data.frame(
+    Resolution = smu,
+    Name = narr,
+    `Avg Run/Avg Spawners` = "",
+    `LRP/LBB` = "",
+    `Mgmt Target` = "",
+    Forecast = "",
+    Outlook = "",
+    check.names = FALSE
+  )
+
+  # Row 3: Proper table header row (as part of body)
+  row3 <- data.frame(
+    Resolution = "Resolution",
+    Name = "Name",
+    `Avg Run/Avg Spawners` = "Avg Run/Avg Spawners",
+    `LRP/LBB` = "LRP/LBB",
+    `Mgmt Target` = "Mgmt Target",
+    Forecast = "Forecast",
+    Outlook = "Outlook",
+    check.names = FALSE
+  )
+
+  # Actual data rows
+  data_rows <- df_smu %>%
+    select(Resolution, Name, `Avg Run/Avg Spawners`,
+           `LRP/LBB`, `Mgmt Target`, Forecast, Outlook)
+
+  # Combine
+  block <- bind_rows(row1, row2, row3, data_rows)
+  block
+}
+
+# Build all SMU blocks
+block_list <- lapply(smu_list, build_block)
+
+# Combine all blocks
+big_df <- bind_rows(block_list)
+
+
+
+
+# ---- Convert to flextable ----
+ft <- flextable(big_df)
+
+
+# Remove default header row
+ft <- delete_part(ft, part = "header")
+
+
+
+# Style Row 1 (SMU/Narrative labels)
+ft <- bg(ft, i = which(big_df$Resolution == "SMU" & big_df$Name == "Narrative"),
+         bg = "gray90")
+ft <- bold(ft, i = which(big_df$Resolution == "SMU" & big_df$Name == "Narrative"),
+           bold = TRUE)
+
+# Style Row 3 (column headers)
+ft <- bg(ft, i = which(big_df$Resolution == "Resolution"),
+         bg = "gray90")
+ft <- bold(ft, i = which(big_df$Resolution == "Resolution"),
+           bold = TRUE)
+
+# Apply borders + autofit
+ft <- border_remove(ft)
+ft <- border_outer(ft, border = fp_border(color = "black", width = 1))
+ft <- border_inner_h(ft, border = fp_border(color = "black", width = 1))
+ft <- border_inner_v(ft, border = fp_border(color = "black", width = 1))
+ft <- autofit(ft)
+
+ft
+
+# Find all rows where Resolution == "SMU" and Name == "Narrative"
+narrative_rows <- which(big_df$Resolution == "SMU" & big_df$Name == "Narrative")
+
+# For each of those rows, also merge the row immediately below it
+for (i in narrative_rows) {
+  # Merge the label row
+  ft <- merge_at(ft, i = i, j = 2:7)
+  # Merge the narrative content row (i + 1)
+  ft <- merge_at(ft, i = i + 1, j = 2:7)
+}
+
+
+ft
+
+## Now add thicker border between each SMU
+# We've already identified where these rows are above
+# Skip the first one because that's at the top
+border_rows <- narrative_rows[-1]
+
+# Apply thicker top border to each of those rows (i.e., above where it says SMU and Narrative)
+for (i in border_rows) {
+  ft <- border(ft, i = i, j = 1:ncol(big_df), border.top = fp_border(color = "black", width = 2), part = "body")
+}
+
+ft
+
+
+
+###
 
