@@ -129,6 +129,7 @@ stacked_df = bind_rows(Outlook_Repeat_Test, cu_outlook_records_enriched, other_o
 
 
 ################################################################################
+################################################################################
 ## Prep the data a bit more to make tables for the report
 
 # Tables will be labelled by DFO Area and Species (for later reporting)
@@ -152,7 +153,7 @@ tabPrep = tabPrep%>%
 
 
 
-tabPrep <- tabPrep %>%
+tabPrep = tabPrep %>%
   group_by(smu_name) %>%
   mutate(
     # Determine resolution type
@@ -227,6 +228,9 @@ nested_tabs = tabPrep %>%
   group_by(smu_area, smu_species, smu_name, Narrative) %>%
   group_split()
 
+################################################################################
+# Code for making 1 single flextable per SMU
+
 # Create flextables
 ft_list = lapply(nested_tabs, function(df_smu) {
   smu = unique(df_smu$smu_name)
@@ -259,12 +263,6 @@ ft_list = lapply(nested_tabs, function(df_smu) {
 
 
 
-save(ft_list, file = "ft_list.RData")
-save(tabPrep, file = "tabPrep.Rdata")
-
-
-flat_tables <- lapply(ft_list, function(x) x$table)
-save(flat_tables, file = "flat_tables.Rdata")
 
 # Find the first match and extract its table
 areas = c("FRASER AND INTERIOR", "NORTH COAST", "SOUTH COAST", "YUKON")
@@ -272,22 +270,18 @@ areas = c("FRASER AND INTERIOR", "NORTH COAST", "SOUTH COAST", "YUKON")
 species_list = c("Chum", "Chinook", "Coho", "Pink-Even", "Sockeye (Lake Type)", "Sockeye (River Type)")
 
 
-filtered <- Filter(function(x) x$area == "FRASER AND INTERIOR" && x$species == "Chinook", ft_list)
-
-##########################
-####################################################
-# Load required libraries
 
 
 
-library(dplyr)
-library(flextable)
-library(officer)
+################################################################################
+################################################################################
+################################################################################
 
+### PRACTICE MAKING TABLES WITH FAKE DATA
+# Should be one flextable for all SMUs within ONE area and species
 
-
-# ---- Fake data with your exact column names ----
-tabPrep <- data.frame(
+# ---- Fake data with same column names ----
+tabPrep = data.frame(
   smu_name = c("North Coast – Chum", "North Coast – Chum",
                "Central Coast – Chum", "Central Coast – Chum"),
   Narrative = c("Another narrative for this SMU", "Another narrative for this SMU",
@@ -303,17 +297,21 @@ tabPrep <- data.frame(
   check.names = FALSE
 )
 
+## RESTRUCTURE THE DATA FRAME
+# To get the format we want, the data needs to be rearranged
+# Where SMU and Narrative are placed above the remaining data columns
+
 # ---- Split into SMU blocks ----
-smu_list <- split(tabPrep, tabPrep$smu_name)
+smu_list = split(tabPrep, tabPrep$smu_name)
 
 # ---- Build each SMU block as a data frame with fake header rows ----
-build_block <- function(df_smu) {
+build_block = function(df_smu) {
 
-  smu <- unique(df_smu$smu_name)
-  narr <- unique(df_smu$Narrative)
+  smu = unique(df_smu$smu_name)
+  narr = unique(df_smu$Narrative)
 
   # Row 1: SMU | Narrative label row
-  row1 <- data.frame(
+  row1 = data.frame(
     Resolution = "SMU",
     Name = "Narrative",
     `Avg Run/Avg Spawners` = "",
@@ -325,7 +323,7 @@ build_block <- function(df_smu) {
   )
 
   # Row 2: SMU value | Narrative value
-  row2 <- data.frame(
+  row2 = data.frame(
     Resolution = smu,
     Name = narr,
     `Avg Run/Avg Spawners` = "",
@@ -337,7 +335,7 @@ build_block <- function(df_smu) {
   )
 
   # Row 3: Proper table header row (as part of body)
-  row3 <- data.frame(
+  row3 = data.frame(
     Resolution = "Resolution",
     Name = "Name",
     `Avg Run/Avg Spawners` = "Avg Run/Avg Spawners",
@@ -349,63 +347,62 @@ build_block <- function(df_smu) {
   )
 
   # Actual data rows
-  data_rows <- df_smu %>%
+  data_rows = df_smu %>%
     select(Resolution, Name, `Avg Run/Avg Spawners`,
            `LRP/LBB`, `Mgmt Target`, Forecast, Outlook)
 
   # Combine
-  block <- bind_rows(row1, row2, row3, data_rows)
+  block = bind_rows(row1, row2, row3, data_rows)
   block
 }
 
 # Build all SMU blocks
-block_list <- lapply(smu_list, build_block)
+block_list = lapply(smu_list, build_block)
 
 # Combine all blocks
-big_df <- bind_rows(block_list)
-
-
-
+big_df = bind_rows(block_list)
 
 # ---- Convert to flextable ----
-ft <- flextable(big_df)
+ft = flextable(big_df)
 
+# Notice though how that created an extra column row at the top.
+# Need to remove this default header row
+ft = delete_part(ft, part = "header")
 
-# Remove default header row
-ft <- delete_part(ft, part = "header")
+## DO MORE STYLISTIC CHANGES
 
-
-
+# Make columns with SMU & Narrative grey and bold
 # Style Row 1 (SMU/Narrative labels)
-ft <- bg(ft, i = which(big_df$Resolution == "SMU" & big_df$Name == "Narrative"),
+ft = bg(ft, i = which(big_df$Resolution == "SMU" & big_df$Name == "Narrative"),
          bg = "gray90")
-ft <- bold(ft, i = which(big_df$Resolution == "SMU" & big_df$Name == "Narrative"),
+ft = bold(ft, i = which(big_df$Resolution == "SMU" & big_df$Name == "Narrative"),
            bold = TRUE)
 
 # Style Row 3 (column headers)
-ft <- bg(ft, i = which(big_df$Resolution == "Resolution"),
+# i.e., Make columns with labels Resolution --> Outlook bold (just need to find the ones with Resolution)
+ft = bg(ft, i = which(big_df$Resolution == "Resolution"),
          bg = "gray90")
-ft <- bold(ft, i = which(big_df$Resolution == "Resolution"),
+ft = bold(ft, i = which(big_df$Resolution == "Resolution"),
            bold = TRUE)
 
 # Apply borders + autofit
-ft <- border_remove(ft)
-ft <- border_outer(ft, border = fp_border(color = "black", width = 1))
-ft <- border_inner_h(ft, border = fp_border(color = "black", width = 1))
-ft <- border_inner_v(ft, border = fp_border(color = "black", width = 1))
-ft <- autofit(ft)
-
+ft = border_remove(ft)
+ft = border_outer(ft, border = fp_border(color = "black", width = 1))
+ft = border_inner_h(ft, border = fp_border(color = "black", width = 1))
+ft = border_inner_v(ft, border = fp_border(color = "black", width = 1))
+ft = autofit(ft)
 ft
 
+## Now do some final merging. The Narrative Column should extend  from row 2-->7
 # Find all rows where Resolution == "SMU" and Name == "Narrative"
-narrative_rows <- which(big_df$Resolution == "SMU" & big_df$Name == "Narrative")
+narrative_rows = which(big_df$Resolution == "SMU" & big_df$Name == "Narrative")
 
 # For each of those rows, also merge the row immediately below it
 for (i in narrative_rows) {
   # Merge the label row
-  ft <- merge_at(ft, i = i, j = 2:7)
+  ft = merge_at(ft, i = i, j = 2:7)
   # Merge the narrative content row (i + 1)
-  ft <- merge_at(ft, i = i + 1, j = 2:7)
+  ft = merge_at(ft, i = i + 1, j = 2:7)
 }
 
 
@@ -414,11 +411,11 @@ ft
 ## Now add thicker border between each SMU
 # We've already identified where these rows are above
 # Skip the first one because that's at the top
-border_rows <- narrative_rows[-1]
+border_rows = narrative_rows[-1]
 
 # Apply thicker top border to each of those rows (i.e., above where it says SMU and Narrative)
 for (i in border_rows) {
-  ft <- border(ft, i = i, j = 1:ncol(big_df), border.top = fp_border(color = "black", width = 2), part = "body")
+  ft = border(ft, i = i, j = 1:ncol(big_df), border.top = fp_border(color = "black", width = 2), part = "body")
 }
 
 ft
