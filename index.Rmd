@@ -117,6 +117,19 @@ opts_chunk$set(
   fig.align = fig_align,
   fig.pos = fig_pos
 )
+
+
+library(flextable)
+set_flextable_defaults(
+  font.size = 10,
+  padding.left = 3, 
+  padding.right = 3, 
+  padding.top = 1, 
+  padding.bottom = 1,
+  na_str = "-",
+  theme_fun = "theme_box"
+)
+
 ```
 
 ```{r load-libraries, cache=FALSE}
@@ -133,3 +146,5 @@ library(readxl)
 library(purrr)
 
 ```
+
+
