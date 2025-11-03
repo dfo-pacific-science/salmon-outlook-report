@@ -568,4 +568,77 @@ save(ftSMU, file = "ftSMU.RData")
 #
 #
 # ###
+#####
+# ERROR MESSAGES
+
+fullList = read.csv("data/phase1culookup.csv")
+
+
+# # Identify missing SMUs
+# missing_smus <- fullList[!fullList$smu %in% cu_outlook_records_enriched$smu_name, ]
+#
+# # Identify missing SMUs (remove duplicates first)
+# missing_smus <- fullList[!fullList$smu %in% unique(cu_outlook_records_enriched$smu_name), ]
+#
+# # Group and print missing SMUs by area and species
+# if (nrow(missing_smus) == 0) {
+#   message("✅ All SMUs are accounted for in the survey results.")
+# } else {
+#   message("⚠️ Missing SMUs from the survey results:\n")
+#
+#   grouped <- split(missing_smus, list(missing_smus$area, missing_smus$species), drop = TRUE)
+#
+#   for (group in grouped) {
+#     area <- unique(group$area)
+#     species <- unique(group$species)
+#     smus <- unique(group$smu)
+#     smu_list <- paste(smus, collapse = ", ")
+#
+#     cat(sprintf("• Within **%s** for species **%s**, the following SMUs are missing: %s\n", area, species, smu_list))
+#   }
+# }
+#
+
+
+
+# Step 1: Get CUs from tabPrep where Resolution is CU or CU (aggregate)
+cu_rows <- tabPrep %>%
+  filter(Resolution %in% c("CU (singular)", "CU (aggregate)"))
+
+# Extract CU names (split aggregates by comma, no space)
+reported_cus <- cu_rows$Name %>%
+  strsplit(split = ",") %>%
+  unlist() %>%
+  unique()
+
+# Step 2: Get SMUs from tabPrep where Resolution is SMU
+smu_rows <- tabPrep %>%
+  filter(Resolution == "SMU")
+
+# Get associated CUs from fullList for those SMUs
+excluded_cus <- fullList %>%
+  filter(smu %in% smu_rows$Name) %>%
+  pull(cu) %>%
+  unique()
+
+# Step 3: Get reference CUs from fullList, excluding those tied to SMUs
+reference_cus <- fullList %>%
+  filter(!cu %in% excluded_cus) %>%
+  pull(cu) %>%
+  unique()
+
+# Step 4: Identify missing CUs
+missing_cus <- setdiff(reference_cus, reported_cus)
+
+# Step 5: Display results
+if (length(missing_cus) == 0) {
+  message("✅ All CUs are accounted for.")
+} else {
+  message("⚠️ The following CUs are missing from tabPrep:")
+  print(missing_cus)
+}
+
+
+
+
 
