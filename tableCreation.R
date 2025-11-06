@@ -16,6 +16,10 @@ library(stringr)
 # Read raw sheet without interpreting the first row as names
 raw = read_excel("data/outlookClasses.xlsx", sheet = 1, col_names = FALSE)
 
+# Also need to read in lookup table with full CU and SMU names
+fullList = read.csv("data/phase1culookup.csv")
+
+
 # Extract top and bottom header rows (first two rows of the sheet)
 header_top = as.character(unlist(raw[1, ], use.names = FALSE))
 header_bottom = as.character(unlist(raw[2, ], use.names = FALSE))
@@ -299,6 +303,44 @@ build_block <- function(df_smu) {
     select(Resolution, Name, `Avg Run/Avg Spawners`,
            `LRP/LBB`, `Mgmt Target`, Forecast, Outlook)
 
+
+
+  # # ---- Replace CU codes with CU names ONLY for CU rows ------------------------
+  # lookup <- fullList %>%
+  #   select(code = name, cu_name = label)
+  #
+  # df_filtered$Name <- mapply(function(name_value, resolution_value) {
+  #
+  #   # Only replace names for CU rows
+  #   if (resolution_value %in% c("CU (singular)", "CU (aggregate)")) {
+  #
+  #     # Convert commas to spaces, split into codes
+  #     code_vec <- name_value %>%
+  #       str_replace_all(",", " ") %>%
+  #       str_squish() %>%
+  #       str_split(" ") %>%
+  #       unlist()
+  #
+  #     # Replace each code using the lookup
+  #     replaced <- lookup$Name[match(code_vec, lookup$code)]
+  #
+  #     # Keep original code if not found in lookup
+  #     replaced[is.na(replaced)] <- code_vec[is.na(replaced)]
+  #
+  #     # Return the cleaned version
+  #     paste(replaced, collapse = " ")
+  #
+  #   } else {
+  #     # For SMU rows or CHECK rows → return original untouched
+  #     name_value
+  #   }
+  #
+  # }, df_filtered$Name, df_filtered$Resolution)
+  #
+  #
+  #
+
+
   # Combine into final block
   bind_rows(row1, row2, row3, data_rows)
 }
@@ -395,6 +437,9 @@ make_table <- function(area, species, data = tabPrep) {
   df_filtered <- data %>%
     filter(smu_area == area,
            smu_species == species)
+
+
+
 
   # Handle cases where no data exists
   if (nrow(df_filtered) == 0) {
