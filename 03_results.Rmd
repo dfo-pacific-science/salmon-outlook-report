@@ -1,88 +1,95 @@
 # Results
 
-```{r table-narrative, results='asis'}
-
-# Fake narrative text (~250 words)
-narrative_text <- paste(
-  rep("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ", 10),
-  collapse = " "
-)
-
-# --- Main data table (7 cols) ---
-df <- data.frame(
-  Resolution       = c("SMU", "Other"),
-  Name             = c("WCVI Chinook", "Conuma River"),
-  `Avg Run/Avg Spawners` = c("-", "50,000"),
-  `LRP/LBB`        = c("-", "n/a"),
-  `Mgmt Target`    = c("Maximum escapement: 40,000", "10,000"),
-  `Prelim Forecast`= c("-", "58,000"),
-  `Outlook Category` = c("1", "4"),
-  check.names = FALSE, stringsAsFactors = FALSE
-)
-
-ft <- flextable(df) %>%
-  theme_vanilla() %>%
-  bold(part = "header") %>%
-  color(part = "header", color = "black") %>%
-  bg(part = "header", bg = "grey90") %>%
-  border_remove() %>%
-  border_outer(border = officer::fp_border(color = "black", width = 1)) %>%
-  border_inner_h(border = officer::fp_border(color = "black", width = 0.5)) %>%
-  border_inner_v(border = officer::fp_border(color = "black", width = 0.5)) %>%
-  autofit() %>%
-  set_table_properties(layout = "autofit", width = 1)
 
 
 
-# --- Add top block values (plain text row) ---
-ft <- add_header_row(
-  x = ft,
-  values = c("WCVI Chinook (includes 3 CUs)", narrative_text),
-  colwidths = c(1, 6)
-)
+```{r missing-smus-table, echo=FALSE}
+library(dplyr)
+library(knitr)
 
-ft <- bold(ft, i = 1, part = "header", bold = FALSE)
-ft <- bg(ft, i = 1, part = "header", bg = "white")
+source("testingTables.R")
+source("tableCreation.R")
 
-# --- Add top row (SMU / Narrative) ---
-ft <- add_header_row(
-  x = ft,
-  values = c("SMU", "Narrative"),
-  colwidths = c(1, 6)
-)
-ft <- bold(ft, i = 1, part = "header", bold = TRUE)
-ft <- bg(ft, i = 1, part = "header", bg = "grey90")
-ft <- color(ft, i = 1, part = "header", color = "black")
+# Identify missing SMUs
+missing_smus <- fullList %>%
+  filter(!smu %in% unique(cu_outlook_records_enriched$smu_name)) %>%
+  distinct(area, species, smu)
 
-ft
-
-```
-
-```{r setup2, include=FALSE}
-library(flextable)
-library(glue)
-load("ftSMU.RData")
-
-```
-
-```{r tab}
-#ft2 <- ft_list[[1]]$table
-#ft2
-```
-
-```{r setup3, include=FALSE}
-# Assume ft_list is already created
-areas <- c("Fraser and Interior", "North Coast", "South Coast", "Yukon Transboundary")
-species_list <- c("Chum", "Chinook", "Coho", "Pink-Even", "Sockeye Lake-Type", "Sockeye River-Type")
+# Check and display
+if (nrow(missing_smus) == 0) {
+  knitr::kable(data.frame(Message = "All SMUs are accounted for in the survey results."))
+} else {
+  missing_smus %>%
+    arrange(area, species, smu) %>%
+    knitr::kable(col.names = c("Area", "Species", "Missing SMU"),
+                 caption = "Missing SMUs grouped by Area and Species")
+}
 
 
 ```
+
+```{r setup5, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Identify Missing CUs
+
+```{r missing-cu, echo = F}
+# Step 1: Get CUs from tabPrep where Resolution is CU or CU (aggregate)
+cu_rows <- tabPrep %>%
+  filter(Resolution %in% c("CU (singular)", "CU (aggregate)"))
+
+# Extract CU names (split aggregates by comma, no space)
+reported_cus <- cu_rows$Name %>%
+  strsplit(split = ",") %>%
+  unlist() %>%
+  unique()
+
+# Step 2: Get SMUs from tabPrep where Resolution is SMU
+smu_rows <- tabPrep %>%
+  filter(Resolution == "SMU")
+
+# Get associated CUs from fullList for those SMUs
+excluded_cus <- fullList %>%
+  filter(smu %in% smu_rows$Name) %>%
+  pull(cu) %>%
+  unique()
+
+# Step 3: Get reference CUs from fullList, excluding those tied to SMUs
+reference_cus <- fullList %>%
+  filter(!cu %in% excluded_cus) %>%
+  pull(cu) %>%
+  unique()
+
+# Step 4: Identify missing CUs
+missing_cus <- setdiff(reference_cus, reported_cus)
+
+# Step 5: Display results
+if (length(missing_cus) == 0) {
+  knitr::kable(data.frame(Message = "All CUs are accounted for in the survey results."))
+} else {
+  data.frame(`Missing CU` = sort(missing_cus)) %>%
+    knitr::kable(caption = "Missing CUs from the survey results")
+}
+```
+
 
 ## Fraser and Interior Area
 
 ### Chum
 
+
+
+
 ### Chinook
+
+```{r fiaChinookTable}
+
+make_table("FRASER AND INTERIOR", "Chinook")
+
+
+```
+
 
 ### Coho
 
@@ -110,26 +117,14 @@ species_list <- c("Chum", "Chinook", "Coho", "Pink-Even", "Sockeye Lake-Type", "
 
 ### Chum
 
-```{r tableTest, echo=FALSE}
-species <- "Chum Salmon"
-area <- "North Coast"
-year <- 2025
+```{r scChumTable}
 
-
-caption_text <- paste0(
-  "Summary of metrics informing the annual status evaluation for ",
-  species, " in the ", area, " area during the ", year, " management cycle. ",
-  "Values are presented for each stock management unit (SMU), and where applicable, for associated singular conservation units (CUs), CU aggregations, and Hatchery or Indicator stocks. ",
-  "Reported values include recent average run size or spawner abundance, biological reference points (limit reference point [LRP] and lower biological benchmark [LBB]), and management (mgmt.) targets or operational control points used to interpret current conditions. ",
-  "The forecast provides a numerical abundance estimate for the return year, while the outlook indicates the categorical status classification (see definitions in Table 1)."
-)
-
-ftSMU <- set_caption(ftSMU, 
-                     caption = caption_text)
-ftSMU
+make_table("SOUTH COAST", "Chum")
 
 
 ```
+
+
 
 
 ```{r tableTest2, results = "asis"}
@@ -147,9 +142,20 @@ ftSMU
 
 ### Pink-Even
 
-### Sockeye Lake-Type
+### Sockeye (Lake Type)
 
-### Sockeye River-Type
+```{r scsockeyLTTable}
+
+make_table("SOUTH COAST", "Sockeye (Lake Type)")
+
+
+```
+
+### Sockeye (River Type)
+
+
+
+
 
 ## Yukon Transboundary
 
