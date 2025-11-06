@@ -65,9 +65,7 @@ For CUs or SMUs with references in place (i.e. either lower (LBB) and upper biol
 
 SMUs for which insufficient data area available to determine an Outlook are noted as ‘Data Deficient’.
 
-```{r table-stock-outlooks, tab.cap = "TEST THIS PLEASE WORK"}
-
-
+```{r table-stock-outlooks}
 
 
 # Read raw sheet without interpreting the first row as names
@@ -108,11 +106,11 @@ ft = flextable(df_body) %>%
   align(j = 1, align = "left", part = "all") %>%   # left-align first column
   set_table_properties(layout = "autofit", width = 1)
 
-# caption_text <- paste0("Definitions of Outlook categories used to classify expected spawning abundance for conservation units (CUs) and stock management units (SMUs). Categories are based on biological benchmarks under the Wild Salmon Policy and reference points under the DFO precautionary approach, where available. For data-limited units, classifications are informed by percentiles of long-term observed abundance. Each category reflects relative abundance expectations to support status evaluation and harvest planning. Acronyms include LBB: lower biological benchmark, UBB: upper biological benchmark, TRP: target reference point, LRP: limit reference point; USR: upper stock reference.")
-# 
-# 
-# ft <- set_caption(ft, 
-#                      caption = caption_text)
+caption_text <- paste0("Definitions of Outlook categories used to classify expected spawning abundance for conservation units (CUs) and stock management units (SMUs). Categories are based on biological benchmarks under the Wild Salmon Policy and reference points under the DFO precautionary approach, where available. For data-limited units, classifications are informed by percentiles of long-term observed abundance. Each category reflects relative abundance expectations to support status evaluation and harvest planning. Acronyms include LBB: lower biological benchmark, UBB: upper biological benchmark, TRP: target reference point, LRP: limit reference point; USR: upper stock reference.")
+
+
+ft <- set_caption(ft,
+                     caption = caption_text)
 
 ft
 
