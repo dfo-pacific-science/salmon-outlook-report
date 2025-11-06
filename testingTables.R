@@ -18,6 +18,10 @@ library(stringr)
 # Read raw sheet without interpreting the first row as names
 raw = read_excel("data/outlookClasses.xlsx", sheet = 1, col_names = FALSE)
 
+# Also need to read in lookup table with full CU and SMU names
+fullList = read.csv("data/phase1culookup.csv")
+
+
 # Extract top and bottom header rows (first two rows of the sheet)
 header_top = as.character(unlist(raw[1, ], use.names = FALSE))
 header_bottom = as.character(unlist(raw[2, ], use.names = FALSE))
@@ -134,6 +138,13 @@ stacked_df = bind_rows(Outlook_Repeat_Test, cu_outlook_records_enriched, other_o
 
 # Tables will be labelled by DFO Area and Species (for later reporting)
 
+
+### NEW CODE FOR ADDING CU NAMES BETTER
+
+
+fullList = read.csv("data/phase1culookup.csv")
+
+
 # Add fake data to columns for final tables
 # These values will come from the second survey
 tabPrep = cu_outlook_records_enriched %>%
@@ -150,6 +161,23 @@ tabPrep = tabPrep%>%
     smu_area = "SOUTH COAST",
     smu_species = "Chum"
   )
+
+
+
+
+# Function to map CU codes to labels
+get_labels <- function(cu_string, ref_df) {
+  cu_codes <- str_split(cu_string, ",")[[1]]
+  labels <- ref_df %>%
+    filter(cu %in% cu_codes) %>%
+    arrange(match(cu, cu_codes)) %>%  # preserve original order
+    pull(label)
+  paste(labels, collapse = ", ")
+}
+
+# Apply function to tabData
+tabPrep = tabPrep %>%
+  mutate(CU_Names = map_chr(cu_outlook_selection, ~ get_labels(.x, fullList)))
 
 
 
@@ -571,7 +599,7 @@ save(ftSMU, file = "ftSMU.RData")
 #####
 # ERROR MESSAGES
 
-fullList = read.csv("data/phase1culookup.csv")
+
 
 
 # # Identify missing SMUs
@@ -599,46 +627,42 @@ fullList = read.csv("data/phase1culookup.csv")
 # }
 #
 
-
-
-# Step 1: Get CUs from tabPrep where Resolution is CU or CU (aggregate)
-cu_rows <- tabPrep %>%
-  filter(Resolution %in% c("CU (singular)", "CU (aggregate)"))
-
-# Extract CU names (split aggregates by comma, no space)
-reported_cus <- cu_rows$Name %>%
-  strsplit(split = ",") %>%
-  unlist() %>%
-  unique()
-
-# Step 2: Get SMUs from tabPrep where Resolution is SMU
-smu_rows <- tabPrep %>%
-  filter(Resolution == "SMU")
-
-# Get associated CUs from fullList for those SMUs
-excluded_cus <- fullList %>%
-  filter(smu %in% smu_rows$Name) %>%
-  pull(cu) %>%
-  unique()
-
-# Step 3: Get reference CUs from fullList, excluding those tied to SMUs
-reference_cus <- fullList %>%
-  filter(!cu %in% excluded_cus) %>%
-  pull(cu) %>%
-  unique()
-
-# Step 4: Identify missing CUs
-missing_cus <- setdiff(reference_cus, reported_cus)
-
-# Step 5: Display results
-if (length(missing_cus) == 0) {
-  message("✅ All CUs are accounted for.")
-} else {
-  message("⚠️ The following CUs are missing from tabPrep:")
-  print(missing_cus)
-}
-
-
-
-
+#
+#
+# # Step 1: Get CUs from tabPrep where Resolution is CU or CU (aggregate)
+# cu_rows <- tabPrep %>%
+#   filter(Resolution %in% c("CU (singular)", "CU (aggregate)"))
+#
+# # Extract CU names (split aggregates by comma, no space)
+# reported_cus <- cu_rows$Name %>%
+#   strsplit(split = ",") %>%
+#   unlist() %>%
+#   unique()
+#
+# # Step 2: Get SMUs from tabPrep where Resolution is SMU
+# smu_rows <- tabPrep %>%
+#   filter(Resolution == "SMU")
+#
+# # Get associated CUs from fullList for those SMUs
+# excluded_cus <- fullList %>%
+#   filter(smu %in% smu_rows$Name) %>%
+#   pull(cu) %>%
+#   unique()
+#
+# # Step 3: Get reference CUs from fullList, excluding those tied to SMUs
+# reference_cus <- fullList %>%
+#   filter(!cu %in% excluded_cus) %>%
+#   pull(cu) %>%
+#   unique()
+#
+# # Step 4: Identify missing CUs
+# missing_cus <- setdiff(reference_cus, reported_cus)
+#
+# # Step 5: Display results
+# if (length(missing_cus) == 0) {
+#   message("✅ All CUs are accounted for.")
+# } else {
+#   message("⚠️ The following CUs are missing from tabPrep:")
+#   print(missing_cus)
+# }
 
