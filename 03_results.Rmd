@@ -28,9 +28,6 @@ if (nrow(missing_smus) == 0) {
 
 ```
 
-```{r setup5, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
 
 ## Identify Missing CUs
 
