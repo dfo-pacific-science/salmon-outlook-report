@@ -359,6 +359,31 @@ style_smu_table <- function(big_df) {
   ft
 }
 
+
+#######
+# I THINK I NEED TO MAKE MY TABLE CREATING CAPTION HERE
+
+make_caption = function(species, area, year){
+
+  # Convert area name (all caps) to title case
+  area_titleCase = area %>%
+    tolower() %>%
+    tools::toTitleCase() %>%
+    gsub("\\bAnd\\b", "and", .)
+
+
+  paste0(
+    "Summary of metrics informing the annual status evaluation for ",
+    species, " in the ", area_titleCase, " area during the ", year, " management cycle. ",
+    "Values are presented for each stock management unit (SMU), and where applicable, for associated singular conservation units (CUs), CU aggregations, and Hatchery or Indicator stocks. ",
+    "Reported values include recent average run size or spawner abundance, biological reference points (limit reference point [LRP] and lower biological benchmark [LBB]), and management (mgmt.) targets or operational control points used to interpret current conditions. ",
+    "The forecast provides a numerical abundance estimate for the return year, while the outlook indicates the categorical status classification (see definitions in Table 1)."
+)
+
+}
+
+
+
 ################################################################################
 # 3. Function: make_table(area, species, data)
 #    This is the function you call in Results.Rmd
@@ -388,6 +413,12 @@ make_table <- function(area, species, data = tabPrep) {
   # Apply styling
   ft <- style_smu_table(big_df)
 
+  # Buid caption text
+  caption_text = make_caption(species = species, area = area, year = 2026)
+
+  ft = set_caption(ft, caption = caption_text)
+
+
   return(ft)
 }
 
@@ -397,6 +428,7 @@ make_table <- function(area, species, data = tabPrep) {
 
 make_table("FRASER AND INTERIOR", "Chinook")
 make_table("SOUTH COAST", "Sockeye (Lake Type)")
+
 
 
 
