@@ -95,9 +95,20 @@ if(!is.null(ft)){
 
 ### Chinook
 
-```{r fiaChinookTable}
+```{r fiaChinookTable, results = "asis"}
 
-make_table("FRASER AND INTERIOR", "Chinook")
+ft = tryCatch(
+  make_table("FRASER AND INTERIOR", "Chinook"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+
 
 
 ```
@@ -105,25 +116,189 @@ make_table("FRASER AND INTERIOR", "Chinook")
 
 ### Coho
 
+```{r fiaCohoTable}
+
+ft = tryCatch(
+  make_table("FRASER AND INTERIOR", "Coho"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+
+
+
+```
+
+
 ### Pink-Even
+
+```{r fiaPinkEvenTable}
+
+ft = tryCatch(
+  make_table("FRASER AND INTERIOR", "Pink Even"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+```
 
 ### Sockeye Lake-Type
 
+```{r fiaSockeyeLakeTypeTable}
+
+ft = tryCatch(
+  make_table("FRASER AND INTERIOR", "Sockeye Lake Type"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+```
+
+
 ### Sockeye River-Type
+
+```{r fiaSockeyeRiverTypeTable}
+
+ft = tryCatch(
+  make_table("FRASER AND INTERIOR", "Sockeye River Type"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+```
+
 
 ## North Coast Area
 
 ### Chum
 
+```{r northchumTable}
+
+ft = tryCatch(
+  make_table("NORTH COAST", "Chum"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+```
+
+
 ### Chinook
+
+```{r northChinookTable}
+
+ft = tryCatch(
+  make_table("NORTH COAST", "Chinook"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+```
+
 
 ### Coho
 
+```{r northCohoTable}
+
+ft = tryCatch(
+  make_table("NORTH COAST", "Coho"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+```
+
+
 ### Pink-Even
+
+
+```{r northPinkEvenTable}
+
+ft = tryCatch(
+  make_table("NORTH COAST", "Pink Even"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+```
+
+
 
 ### Sockeye Lake-Type
 
+```{r northSockeyeLakeTable}
+
+ft = tryCatch(
+  make_table("NORTH COAST", "Sockeye (Lake Type)"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+```
+
+
 ### Sockeye River-Type
+
+```{r northSockeyeRiverTable}
+
+ft = tryCatch(
+  make_table("NORTH COAST", "Sockeye (River Type)"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+```
+
 
 ## South Coast Area
 
@@ -131,41 +306,114 @@ make_table("FRASER AND INTERIOR", "Chinook")
 
 ```{r scChumTable}
 
-make_table("SOUTH COAST", "Chum")
+ft = tryCatch(
+  make_table("SOUTH COAST", "Chum"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
 
 
 ```
-
-
-
-
-```{r tableTest2, results = "asis"}
-
-
-#ftSMU
-
-```
-
 
 
 ### Chinook
 
+```{r scChinookTable}
+
+ft = tryCatch(
+  make_table("SOUTH COAST", "Chinook"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+
+
+```
+
+
 ### Coho
 
+```{r scCohoTable}
+
+ft = tryCatch(
+  make_table("SOUTH COAST", "Coho"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+
+```
+
+
 ### Pink-Even
+
+```{r scPinkTable}
+
+ft = tryCatch(
+  make_table("SOUTH COAST", "Pink Even"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+
+```
 
 ### Sockeye (Lake Type)
 
 ```{r scsockeyLTTable}
 
-make_table("SOUTH COAST", "Sockeye (Lake Type)")
+ft = tryCatch(
+  make_table("SOUTH COAST", "Sockeye (Lake Type)"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
 
+if(!is.null(ft)){
+  ft
+}
 
 ```
 
 ### Sockeye (River Type)
 
+```{r scsockeyRTTable}
 
+ft = tryCatch(
+  make_table("SOUTH COAST", "Sockeye (River Type)"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+
+```
 
 
 
@@ -173,12 +421,112 @@ make_table("SOUTH COAST", "Sockeye (Lake Type)")
 
 ### Chum
 
+```{r ytChumTable}
+
+ft = tryCatch(
+  make_table("YUKON TRANSBOUNDARY", "Chum"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+
+```
+
+
 ### Chinook
+
+```{r ytChinookTable}
+
+ft = tryCatch(
+  make_table("YUKON TRANSBOUNDARY", "Chinook"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+
+```
+
 
 ### Coho
 
+```{r ytCohoTable}
+
+ft = tryCatch(
+  make_table("YUKON TRANSBOUNDARY", "Coho"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+
+```
+
+
 ### Pink-Even
+```{r ytPinkEvenTable}
+
+ft = tryCatch(
+  make_table("YUKON TRANSBOUNDARY", "Pink Even"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+
+```
+
 
 ### Sockeye Lake-Type
 
+```{r ytSockeyeLTTable}
+
+ft = tryCatch(
+  make_table("YUKON TRANSBOUNDARY", "Sockeye Lake Type"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+
+```
+
+
 ### Sockeye River-Type
+
+```{r ytSockeyeRTTable}
+
+ft = tryCatch(
+  make_table("YUKON TRANSBOUNDARY", "Sockeye River Type"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+
+```
