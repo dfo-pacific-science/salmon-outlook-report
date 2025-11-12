@@ -256,7 +256,7 @@ tabPrep = tabPrep %>%
 #    Builds the SMU → Narrative → Header → Data block for one SMU
 ################################################################################
 
-build_block <- function(df_smu) {
+build_block = function(df_smu) {
 
   # Unique values for the SMU
   smu  <- unique(df_smu$smu_name)
@@ -305,40 +305,34 @@ build_block <- function(df_smu) {
 
 
 
-  # # ---- Replace CU codes with CU names ONLY for CU rows ------------------------
-  # lookup <- fullList %>%
-  #   select(code = name, cu_name = label)
-  #
-  # df_filtered$Name <- mapply(function(name_value, resolution_value) {
-  #
-  #   # Only replace names for CU rows
-  #   if (resolution_value %in% c("CU (singular)", "CU (aggregate)")) {
-  #
-  #     # Convert commas to spaces, split into codes
-  #     code_vec <- name_value %>%
-  #       str_replace_all(",", " ") %>%
-  #       str_squish() %>%
-  #       str_split(" ") %>%
-  #       unlist()
-  #
-  #     # Replace each code using the lookup
-  #     replaced <- lookup$Name[match(code_vec, lookup$code)]
-  #
-  #     # Keep original code if not found in lookup
-  #     replaced[is.na(replaced)] <- code_vec[is.na(replaced)]
-  #
-  #     # Return the cleaned version
-  #     paste(replaced, collapse = " ")
-  #
-  #   } else {
-  #     # For SMU rows or CHECK rows → return original untouched
-  #     name_value
-  #   }
-  #
-  # }, df_filtered$Name, df_filtered$Resolution)
-  #
-  #
-  #
+  # ---- Replace CU codes with CU names ONLY for CU rows ------------------------
+  lookup <- fullList %>%
+    select(code = cu, cu_name = label)
+
+  data_rows <- data_rows %>%
+    mutate(
+      Name = if_else(
+        Resolution %in% c("CU (singular)", "CU (aggregate)"),
+        map_chr(Name, function(name_value) {
+          # Split by commas or spaces
+          code_vec <- name_value %>%
+            str_replace_all(",", " ") %>%
+            str_squish() %>%
+            str_split(" ") %>%
+            unlist()
+
+          # Replace codes using lookup
+          replaced <- lookup$cu_name[match(code_vec, lookup$code)]
+          replaced[is.na(replaced)] <- code_vec[is.na(replaced)]
+
+          # Join with a space between names
+          paste(replaced, collapse = ", ")
+        }),
+        Name  # otherwise leave unchanged
+      )
+    )
+
+
 
 
   # Combine into final block
@@ -473,7 +467,7 @@ make_table <- function(area, species, data = tabPrep) {
 
 make_table("FRASER AND INTERIOR", "Chinook")
 make_table("SOUTH COAST", "Sockeye (Lake Type)")
-
+make_table("NORTH COAST", "Chinook")
 
 
 
