@@ -75,6 +75,21 @@ if (length(missing_cus) == 0) {
 
 ### Chum
 
+```{r fiaChumTable, results = "asis"}
+
+ft = tryCatch(
+  make_table("FRASER AND INTERIOR", "Chum"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+
+```
 
 
 
