@@ -259,11 +259,11 @@ tabPrep = tabPrep %>%
 build_block = function(df_smu) {
 
   # Unique values for the SMU
-  smu  <- unique(df_smu$smu_name)
-  narr <- unique(df_smu$Narrative)
+  smu  = unique(df_smu$smu_name)
+  narr = unique(df_smu$Narrative)
 
   # Row 1: label row (gets grey + bold styling later)
-  row1 <- data.frame(
+  row1 = data.frame(
     Resolution = "SMU",
     Name       = "Narrative",
     `Avg Run/Avg Spawners` = "",
@@ -275,7 +275,7 @@ build_block = function(df_smu) {
   )
 
   # Row 2: actual SMU values + narrative content
-  row2 <- data.frame(
+  row2 = data.frame(
     Resolution = smu,
     Name       = narr,
     `Avg Run/Avg Spawners` = "",
@@ -287,7 +287,7 @@ build_block = function(df_smu) {
   )
 
   # Row 3: pseudo-header row (becomes part of body)
-  row3 <- data.frame(
+  row3 = data.frame(
     Resolution = "Resolution",
     Name       = "Name",
     `Avg Run/Avg Spawners` = "Avg Run/Avg Spawners",
@@ -299,31 +299,31 @@ build_block = function(df_smu) {
   )
 
   # Actual rows from input
-  data_rows <- df_smu %>%
+  data_rows = df_smu %>%
     select(Resolution, Name, `Avg Run/Avg Spawners`,
            `LRP/LBB`, `Mgmt Target`, Forecast, Outlook)
 
 
 
-  # ---- Replace CU codes with CU names ONLY for CU rows ------------------------
-  lookup <- fullList %>%
+  # Replace CU codes with CU names ONLY for CU rows
+  lookup = fullList %>%
     select(code = cu, cu_name = label)
 
-  data_rows <- data_rows %>%
+  data_rows = data_rows %>%
     mutate(
       Name = if_else(
         Resolution %in% c("CU (singular)", "CU (aggregate)"),
         map_chr(Name, function(name_value) {
           # Split by commas or spaces
-          code_vec <- name_value %>%
+          code_vec = name_value %>%
             str_replace_all(",", " ") %>%
             str_squish() %>%
             str_split(" ") %>%
             unlist()
 
           # Replace codes using lookup
-          replaced <- lookup$cu_name[match(code_vec, lookup$code)]
-          replaced[is.na(replaced)] <- code_vec[is.na(replaced)]
+          replaced = lookup$cu_name[match(code_vec, lookup$code)]
+          replaced[is.na(replaced)] = code_vec[is.na(replaced)]
 
           # Join with a space between names
           paste(replaced, collapse = ", ")
@@ -344,35 +344,35 @@ build_block = function(df_smu) {
 #    Applies all styling, merging, borders, bolding, etc.
 ################################################################################
 
-style_smu_table <- function(big_df) {
+style_smu_table = function(big_df) {
 
-  ft <- flextable(big_df)
+  ft = flextable(big_df)
 
   # Remove automatically generated header — we already encoded headers manually
-  ft <- delete_part(ft, part = "header")
+  ft = delete_part(ft, part = "header")
 
   # Identify key rows for styling
-  idx_label  <- which(big_df$Resolution == "SMU"       & big_df$Name == "Narrative")  # row 1 of each block
-  idx_header <- which(big_df$Resolution == "Resolution")                               # row 3 of each block
+  idx_label  = which(big_df$Resolution == "SMU"       & big_df$Name == "Narrative")  # row 1 of each block
+  idx_header = which(big_df$Resolution == "Resolution")                               # row 3 of each block
 
   # Style label row (row 1)
-  ft <- bg(ft, i = idx_label, bg = "gray90")
-  ft <- bold(ft, i = idx_label, bold = TRUE)
+  ft = bg(ft, i = idx_label, bg = "gray90")
+  ft = bold(ft, i = idx_label, bold = TRUE)
 
   # Style pseudo-header row (row 3)
-  ft <- bg(ft, i = idx_header, bg = "gray90")
-  ft <- bold(ft, i = idx_header, bold = TRUE)
+  ft = bg(ft, i = idx_header, bg = "gray90")
+  ft = bold(ft, i = idx_header, bold = TRUE)
 
   # Borders
-  ft <- border_remove(ft)
-  ft <- border_outer(ft, border = fp_border(color="black", width=1))
-  ft <- border_inner_h(ft, border = fp_border(color="black", width=1))
-  ft <- border_inner_v(ft, border = fp_border(color="black", width=1))
+  ft = border_remove(ft)
+  ft = border_outer(ft, border = fp_border(color="black", width=1))
+  ft = border_inner_h(ft, border = fp_border(color="black", width=1))
+  ft = border_inner_v(ft, border = fp_border(color="black", width=1))
 
   # Merge narrative across columns (rows 1 + 2)
   for (i in idx_label) {
-    ft <- merge_at(ft, i = i,     j = 2:7)
-    ft <- merge_at(ft, i = i + 1, j = 2:7)
+    ft = merge_at(ft, i = i,     j = 2:7)
+    ft = merge_at(ft, i = i + 1, j = 2:7)
   }
 
   # Thicker border between SMU blocks (skip first block)
@@ -389,8 +389,8 @@ style_smu_table <- function(big_df) {
     }
   }
 
-  ft <- autofit(ft)
-  ft <- set_table_properties(ft, layout = "autofit")
+  ft = autofit(ft)
+  ft = set_table_properties(ft, layout = "autofit")
 
   ft
 }
@@ -425,15 +425,12 @@ make_caption = function(species, area, year){
 #    This is the function you call in Results.Rmd
 ################################################################################
 
-make_table <- function(area, species, data = tabPrep) {
+make_table = function(area, species, data = tabPrep) {
 
   # Filter to SMUs that match both area and species
-  df_filtered <- data %>%
+  df_filtered = data %>%
     filter(smu_area == area,
            smu_species == species)
-
-
-
 
   # Handle cases where no data exists
   if (nrow(df_filtered) == 0) {
@@ -441,16 +438,16 @@ make_table <- function(area, species, data = tabPrep) {
   }
 
   # Split into SMU-specific dataframes
-  smu_list <- split(df_filtered, df_filtered$smu_name)
+  smu_list = split(df_filtered, df_filtered$smu_name)
 
   # Build each SMU block
-  block_list <- lapply(smu_list, build_block)
+  block_list = lapply(smu_list, build_block)
 
   # Combine into one long table for this area × species
-  big_df <- bind_rows(block_list)
+  big_df = bind_rows(block_list)
 
   # Apply styling
-  ft <- style_smu_table(big_df)
+  ft = style_smu_table(big_df)
 
   # Buid caption text
   caption_text = make_caption(species = species, area = area, year = 2026)
@@ -467,7 +464,6 @@ make_table <- function(area, species, data = tabPrep) {
 
 make_table("FRASER AND INTERIOR", "Chinook")
 make_table("SOUTH COAST", "Sockeye (Lake Type)")
-make_table("NORTH COAST", "Chinook")
 
 
 
