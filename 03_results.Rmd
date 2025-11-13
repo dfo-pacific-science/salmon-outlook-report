@@ -1,8 +1,5 @@
 # Results
 
-
-
-
 ```{r missing-smus-table, echo=FALSE}
 library(dplyr)
 library(knitr)
@@ -11,7 +8,7 @@ source("testingTables.R")
 source("tableCreation.R")
 
 # Identify missing SMUs
-missing_smus <- fullList %>%
+missing_smus = fullList %>%
   filter(!smu %in% unique(cu_outlook_records_enriched$smu_name)) %>%
   distinct(area, species, smu)
 
@@ -33,33 +30,33 @@ if (nrow(missing_smus) == 0) {
 
 ```{r missing-cu, echo = F}
 # Step 1: Get CUs from tabPrep where Resolution is CU or CU (aggregate)
-cu_rows <- tabPrep %>%
+cu_rows = tabPrep %>%
   filter(Resolution %in% c("CU (singular)", "CU (aggregate)"))
 
 # Extract CU names (split aggregates by comma, no space)
-reported_cus <- cu_rows$Name %>%
+reported_cus = cu_rows$Name %>%
   strsplit(split = ",") %>%
   unlist() %>%
   unique()
 
 # Step 2: Get SMUs from tabPrep where Resolution is SMU
-smu_rows <- tabPrep %>%
+smu_rows = tabPrep %>%
   filter(Resolution == "SMU")
 
 # Get associated CUs from fullList for those SMUs
-excluded_cus <- fullList %>%
+excluded_cus = fullList %>%
   filter(smu %in% smu_rows$Name) %>%
   pull(cu) %>%
   unique()
 
 # Step 3: Get reference CUs from fullList, excluding those tied to SMUs
-reference_cus <- fullList %>%
+reference_cus = fullList %>%
   filter(!cu %in% excluded_cus) %>%
   pull(cu) %>%
   unique()
 
 # Step 4: Identify missing CUs
-missing_cus <- setdiff(reference_cus, reported_cus)
+missing_cus = setdiff(reference_cus, reported_cus)
 
 # Step 5: Display results
 if (length(missing_cus) == 0) {
