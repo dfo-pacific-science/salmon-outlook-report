@@ -149,7 +149,7 @@ if(!is.null(ft)){
 }
 ```
 
-### Sockeye Lake-Type
+### Sockeye Lake Type
 
 ```{r fiaSockeyeLakeTypeTable}
 
@@ -167,7 +167,7 @@ if(!is.null(ft)){
 ```
 
 
-### Sockeye River-Type
+### Sockeye River Type
 
 ```{r fiaSockeyeRiverTypeTable}
 
@@ -241,7 +241,7 @@ if(!is.null(ft)){
 ```
 
 
-### Pink-Even
+### Pink Even
 
 
 ```{r northPinkEvenTable}
@@ -261,12 +261,12 @@ if(!is.null(ft)){
 
 
 
-### Sockeye Lake-Type
+### Sockeye Lake Type
 
 ```{r northSockeyeLakeTable}
 
 ft = tryCatch(
-  make_table("NORTH COAST", "Sockeye (Lake Type)"),
+  make_table("NORTH COAST", "Sockeye Lake Type"),
   error = function(e){
     print("No data for this species/area combination.")
     return(NULL)
@@ -279,12 +279,12 @@ if(!is.null(ft)){
 ```
 
 
-### Sockeye River-Type
+### Sockeye River Type
 
 ```{r northSockeyeRiverTable}
 
 ft = tryCatch(
-  make_table("NORTH COAST", "Sockeye (River Type)"),
+  make_table("NORTH COAST", "Sockeye River Type"),
   error = function(e){
     print("No data for this species/area combination.")
     return(NULL)
@@ -358,7 +358,7 @@ if(!is.null(ft)){
 ```
 
 
-### Pink-Even
+### Pink Even
 
 ```{r scPinkTable}
 
@@ -381,7 +381,7 @@ if(!is.null(ft)){
 ```{r scsockeyLTTable}
 
 ft = tryCatch(
-  make_table("SOUTH COAST", "Sockeye (Lake Type)"),
+  make_table("SOUTH COAST", "Sockeye Lake Type"),
   error = function(e){
     print("No data for this species/area combination.")
     return(NULL)
@@ -399,7 +399,7 @@ if(!is.null(ft)){
 ```{r scsockeyRTTable}
 
 ft = tryCatch(
-  make_table("SOUTH COAST", "Sockeye (River Type)"),
+  make_table("SOUTH COAST", "Sockeye River Type"),
   error = function(e){
     print("No data for this species/area combination.")
     return(NULL)
@@ -473,7 +473,7 @@ if(!is.null(ft)){
 ```
 
 
-### Pink-Even
+### Pink Even
 ```{r ytPinkEvenTable}
 
 ft = tryCatch(
@@ -491,7 +491,7 @@ if(!is.null(ft)){
 ```
 
 
-### Sockeye Lake-Type
+### Sockeye Lake Type
 
 ```{r ytSockeyeLTTable}
 
@@ -510,7 +510,7 @@ if(!is.null(ft)){
 ```
 
 
-### Sockeye River-Type
+### Sockeye River Type
 
 ```{r ytSockeyeRTTable}
 
