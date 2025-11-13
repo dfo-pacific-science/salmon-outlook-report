@@ -246,38 +246,6 @@ build_block = function(df_smu) {
     select(Resolution, Name, `Avg Run/Avg Spawners`,
            `LRP/LBB`, `Mgmt Target`, Forecast, Outlook)
 
-
-
-  # # Replace CU codes with CU names ONLY for CU rows
-  # lookup = crosswalkList %>%
-  #   select(code = cu, cu_name = label)
-  #
-  # data_rows = data_rows %>%
-  #   mutate(
-  #     Name = if_else(
-  #       Resolution %in% c("CU (singular)", "CU (aggregate)"),
-  #       map_chr(Name, function(name_value) {
-  #         # Split by commas or spaces
-  #         code_vec = name_value %>%
-  #           str_replace_all(",", " ") %>%
-  #           str_squish() %>%
-  #           str_split(" ") %>%
-  #           unlist()
-  #
-  #         # Replace codes using lookup
-  #         replaced = lookup$cu_name[match(code_vec, lookup$code)]
-  #         replaced[is.na(replaced)] = code_vec[is.na(replaced)]
-  #
-  #         # Join with a space between names
-  #         paste(replaced, collapse = ", ")
-  #       }),
-  #       Name  # otherwise leave unchanged
-  #     )
-  #   )
-
-
-
-
   # Combine into final block
   bind_rows(row1, row2, row3, data_rows)
 }
