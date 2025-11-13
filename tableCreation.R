@@ -24,7 +24,8 @@ library(stringr)
 crosswalkList = read.csv("data/phase1culookup.csv")
 
 # For now, I have practice data stored here
-dummyPath = "data/finnis_outlook_phase1_test_dummy_data_20250905.xlsx"
+dummyPath = "data/testData3.xlsx"
+# dummyPath = "data/finnis_outlook_phase1_test_dummy_data_20250905.xlsx" # Anna's test data
 
 # List all sheet names within the file
 sheet_names = readxl::excel_sheets(dummyPath)
@@ -56,7 +57,7 @@ keep_cols_other = c(
 )
 
 # Get the cols I want for the SMU data
-Outlook_Repeat_Test = Outlook_Repeat_Test %>%
+Outlook_Repeat_Test = Salmon_Outlook_Report %>% # Note this name has changed!! Be careful
   select(all_of(keep_cols_repeat))
 
 # Now for the CU data
@@ -377,8 +378,8 @@ make_table = function(area, species, data = tabPrep) {
 ################################################################################
 
 # Test making the tables to see if they work
-make_table("FRASER AND INTERIOR", "Chinook")
-make_table("SOUTH COAST", "Sockeye (Lake Type)")
+make_table("FRASER AND INTERIOR", "Chum")
+#make_table("SOUTH COAST", "Chinook")
 
 
 
