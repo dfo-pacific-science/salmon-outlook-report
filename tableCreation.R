@@ -60,9 +60,50 @@ keep_cols_other = c(
 Outlook_Repeat_Test = Salmon_Outlook_Report %>% # Note this name has changed!! Be careful
   select(all_of(keep_cols_repeat))
 
-# Now for the CU data
-cu_outlook_records = cu_outlook_records %>%
-  select(all_of(keep_cols_cu))
+# NOW FOR CU DATA BUT I HAVE TO MAKE SOOOOOO MANY CHECKS FIRST
+cu_outlook_records <- cu_outlook_records %>%
+  # Keep only the columns you specified
+  select(all_of(keep_cols_cu)) %>%
+
+  # Apply all logic in one mutate block
+  mutate(
+    # 1. If BOTH cu_outlook_selection AND cu_outlook_assignment are empty or NA,
+    #    set BOTH to "CHECK: No data entered"
+    cu_outlook_selection = if_else(
+      (is.na(cu_outlook_selection) | cu_outlook_selection == "") &
+        (is.na(cu_outlook_assignment) | cu_outlook_assignment == ""),
+      "CHECK: No data entered",
+      cu_outlook_selection
+    ),
+    cu_outlook_assignment = if_else(
+      (is.na(cu_outlook_selection) | cu_outlook_selection == "") &
+        (is.na(cu_outlook_assignment) | cu_outlook_assignment == ""),
+      "CHECK: No data entered",
+      cu_outlook_assignment
+    ),
+
+    # 2. If cu_outlook_assignment has a value but cu_outlook_selection is blank,
+    #    set cu_outlook_selection to "Outlook assigned but no CU specified"
+    cu_outlook_selection = if_else(
+      (is.na(cu_outlook_selection) | cu_outlook_selection == "") &
+        !(is.na(cu_outlook_assignment) | cu_outlook_assignment == ""),
+      "Outlook assigned but no CU specified",
+      cu_outlook_selection
+    ),
+
+    # 3. Add cu_count column:
+    #    - If cu_outlook_selection contains an error message, count = 1
+    #    - Otherwise, count commas and add 1 (e.g., "CK-23,CK-20" → 2)
+    cu_count = case_when(
+      cu_outlook_selection %in% c("CHECK: No data entered", "Outlook assigned but no CU specified") ~ 1L,
+      TRUE ~ str_count(cu_outlook_selection, ",") + 1L
+    )
+  )
+
+
+
+
+
 
 # For the Outlook/hatchery data
 other_outlook_records = other_outlook_records %>%
@@ -387,7 +428,7 @@ make_table = function(area, species, data = tabPrep) {
 
 # Test making the tables to see if they work
 make_table("FRASER AND INTERIOR", "Chinook")
-#make_table("SOUTH COAST", "Chinook")
+make_table("SOUTH COAST", "Chinook")
 
 
 
