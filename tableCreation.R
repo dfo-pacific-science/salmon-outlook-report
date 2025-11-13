@@ -103,6 +103,23 @@ tabPrep = cu_outlook_records_enriched %>%
     `Mgmt Target`    = "10,000"
   )
 
+############## ADD BETTER COMMENT HERE
+# Function to map CU codes to labels
+get_labels <- function(cu_string, ref_df) {
+  cu_codes <- str_split(cu_string, ",")[[1]]
+  labels <- ref_df %>%
+    filter(cu %in% cu_codes) %>%
+    arrange(match(cu, cu_codes)) %>%  # preserve original order
+    pull(label)
+  paste(labels, collapse = ", ")
+}
+
+# Apply function to tabData
+tabPrep = tabPrep %>%
+  mutate(CU_Names = map_chr(cu_outlook_selection, ~ get_labels(.x, fullList)))
+
+
+
 # Then need to say what the Resolution is.
 # Options are: SMU, CU (aggregate) and CU (singular)
 # Then select the Outlook and Forecast based on resolution
@@ -123,7 +140,7 @@ tabPrep = tabPrep %>%
     # Assign Name based on resolution
     Name = case_when(
       Resolution == "SMU" ~ smu_name,
-      Resolution %in% c("CU (aggregate)", "CU (singular)") ~ cu_outlook_selection,
+      Resolution %in% c("CU (aggregate)", "CU (singular)") ~ CU_Names,
       str_detect(Resolution, "CHECK VALUE") ~ "Check value",
       TRUE ~ NA_character_
     ),
@@ -155,6 +172,9 @@ tabPrep = tabPrep %>%
       # Remove extra spaces around the dash
       str_replace_all("\\s*–\\s*", "–")
   )
+
+
+
 
 # Rename columns and select relevant ones
 tabPrep = tabPrep %>%
@@ -228,32 +248,32 @@ build_block = function(df_smu) {
 
 
 
-  # Replace CU codes with CU names ONLY for CU rows
-  lookup = crosswalkList %>%
-    select(code = cu, cu_name = label)
-
-  data_rows = data_rows %>%
-    mutate(
-      Name = if_else(
-        Resolution %in% c("CU (singular)", "CU (aggregate)"),
-        map_chr(Name, function(name_value) {
-          # Split by commas or spaces
-          code_vec = name_value %>%
-            str_replace_all(",", " ") %>%
-            str_squish() %>%
-            str_split(" ") %>%
-            unlist()
-
-          # Replace codes using lookup
-          replaced = lookup$cu_name[match(code_vec, lookup$code)]
-          replaced[is.na(replaced)] = code_vec[is.na(replaced)]
-
-          # Join with a space between names
-          paste(replaced, collapse = ", ")
-        }),
-        Name  # otherwise leave unchanged
-      )
-    )
+  # # Replace CU codes with CU names ONLY for CU rows
+  # lookup = crosswalkList %>%
+  #   select(code = cu, cu_name = label)
+  #
+  # data_rows = data_rows %>%
+  #   mutate(
+  #     Name = if_else(
+  #       Resolution %in% c("CU (singular)", "CU (aggregate)"),
+  #       map_chr(Name, function(name_value) {
+  #         # Split by commas or spaces
+  #         code_vec = name_value %>%
+  #           str_replace_all(",", " ") %>%
+  #           str_squish() %>%
+  #           str_split(" ") %>%
+  #           unlist()
+  #
+  #         # Replace codes using lookup
+  #         replaced = lookup$cu_name[match(code_vec, lookup$code)]
+  #         replaced[is.na(replaced)] = code_vec[is.na(replaced)]
+  #
+  #         # Join with a space between names
+  #         paste(replaced, collapse = ", ")
+  #       }),
+  #       Name  # otherwise leave unchanged
+  #     )
+  #   )
 
 
 
