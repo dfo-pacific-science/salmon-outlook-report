@@ -91,7 +91,6 @@ stacked_df = bind_rows(Outlook_Repeat_Test, cu_outlook_records_enriched, other_o
 
 
 ################################################################################
-################################################################################
 ## Prep the data a bit more to make tables for the report
 
 # Add fake data to columns for final tables
@@ -103,11 +102,11 @@ tabPrep = cu_outlook_records_enriched %>%
     `Mgmt Target`    = "10,000"
   )
 
-############## ADD BETTER COMMENT HERE
-# Function to map CU codes to labels
-get_labels <- function(cu_string, ref_df) {
-  cu_codes <- str_split(cu_string, ",")[[1]]
-  labels <- ref_df %>%
+# Replace CU codes with actual names (defined in fullList excel file)
+# Make sure there's a comma and space separating them
+get_labels = function(cu_string, ref_df) {
+  cu_codes = str_split(cu_string, ",")[[1]]
+  labels = ref_df %>%
     filter(cu %in% cu_codes) %>%
     arrange(match(cu, cu_codes)) %>%  # preserve original order
     pull(label)
@@ -116,8 +115,7 @@ get_labels <- function(cu_string, ref_df) {
 
 # Apply function to tabData
 tabPrep = tabPrep %>%
-  mutate(CU_Names = map_chr(cu_outlook_selection, ~ get_labels(.x, fullList)))
-
+  mutate(CU_Names = map_chr(cu_outlook_selection, ~ get_labels(.x, crosswalkList)))
 
 
 # Then need to say what the Resolution is.
@@ -162,6 +160,7 @@ tabPrep = tabPrep %>%
     )
   )
 
+## Do some final editing of the data frame
 
 # Fix up the Forecasts
 tabPrep = tabPrep %>%
@@ -172,9 +171,6 @@ tabPrep = tabPrep %>%
       # Remove extra spaces around the dash
       str_replace_all("\\s*–\\s*", "–")
   )
-
-
-
 
 # Rename columns and select relevant ones
 tabPrep = tabPrep %>%
@@ -195,8 +191,13 @@ tabPrep = tabPrep %>%
 
 
 ################################################################################
-# 1. Function: build_block()
-#    Builds the SMU → Narrative → Header → Data block for one SMU
+################################################################################
+### Putting everything together in a table
+
+# Step 1 reate a function: build_block()
+# That builds a dataframe with approximately the same layout that will appear
+# in the report.
+# It Builds the SMU → Narrative → Header → Data block for each SMU
 ################################################################################
 
 build_block = function(df_smu) {
@@ -251,8 +252,12 @@ build_block = function(df_smu) {
 }
 
 ################################################################################
-# 2. Function: style_smu_table()
-#    Applies all styling, merging, borders, bolding, etc.
+# Now apply the styling, merging, borders, bolding, etc.
+# Do this within a function style_smu_table
+
+# It's a bit confusing because SMU/Narrative should be bold/grey. Same with the
+# Other col names (Resolution, name, etc.)
+
 ################################################################################
 
 style_smu_table = function(big_df) {
@@ -370,25 +375,10 @@ make_table = function(area, species, data = tabPrep) {
 }
 
 ################################################################################
-# End of master script
-################################################################################
 
+# Test making the tables to see if they work
 make_table("FRASER AND INTERIOR", "Chinook")
 make_table("SOUTH COAST", "Sockeye (Lake Type)")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
