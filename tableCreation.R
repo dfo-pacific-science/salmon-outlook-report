@@ -148,7 +148,11 @@ tabPrep = tabPrep %>%
     Forecast = case_when(
       Resolution == "SMU" ~ smu_prelim_forecast,
       Resolution %in% c("CU (aggregate)", "CU (singular)") ~ cu_prelim_forecast,
-      str_detect(Resolution, "CHECK VALUE") ~ "Check value",
+      str_detect(Resolution, "CHECK VALUE") ~ paste0(
+        "CHECK VALUE: Outlook entered for entire SMU AND individual CU(s). ",
+        "SMU Forecast = ", coalesce(smu_prelim_forecast, "NA"), "; ",
+        "CU Forecast = ", coalesce(cu_prelim_forecast, "NA")
+      ),
       TRUE ~ NA_character_
     ),
 
@@ -156,7 +160,11 @@ tabPrep = tabPrep %>%
     Outlook = case_when(
       Resolution == "SMU" ~ smu_outlook_assignment,
       Resolution %in% c("CU (aggregate)", "CU (singular)") ~ cu_outlook_assignment,
-      str_detect(Resolution, "CHECK VALUE") ~ "Check value",
+      str_detect(Resolution, "CHECK VALUE") ~ paste0(
+        "CHECK VALUE: Outlook entered for entire SMU AND individual CU(s). ",
+        "SMU Outlook = ", coalesce(smu_outlook_assignment, "NA"), "; ",
+        "CU Outlook = ", coalesce(cu_outlook_assignment, "NA")
+      ),
       TRUE ~ NA_character_
     )
   )
@@ -378,7 +386,7 @@ make_table = function(area, species, data = tabPrep) {
 ################################################################################
 
 # Test making the tables to see if they work
-make_table("FRASER AND INTERIOR", "Chum")
+make_table("FRASER AND INTERIOR", "Chinook")
 #make_table("SOUTH COAST", "Chinook")
 
 
