@@ -10,68 +10,23 @@ library(readxl)
 library(purrr)
 library(stringr)
 
-################################################################################
-## Code for making Table 1 with Outlook classes
 
-# Read raw sheet without interpreting the first row as names
-raw = read_excel("data/outlookClasses.xlsx", sheet = 1, col_names = FALSE)
-
-# Also need to read in lookup table with full CU and SMU names
-fullList = read.csv("data/phase1culookup.csv")
-
-
-# Extract top and bottom header rows (first two rows of the sheet)
-header_top = as.character(unlist(raw[1, ], use.names = FALSE))
-header_bottom = as.character(unlist(raw[2, ], use.names = FALSE))
-
-# Body is everything after those two header rows
-df_body = raw[-c(1,2), , drop = FALSE]
-
-# Give the body sensible column names using the 'bottom' header,
-# making unique names if needed (avoids duplicate-names issues)
-colnames(df_body) = make.unique(header_bottom)
-
-# Build the flextable and set a two-row header using set_header_df
-mapping = data.frame(
-  col_keys = colnames(df_body),
-  top = header_top,
-  bottom = header_bottom,
-  stringsAsFactors = FALSE
-)
-
-ft = flextable(df_body) %>%
-  set_header_df(mapping = mapping, key = "col_keys") %>%
-  # merge cells horizontally where top header labels are the same
-  merge_h(part = "header") %>%
-  # formatting: remove default inner borders then add the three main horizontal rules
-  merge_v(part = "header", j = 1) %>%
-  border_remove() %>%
-  hline_top(part = "header", border = fp_border(color = "black", width = 1)) %>%
-  hline_bottom(part = "header", border = fp_border(color = "black", width = 1)) %>%
-  hline_bottom(part = "body",   border = fp_border(color = "black", width = 1)) %>%
-  # aesthetic touches
-  bold(part = "header") %>%
-  align(align = "center", part = "header") %>%
-  align(j = 1, align = "left", part = "all") %>%   # left-align first column
-  autofit()
-
-# 7) Show the table
-ft
-
-#################################################################################
 ################################################################################
 ## Code for making tables that give outlooks/narratives for each SMU
 
 ## Prep the data
+
 # Current format has the data in an Excel file divided into 3 sheets
 # One is data for each SMU, one is data for CUs, one is data for Other (hatchery/indicator)
 # These need to be merged together in various ways
 
+# Read in the list with full SMU/CU names (from the crosswalk)
+crosswalkList = read.csv("data/phase1culookup.csv")
+
 # For now, I have practice data stored here
 dummyPath = "data/finnis_outlook_phase1_test_dummy_data_20250905.xlsx"
 
-
-# List all sheet names.
+# List all sheet names within the file
 sheet_names = readxl::excel_sheets(dummyPath)
 
 # Read each sheet and name the list elements
@@ -81,31 +36,36 @@ df_list = map(sheet_names, ~ read_excel(dummyPath, sheet = .x)) %>%
 # Export each dataframe to the global environment
 list2env(df_list, envir = .GlobalEnv)
 
-# Columns we want to keep (now using parentrowid instead of uniquerowid)
+# Specify the columns we want to keep (now using parentrowid instead of uniquerowid)
+# For the SMU/overall data
 keep_cols_repeat = c(
   "globalid", "uniquerowid",
   "smu_area", "smu_species", "smu_name",
   "outlook_narrative", "smu_outlook_assignment", "smu_prelim_forecast"
 )
 
+# For the CU-level data
 keep_cols_cu = c(
   "cu_outlook_selection", "cu_outlook_assignment", "cu_prelim_forecast", "cu_count",
   "parentrowid"
 )
 
+# For hatchery/indicator data
 keep_cols_other = c(
   "other_outlook_selection", "other_outlook_assignment", "other_prelim_forecast", "parentrowid"
 )
 
+# Get the cols I want for the SMU data
 Outlook_Repeat_Test = Outlook_Repeat_Test %>%
   select(all_of(keep_cols_repeat))
 
+# Now for the CU data
 cu_outlook_records = cu_outlook_records %>%
   select(all_of(keep_cols_cu))
 
+# For the Outlook/hatchery data
 other_outlook_records = other_outlook_records %>%
   select(all_of(keep_cols_other))
-
 
 
 # Step 2: Join smu_area, smu_species, smu_name from Outlook_Repeat_Test to cu_outlook_records
@@ -134,15 +94,6 @@ stacked_df = bind_rows(Outlook_Repeat_Test, cu_outlook_records_enriched, other_o
 ################################################################################
 ## Prep the data a bit more to make tables for the report
 
-# Tables will be labelled by DFO Area and Species (for later reporting)
-
-
-### NEW CODE FOR ADDING CU NAMES BETTER
-
-
-fullList = read.csv("data/phase1culookup.csv")
-
-
 # Add fake data to columns for final tables
 # These values will come from the second survey
 tabPrep = cu_outlook_records_enriched %>%
@@ -152,33 +103,9 @@ tabPrep = cu_outlook_records_enriched %>%
     `Mgmt Target`    = "10,000"
   )
 
-
-#### STEPHEN REMOVE THIS BUT JUST FOR TESTING
-# tabPrep = tabPrep%>%
-#   mutate(
-#     smu_area = "SOUTH COAST",
-#     smu_species = "Chum"
-#   )
-
-
-
-
-# Function to map CU codes to labels
-get_labels <- function(cu_string, ref_df) {
-  cu_codes <- str_split(cu_string, ",")[[1]]
-  labels <- ref_df %>%
-    filter(cu %in% cu_codes) %>%
-    arrange(match(cu, cu_codes)) %>%  # preserve original order
-    pull(label)
-  paste(labels, collapse = ", ")
-}
-
-# Apply function to tabData
-tabPrep = tabPrep %>%
-  mutate(CU_Names = map_chr(cu_outlook_selection, ~ get_labels(.x, fullList)))
-
-
-
+# Then need to say what the Resolution is.
+# Options are: SMU, CU (aggregate) and CU (singular)
+# Then select the Outlook and Forecast based on resolution
 tabPrep = tabPrep %>%
   group_by(smu_name) %>%
   mutate(
@@ -219,7 +146,6 @@ tabPrep = tabPrep %>%
   )
 
 
-
 # Fix up the Forecasts
 tabPrep = tabPrep %>%
   mutate(
@@ -230,9 +156,7 @@ tabPrep = tabPrep %>%
       str_replace_all("\\s*–\\s*", "–")
   )
 
-
-
-# Prepare the data
+# Rename columns and select relevant ones
 tabPrep = tabPrep %>%
   rename(Narrative = outlook_narrative) %>%
   select(
@@ -248,7 +172,6 @@ tabPrep = tabPrep %>%
     Forecast,
     Outlook
   )
-
 
 
 ################################################################################
@@ -306,7 +229,7 @@ build_block = function(df_smu) {
 
 
   # Replace CU codes with CU names ONLY for CU rows
-  lookup = fullList %>%
+  lookup = crosswalkList %>%
     select(code = cu, cu_name = label)
 
   data_rows = data_rows %>%
