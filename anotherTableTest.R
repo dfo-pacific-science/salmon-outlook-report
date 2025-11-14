@@ -155,8 +155,56 @@ tabPrep = tabPrep %>%
   mutate(CU_Names = map_chr(cu_outlook_selection, ~ get_labels(.x, crosswalkList)))
 
 
+###############################################################################
+## Add SMU/CU assignment-checking logic BEFORE the Resolution logic
+################################################################################
+
 tabPrep = tabPrep %>%
-  # ---- Identify cases where both SMU and CU outlooks were entered ----
+
+  # ---- Check SMU/CU assignment combinations exactly as per Stephen rules ----
+group_by(smu_name) %>%
+  mutate(
+    # --- Determine whether entries are numeric ---
+    # Suppress warnings when converting to numeric.
+    smu_numeric = suppressWarnings(!is.na(as.numeric(smu_outlook_assignment))),
+    cu_numeric  = suppressWarnings(!is.na(as.numeric(cu_outlook_assignment))),
+
+    # --- Identify Data Deficient entries ---
+    smu_dd = tolower(smu_outlook_assignment) == "data deficient",
+    cu_dd  = tolower(cu_outlook_assignment) == "data deficient",
+
+    # --- Identify empty entries ---
+    # Includes NA, "", "NA", "N/A", "na", "n/a"
+    smu_empty = is.na(smu_outlook_assignment) |
+      smu_outlook_assignment %in% c("", "N/A", "NA", "n/a", "na"),
+    cu_empty = is.na(cu_outlook_assignment) |
+      cu_outlook_assignment %in% c("", "N/A", "NA", "n/a", "na"),
+
+    # --- Apply logic for what needs checking ---
+    needs_check = case_when(
+      smu_empty & cu_empty ~ TRUE,               # both empty → special case
+      smu_numeric & cu_numeric ~ TRUE,           # both numbers
+      smu_numeric & cu_dd ~ TRUE,                # numeric + Data Deficient
+      smu_dd & cu_numeric ~ TRUE,                # Data Deficient + numeric
+      TRUE ~ FALSE                                # all else OK
+    ),
+
+    # --- Provide specific reasons ---
+    check_reason = case_when(
+      smu_empty & cu_empty ~ "Only NA entered",
+      smu_numeric & cu_numeric ~ "SMU and CU both assigned numeric values",
+      smu_numeric & cu_dd ~ "SMU numeric but CU data deficient",
+      smu_dd & cu_numeric ~ "CU numeric but SMU data deficient",
+      TRUE ~ NA_character_
+    )
+  ) %>%
+  ungroup() %>%
+
+
+  ################################################################################
+## Your original SMU/CU presence check (kept exactly as you had it)
+## This happens AFTER the new logic above
+################################################################################
 group_by(smu_name) %>%
   mutate(
     # SMU has a real value (not NA, not "", not "N/A")
@@ -172,22 +220,12 @@ group_by(smu_name) %>%
         cu_outlook_assignment != ""
     ),
 
-    needs_check = smu_has_value & cu_has_value
+    # Original conflict logic (still valid)
+    needs_check_original = smu_has_value & cu_has_value
   ) %>%
   ungroup() %>%
 
-  # ---- Assign Resolution type ----
-group_by(smu_name) %>%
-  mutate(
-    Resolution = case_when(
-      !needs_check & n() == 1 & cu_count == 1 ~ "SMU",
-      !needs_check & n() > 1 & cu_count > 1 ~ "CU (aggregate)",
-      !needs_check & n() > 1 & cu_count == 1 ~ "CU (singular)",
-      needs_check ~ "CHECK VALUE — SMU + CU outlooks assigned",
-      TRUE ~ "CHECK VALUE — unexpected combination"
-    )
-  ) %>%
-  ungroup() %>%
+
 
   # ---- Assign Name, Forecast, Outlook ----
 mutate(
@@ -443,7 +481,3 @@ make_table = function(area, species, data = tabPrep) {
 # Test making the tables to see if they work
 make_table("FRASER AND INTERIOR", "Chinook")
 make_table("SOUTH COAST", "Chinook")
-
-
-
-
