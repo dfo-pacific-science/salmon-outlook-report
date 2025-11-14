@@ -12,63 +12,32 @@ library(stringr)
 
 
 ################################################################################
-## Code for making tables that give outlooks/narratives for each SMU
-
 ## Prep the data
 
-# Current format has the data in an Excel file divided into 3 sheets
-# One is data for each SMU, one is data for CUs, one is data for Other (hatchery/indicator)
-# These need to be merged together in various ways
-
-# Read in the list with full SMU/CU names (from the crosswalk)
 crosswalkList = read.csv("data/phase1culookup.csv")
-
-# For now, I have practice data stored here
 dummyPath = "data/testData3.xlsx"
-# dummyPath = "data/finnis_outlook_phase1_test_dummy_data_20250905.xlsx" # Anna's test data
 
-# List all sheet names within the file
 sheet_names = readxl::excel_sheets(dummyPath)
-
-# Read each sheet and name the list elements
 df_list = map(sheet_names, ~ read_excel(dummyPath, sheet = .x)) %>%
   set_names(sheet_names)
-
-# Export each dataframe to the global environment
 list2env(df_list, envir = .GlobalEnv)
 
-# Specify the columns we want to keep (now using parentrowid instead of uniquerowid)
-# For the SMU/overall data
-keep_cols_repeat = c(
-  "globalid", "uniquerowid",
-  "smu_area", "smu_species", "smu_name",
-  "outlook_narrative", "smu_outlook_assignment", "smu_prelim_forecast"
-)
+# Columns to keep
+keep_cols_repeat = c("globalid", "uniquerowid",
+                     "smu_area", "smu_species", "smu_name",
+                     "outlook_narrative", "smu_outlook_assignment", "smu_prelim_forecast")
+keep_cols_cu = c("cu_outlook_selection", "cu_outlook_assignment", "cu_prelim_forecast", "cu_count",
+                 "parentrowid")
+keep_cols_other = c("other_outlook_selection", "other_outlook_assignment", "other_prelim_forecast",
+                    "parentrowid")
 
-# For the CU-level data
-keep_cols_cu = c(
-  "cu_outlook_selection", "cu_outlook_assignment", "cu_prelim_forecast", "cu_count",
-  "parentrowid"
-)
-
-# For hatchery/indicator data
-keep_cols_other = c(
-  "other_outlook_selection", "other_outlook_assignment", "other_prelim_forecast", "parentrowid"
-)
-
-# Get the cols I want for the SMU data
-Outlook_Repeat_Test = Salmon_Outlook_Report %>% # Note this name has changed!! Be careful
+Outlook_Repeat_Test = Salmon_Outlook_Report %>%
   select(all_of(keep_cols_repeat))
 
-# NOW FOR CU DATA BUT I HAVE TO MAKE SOOOOOO MANY CHECKS FIRST
+# CU data checks
 cu_outlook_records <- cu_outlook_records %>%
-  # Keep only the columns you specified
   select(all_of(keep_cols_cu)) %>%
-
-  # Apply all logic in one mutate block
   mutate(
-    # 1. If BOTH cu_outlook_selection AND cu_outlook_assignment are empty or NA,
-    #    set BOTH to "CHECK: No data entered"
     cu_outlook_selection = if_else(
       (is.na(cu_outlook_selection) | cu_outlook_selection == "") &
         (is.na(cu_outlook_assignment) | cu_outlook_assignment == ""),
@@ -81,57 +50,33 @@ cu_outlook_records <- cu_outlook_records %>%
       "CHECK: No data entered",
       cu_outlook_assignment
     ),
-
-    # 2. If cu_outlook_assignment has a value but cu_outlook_selection is blank,
-    #    set cu_outlook_selection to "Outlook assigned but no CU specified"
     cu_outlook_selection = if_else(
       (is.na(cu_outlook_selection) | cu_outlook_selection == "") &
         !(is.na(cu_outlook_assignment) | cu_outlook_assignment == ""),
       "Outlook assigned but no CU specified",
       cu_outlook_selection
     ),
-
-    # 3. Add cu_count column:
-    #    - If cu_outlook_selection contains an error message, count = 1
-    #    - Otherwise, count commas and add 1 (e.g., "CK-23,CK-20" → 2)
     cu_count = case_when(
       cu_outlook_selection %in% c("CHECK: No data entered", "Outlook assigned but no CU specified") ~ 1L,
       TRUE ~ str_count(cu_outlook_selection, ",") + 1L
     )
   )
 
-# For the Outlook/hatchery data
-other_outlook_records = other_outlook_records %>%
-  select(all_of(keep_cols_other))
+# other_outlook_records = other_outlook_records %>%
+#   select(all_of(keep_cols_other))
 
-
-# Step 2: Join smu_area, smu_species, smu_name from Outlook_Repeat_Test to cu_outlook_records
+# Join with SMU info
 cu_outlook_records_enriched = cu_outlook_records %>%
-  left_join(
-    Outlook_Repeat_Test,
-    #select(uniquerowid, smu_area, smu_species, smu_name, outlook_narrative),
-    by = c("parentrowid" = "uniquerowid")
-  )
+  full_join(Outlook_Repeat_Test, by = c("parentrowid" = "uniquerowid"))
 
-# Step 2: Join smu_area, smu_species, smu_name from Outlook_Repeat_Test to cu_outlook_records
-other_outlook_records_enriched = other_outlook_records %>%
-  left_join(
-    Outlook_Repeat_Test %>%
-      select(uniquerowid, smu_area, smu_species, smu_name),
-    by = c("parentrowid" = "uniquerowid")
-  )
-
-
-#test = full_join(Outlook_Repeat_Test, cu_outlook_records_enriched, by = c("uniquerowid" = "parentrowid"))
-
-stacked_df = bind_rows(Outlook_Repeat_Test, cu_outlook_records_enriched, other_outlook_records_enriched)
-
+# other_outlook_records_enriched = other_outlook_records %>%
+#   left_join(Outlook_Repeat_Test %>% select(uniquerowid, smu_area, smu_species, smu_name),
+#             by = c("parentrowid" = "uniquerowid"))
+#
+# stacked_df = bind_rows(Outlook_Repeat_Test, cu_outlook_records_enriched, other_outlook_records_enriched)
 
 ################################################################################
-## Prep the data a bit more to make tables for the report
-
-# Add fake data to columns for final tables
-# These values will come from the second survey
+## Prep final table
 tabPrep = cu_outlook_records_enriched %>%
   mutate(
     `Avg Run/Avg Spawners` = "50,000",
@@ -139,176 +84,107 @@ tabPrep = cu_outlook_records_enriched %>%
     `Mgmt Target`    = "10,000"
   )
 
-# Replace CU codes with actual names (defined in fullList excel file)
-# Make sure there's a comma and space separating them
+# Replace CU codes with names
 get_labels = function(cu_string, ref_df) {
   cu_codes = str_split(cu_string, ",")[[1]]
   labels = ref_df %>%
     filter(cu %in% cu_codes) %>%
-    arrange(match(cu, cu_codes)) %>%  # preserve original order
+    arrange(match(cu, cu_codes)) %>%
     pull(label)
   paste(labels, collapse = ", ")
 }
-
-# Apply function to tabData
 tabPrep = tabPrep %>%
   mutate(CU_Names = map_chr(cu_outlook_selection, ~ get_labels(.x, crosswalkList)))
 
-
-###############################################################################
-## Add SMU/CU assignment-checking logic BEFORE the Resolution logic
 ################################################################################
-
+## SMU/CU checking & Resolution logic
 tabPrep = tabPrep %>%
-
-  # ---- Check SMU/CU assignment combinations exactly as per Stephen rules ----
-group_by(smu_name) %>%
+  group_by(smu_name) %>%
   mutate(
-    # --- Determine whether entries are numeric ---
-    # Suppress warnings when converting to numeric.
-    smu_numeric = suppressWarnings(!is.na(as.numeric(smu_outlook_assignment))),
-    cu_numeric  = suppressWarnings(!is.na(as.numeric(cu_outlook_assignment))),
-
-    # --- Identify Data Deficient entries ---
+    # Identify Data Deficient and empty entries
     smu_dd = tolower(smu_outlook_assignment) == "data deficient",
-    cu_dd  = tolower(cu_outlook_assignment) == "data deficient",
+    cu_dd = tolower(cu_outlook_assignment) == "data deficient",
+    smu_empty = is.na(smu_outlook_assignment) | smu_outlook_assignment %in% c("", "N/A", "NA", "n/a", "na"),
+    cu_empty = is.na(cu_outlook_assignment) | cu_outlook_assignment %in% c("", "N/A", "NA", "n/a", "na"),
 
-    # --- Identify empty entries ---
-    # Includes NA, "", "NA", "N/A", "na", "n/a"
-    smu_empty = is.na(smu_outlook_assignment) |
-      smu_outlook_assignment %in% c("", "N/A", "NA", "n/a", "na"),
-    cu_empty = is.na(cu_outlook_assignment) |
-      cu_outlook_assignment %in% c("", "N/A", "NA", "n/a", "na"),
-
-    # --- Apply logic for what needs checking ---
+    # Need check if problematic combination
     needs_check = case_when(
-      smu_empty & cu_empty ~ TRUE,               # both empty → special case
-      smu_numeric & cu_numeric ~ TRUE,           # both numbers
-      smu_numeric & cu_dd ~ TRUE,                # numeric + Data Deficient
-      smu_dd & cu_numeric ~ TRUE,                # Data Deficient + numeric
-      TRUE ~ FALSE                                # all else OK
+      smu_empty & cu_empty ~ TRUE,
+      (!smu_empty & !cu_empty & !smu_dd & !cu_dd & smu_outlook_assignment != cu_outlook_assignment) ~ TRUE,
+      smu_dd & !cu_dd ~ TRUE,
+      !smu_dd & cu_dd ~ TRUE,
+      TRUE ~ FALSE
     ),
 
-    # --- Provide specific reasons ---
+    # Construct reason message
     check_reason = case_when(
       smu_empty & cu_empty ~ "Only NA entered",
-      smu_numeric & cu_numeric ~ "SMU and CU both assigned numeric values",
-      smu_numeric & cu_dd ~ "SMU numeric but CU data deficient",
-      smu_dd & cu_numeric ~ "CU numeric but SMU data deficient",
+      (!smu_empty & !cu_empty & !smu_dd & !cu_dd & smu_outlook_assignment != cu_outlook_assignment) ~
+        paste0("SMU and CU values differ"),
+      smu_dd & !cu_dd ~ "SMU Data Deficient but CU entered",
+      !smu_dd & cu_dd ~ "CU Data Deficient but SMU entered",
+      TRUE ~ NA_character_
+    ),
+
+    # Aggregate all CU values for CHECK VALUE display
+    cu_all = paste(cu_outlook_assignment, collapse = ", ")
+  ) %>%
+  ungroup() %>%
+  group_by(smu_name) %>%
+  mutate(
+    # Determine SMU/CU Resolution
+    Resolution = case_when(
+      needs_check ~ paste0("CHECK VALUE: Both SMU and CU outlooks entered. SMU = ", smu_outlook_assignment[1],
+                           ", CU = [", paste(cu_outlook_assignment[!is.na(cu_outlook_assignment)], collapse = ", "), "]"),
+      n() == 1 & !smu_empty ~ "SMU",
+      n() > 1 & cu_count > 1 & !cu_empty ~ "CU (aggregate)",
+      n() > 1 & cu_count == 1 & !cu_empty ~ "CU (singular)",
+      TRUE ~ "Unknown"
+    ),
+    # Name, Forecast, Outlook
+    Name = case_when(
+      Resolution == "SMU" ~ smu_name,
+      Resolution %in% c("CU (aggregate)", "CU (singular)") ~ CU_Names,
+      str_detect(Resolution, "CHECK VALUE") ~ "Check value",
+      TRUE ~ NA_character_
+    ),
+    Forecast = case_when(
+      Resolution == "SMU" ~ smu_prelim_forecast,
+      Resolution %in% c("CU (aggregate)", "CU (singular)") ~ cu_prelim_forecast,
+      str_detect(Resolution, "CHECK VALUE") ~ paste0(
+        "SMU Forecast = ", coalesce(smu_prelim_forecast[1], "NA"), "; CU Forecast = ",
+        paste(coalesce(cu_prelim_forecast[!is.na(cu_prelim_forecast)], "NA"), collapse = ", ")
+      ),
+      TRUE ~ NA_character_
+    ),
+    Outlook = case_when(
+      Resolution == "SMU" ~ smu_outlook_assignment,
+      Resolution %in% c("CU (aggregate)", "CU (singular)") ~ cu_outlook_assignment,
+      str_detect(Resolution, "CHECK VALUE") ~ paste0(
+        "SMU = ", coalesce(smu_outlook_assignment[1], "NA"), "; CU = [",
+        paste(coalesce(cu_outlook_assignment[!is.na(cu_outlook_assignment)], "NA"), collapse = ", "), "]"
+      ),
       TRUE ~ NA_character_
     )
   ) %>%
   ungroup() %>%
-
-
-  ################################################################################
-## Your original SMU/CU presence check (kept exactly as you had it)
-## This happens AFTER the new logic above
-################################################################################
-group_by(smu_name) %>%
-  mutate(
-    # SMU has a real value (not NA, not "", not "N/A")
-    smu_has_value = any(
-      !is.na(smu_outlook_assignment) &
-        smu_outlook_assignment != "" &
-        tolower(smu_outlook_assignment) != "n/a"
-    ),
-
-    # CU has any non-NA entries
-    cu_has_value = any(
-      !is.na(cu_outlook_assignment) &
-        cu_outlook_assignment != ""
-    ),
-
-    # Original conflict logic (still valid)
-    needs_check_original = smu_has_value & cu_has_value
-  ) %>%
-  ungroup() %>%
-
-
-
-  # ---- Assign Name, Forecast, Outlook ----
-mutate(
-  # Name
-  Name = case_when(
-    Resolution == "SMU" ~ smu_name,
-    Resolution %in% c("CU (aggregate)", "CU (singular)") ~ CU_Names,
-    str_detect(Resolution, "CHECK VALUE") ~ "Check value",
-    TRUE ~ NA_character_
-  ),
-
-  # Forecast
-  Forecast = case_when(
-    Resolution == "SMU" ~ smu_prelim_forecast,
-    Resolution %in% c("CU (aggregate)", "CU (singular)") ~ cu_prelim_forecast,
-    str_detect(Resolution, "CHECK VALUE") ~ paste0(
-      "CHECK VALUE: Both SMU and CU forecasts were entered. ",
-      "SMU Forecast = ", coalesce(smu_prelim_forecast, "NA"), "; ",
-      "CU Forecast = ", coalesce(cu_prelim_forecast, "NA")
-    ),
-    TRUE ~ NA_character_
-  ),
-
-  # Outlook
-  Outlook = case_when(
-    Resolution == "SMU" ~ smu_outlook_assignment,
-    Resolution %in% c("CU (aggregate)", "CU (singular)") ~ cu_outlook_assignment,
-    str_detect(Resolution, "CHECK VALUE") ~ paste0(
-      "CHECK VALUE: Both SMU and CU outlooks were entered. ",
-      "SMU Outlook = ", coalesce(smu_outlook_assignment, "NA"), "; ",
-      "CU Outlook = ", coalesce(cu_outlook_assignment, "NA")
-    ),
-    TRUE ~ NA_character_
-  )
-)
-
-## Do some final editing of the data frame
-
-# Fix up the Forecasts
-tabPrep = tabPrep %>%
-  mutate(
-    Forecast = Forecast %>%
-      # Replace hyphen with en dash
-      str_replace_all("-", "–") %>%
-      # Remove extra spaces around the dash
-      str_replace_all("\\s*–\\s*", "–")
-  )
-
-# Rename columns and select relevant ones
-tabPrep = tabPrep %>%
+  # Clean Forecast formatting
+  mutate(Forecast = str_replace_all(Forecast, "-", "–") %>%
+           str_replace_all("\\s*–\\s*", "–")) %>%
   rename(Narrative = outlook_narrative) %>%
   select(
-    smu_area,
-    smu_species,
-    smu_name,
-    Narrative,
-    Resolution,
-    Name,
-    `Avg Run/Avg Spawners`,
-    `LRP/LBB`,
-    `Mgmt Target`,
-    Forecast,
-    Outlook
+    smu_area, smu_species, smu_name, Narrative, Resolution, Name,
+    `Avg Run/Avg Spawners`, `LRP/LBB`, `Mgmt Target`,
+    Forecast, Outlook
   )
 
 
 ################################################################################
-################################################################################
-### Putting everything together in a table
-
-# Step 1 reate a function: build_block()
-# That builds a dataframe with approximately the same layout that will appear
-# in the report.
-# It Builds the SMU → Narrative → Header → Data block for each SMU
-################################################################################
-
+## Function to build SMU blocks
 build_block = function(df_smu) {
-
-  # Unique values for the SMU
   smu  = unique(df_smu$smu_name)
   narr = unique(df_smu$Narrative)
 
-  # Row 1: label row (gets grey + bold styling later)
   row1 = data.frame(
     Resolution = "SMU",
     Name       = "Narrative",
@@ -320,7 +196,6 @@ build_block = function(df_smu) {
     check.names = FALSE
   )
 
-  # Row 2: actual SMU values + narrative content
   row2 = data.frame(
     Resolution = smu,
     Name       = narr,
@@ -332,7 +207,6 @@ build_block = function(df_smu) {
     check.names = FALSE
   )
 
-  # Row 3: pseudo-header row (becomes part of body)
   row3 = data.frame(
     Resolution = "Resolution",
     Name       = "Name",
@@ -344,88 +218,45 @@ build_block = function(df_smu) {
     check.names = FALSE
   )
 
-  # Actual rows from input
   data_rows = df_smu %>%
     select(Resolution, Name, `Avg Run/Avg Spawners`,
            `LRP/LBB`, `Mgmt Target`, Forecast, Outlook)
 
-  # Combine into final block
   bind_rows(row1, row2, row3, data_rows)
 }
 
 ################################################################################
-# Now apply the styling, merging, borders, bolding, etc.
-# Do this within a function style_smu_table
-
-# It's a bit confusing because SMU/Narrative should be bold/grey. Same with the
-# Other col names (Resolution, name, etc.)
-
-################################################################################
-
+## Style table function
 style_smu_table = function(big_df) {
-
-  ft = flextable(big_df)
-
-  # Remove automatically generated header — we already encoded headers manually
-  ft = delete_part(ft, part = "header")
-
-  # Identify key rows for styling
-  idx_label  = which(big_df$Resolution == "SMU"       & big_df$Name == "Narrative")  # row 1 of each block
-  idx_header = which(big_df$Resolution == "Resolution")                               # row 3 of each block
-
-  # Style label row (row 1)
-  ft = bg(ft, i = idx_label, bg = "gray90")
-  ft = bold(ft, i = idx_label, bold = TRUE)
-
-  # Style pseudo-header row (row 3)
-  ft = bg(ft, i = idx_header, bg = "gray90")
-  ft = bold(ft, i = idx_header, bold = TRUE)
-
-  # Borders
+  ft = flextable(big_df) %>% delete_part(part = "header")
+  idx_label  = which(big_df$Resolution == "SMU" & big_df$Name == "Narrative")
+  idx_header = which(big_df$Resolution == "Resolution")
+  ft = bg(ft, i = idx_label, bg = "gray90") %>% bold(i = idx_label, bold = TRUE)
+  ft = bg(ft, i = idx_header, bg = "gray90") %>% bold(i = idx_header, bold = TRUE)
   ft = border_remove(ft)
   ft = border_outer(ft, border = fp_border(color="black", width=1))
   ft = border_inner_h(ft, border = fp_border(color="black", width=1))
   ft = border_inner_v(ft, border = fp_border(color="black", width=1))
-
-  # Merge narrative across columns (rows 1 + 2)
   for (i in idx_label) {
-    ft = merge_at(ft, i = i,     j = 2:7)
+    ft = merge_at(ft, i = i, j = 2:7)
     ft = merge_at(ft, i = i + 1, j = 2:7)
   }
-
-  # Thicker border between SMU blocks (skip first block)
   if (length(idx_label) > 1) {
     idx_separators <- idx_label[-1]
     for (i in idx_separators) {
-      ft <- border(
-        ft,
-        i = i,
-        j = 1:ncol(big_df),
-        border.top = fp_border(color="black", width=2),
-        part = "body"
-      )
+      ft <- border(ft, i = i, j = 1:ncol(big_df), border.top = fp_border(color="black", width=2),
+                   part = "body")
     }
   }
-
   ft = autofit(ft)
   ft = set_table_properties(ft, layout = "autofit")
-
   ft
 }
 
-
-#######
-# I THINK I NEED TO MAKE MY TABLE CREATING CAPTION HERE
-
+################################################################################
+## Caption
 make_caption = function(species, area, year){
-
-  # Convert area name (all caps) to title case
-  area_titleCase = area %>%
-    tolower() %>%
-    tools::toTitleCase() %>%
-    gsub("\\bAnd\\b", "and", .)
-
-
+  area_titleCase = area %>% tolower() %>% tools::toTitleCase() %>% gsub("\\bAnd\\b", "and", .)
   paste0(
     "Summary of metrics informing the annual status evaluation for ",
     species, " in the ", area_titleCase, " area during the ", year, " management cycle. ",
@@ -433,51 +264,25 @@ make_caption = function(species, area, year){
     "Reported values include recent average run size or spawner abundance, biological reference points (limit reference point [LRP] and lower biological benchmark [LBB]), and management (mgmt.) targets or operational control points used to interpret current conditions. ",
     "The forecast provides a numerical abundance estimate for the return year, while the outlook indicates the categorical status classification (see definitions in Table 1)."
   )
-
 }
 
-
-
 ################################################################################
-# 3. Function: make_table(area, species, data)
-#    This is the function you call in Results.Rmd
-################################################################################
-
+## Main table function
 make_table = function(area, species, data = tabPrep) {
-
-  # Filter to SMUs that match both area and species
-  df_filtered = data %>%
-    filter(smu_area == area,
-           smu_species == species)
-
-  # Handle cases where no data exists
-  if (nrow(df_filtered) == 0) {
-    stop(paste("No data found for:", area, "/", species))
-  }
-
-  # Split into SMU-specific dataframes
+  df_filtered = data %>% filter(smu_area == area, smu_species == species)
+  if (nrow(df_filtered) == 0) stop(paste("No data found for:", area, "/", species))
   smu_list = split(df_filtered, df_filtered$smu_name)
-
-  # Build each SMU block
   block_list = lapply(smu_list, build_block)
-
-  # Combine into one long table for this area × species
   big_df = bind_rows(block_list)
-
-  # Apply styling
   ft = style_smu_table(big_df)
-
-  # Buid caption text
   caption_text = make_caption(species = species, area = area, year = 2026)
-
   ft = set_caption(ft, caption = caption_text)
-
-
-  return(ft)
+  ft
 }
 
 ################################################################################
-
-# Test making the tables to see if they work
-make_table("FRASER AND INTERIOR", "Chinook")
+# Example test
+make_table("FRASER AND INTERIOR", "Chum")
 make_table("SOUTH COAST", "Chinook")
+make_table("SOUTH COAST", "Sockeye Lake Type")
+make_table("YUKON TRANSBOUNDARY", "Chinook")
