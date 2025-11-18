@@ -66,8 +66,8 @@ cu_outlook_records <- cu_outlook_records %>%
 #   select(all_of(keep_cols_other))
 
 # Join with SMU info
-cu_outlook_records_enriched = cu_outlook_records %>%
-  full_join(Outlook_Repeat_Test, by = c("parentrowid" = "uniquerowid"))
+cu_outlook_records_enriched = full_join(Outlook_Repeat_Test, cu_outlook_records,
+          by = c("uniquerowid" = "parentrowid"))
 
 # other_outlook_records_enriched = other_outlook_records %>%
 #   left_join(Outlook_Repeat_Test %>% select(uniquerowid, smu_area, smu_species, smu_name),
