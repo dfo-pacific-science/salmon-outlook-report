@@ -4,11 +4,12 @@
 library(dplyr)
 library(knitr)
 
-source("testingTables.R")
-source("tableCreation.R")
+# source("testingTables.R")
+# source("tableCreation.R")
+source("tableTest3.R")
 
 # Identify missing SMUs
-missing_smus = fullList %>%
+missing_smus = crosswalkList %>%
   filter(!smu %in% unique(cu_outlook_records_enriched$smu_name)) %>%
   distinct(area, species, smu)
 
@@ -43,14 +44,14 @@ reported_cus = cu_rows$Name %>%
 smu_rows = tabPrep %>%
   filter(Resolution == "SMU")
 
-# Get associated CUs from fullList for those SMUs
-excluded_cus = fullList %>%
+# Get associated CUs from crosswalkList for those SMUs
+excluded_cus = crosswalkList %>%
   filter(smu %in% smu_rows$Name) %>%
   pull(cu) %>%
   unique()
 
-# Step 3: Get reference CUs from fullList, excluding those tied to SMUs
-reference_cus = fullList %>%
+# Step 3: Get reference CUs from crosswalkList, excluding those tied to SMUs
+reference_cus = crosswalkList %>%
   filter(!cu %in% excluded_cus) %>%
   pull(cu) %>%
   unique()
@@ -69,6 +70,27 @@ if (length(missing_cus) == 0) {
 
 
 ## Fraser and Interior Area
+
+### Chinook
+
+```{r fiaChinookTable, results = "asis"}
+
+ft = tryCatch(
+  make_table("FRASER AND INTERIOR", "Chinook"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+
+
+
+```
+
 
 ### Chum
 
@@ -90,25 +112,7 @@ if(!is.null(ft)){
 
 
 
-### Chinook
 
-```{r fiaChinookTable, results = "asis"}
-
-ft = tryCatch(
-  make_table("FRASER AND INTERIOR", "Chinook"),
-  error = function(e){
-    print("No data for this species/area combination.")
-    return(NULL)
-  }
-)
-
-if(!is.null(ft)){
-  ft
-}
-
-
-
-```
 
 
 ### Coho
@@ -187,12 +191,12 @@ if(!is.null(ft)){
 
 ## North Coast Area
 
-### Chum
+### Chinook
 
-```{r northchumTable}
+```{r northChinookTable}
 
 ft = tryCatch(
-  make_table("NORTH COAST", "Chum"),
+  make_table("NORTH COAST", "Chinook"),
   error = function(e){
     print("No data for this species/area combination.")
     return(NULL)
@@ -205,12 +209,12 @@ if(!is.null(ft)){
 ```
 
 
-### Chinook
+### Chum
 
-```{r northChinookTable}
+```{r northchumTable}
 
 ft = tryCatch(
-  make_table("NORTH COAST", "Chinook"),
+  make_table("NORTH COAST", "Chum"),
   error = function(e){
     print("No data for this species/area combination.")
     return(NULL)
@@ -299,6 +303,26 @@ if(!is.null(ft)){
 
 ## South Coast Area
 
+### Chinook
+
+```{r scChinookTable}
+
+ft = tryCatch(
+  make_table("SOUTH COAST", "Chinook"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+
+
+```
+
+
 ### Chum
 
 ```{r scChumTable}
@@ -319,24 +343,7 @@ if(!is.null(ft)){
 ```
 
 
-### Chinook
 
-```{r scChinookTable}
-
-ft = tryCatch(
-  make_table("SOUTH COAST", "Chinook"),
-  error = function(e){
-    print("No data for this species/area combination.")
-    return(NULL)
-  }
-)
-
-if(!is.null(ft)){
-  ft
-}
-
-
-```
 
 
 ### Coho
@@ -416,12 +423,13 @@ if(!is.null(ft)){
 
 ## Yukon Transboundary
 
-### Chum
 
-```{r ytChumTable}
+### Chinook
+
+```{r ytChinookTable}
 
 ft = tryCatch(
-  make_table("YUKON TRANSBOUNDARY", "Chum"),
+  make_table("YUKON TRANSBOUNDARY", "Chinook"),
   error = function(e){
     print("No data for this species/area combination.")
     return(NULL)
@@ -434,13 +442,12 @@ if(!is.null(ft)){
 
 ```
 
+### Chum
 
-### Chinook
-
-```{r ytChinookTable}
+```{r ytChumTable}
 
 ft = tryCatch(
-  make_table("YUKON TRANSBOUNDARY", "Chinook"),
+  make_table("YUKON TRANSBOUNDARY", "Chum"),
   error = function(e){
     print("No data for this species/area combination.")
     return(NULL)
