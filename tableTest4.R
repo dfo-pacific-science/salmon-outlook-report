@@ -201,7 +201,7 @@ tabPrep = tabPrep %>%
     smu_duplicate = smu_n_distinct_parent > 1L,
     smu_name_display = if_else(
       smu_duplicate,
-      paste0(smu_name, " — NOTE: duplicate entries"),
+      paste0(smu_name, " — CHECK: Data entered for the same SMU more than once"),
       smu_name
     ),
 
