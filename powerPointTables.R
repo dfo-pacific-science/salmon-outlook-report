@@ -52,11 +52,6 @@ layout_properties(ppt, layout = "1_Title and Content", master = "DFO-pp-template
 
 
 
-
-
-
-
-
 # ----------------------------
 # Slide dimensions
 # ----------------------------
@@ -75,6 +70,14 @@ map_y   <- (slide_h - map_height) / 2
 table_y <- map_y
 table_x <- left_margin
 map_x   <- slide_w - map_width - right_margin
+
+
+# Now make some new adjustments
+species_height <- 0.4  # height of species text box
+species_y <- map_y
+table_y <- table_y + species_height  # shift table down by species height
+
+
 
 fraser_map <- "data/maps/fraserMap.png"
 
@@ -104,30 +107,41 @@ for (nm in names(table_list)) {
   # Add new slide
   ppt <- add_slide(ppt, layout = layout_name, master = master_name)
 
-  # ✅ Add title
+  # Add title
   ppt <- ph_with(
     ppt,
     value = paste0("OUTLOOKS – ", area),  # en dash between OUTLOOKS and area
     location = ph_location_type(type = "title")
   )
 
-  # ✅ Add table
+  # Add table
   ppt <- ph_with(
     ppt,
     value = ft,
     location = ph_location(left = table_x, top = table_y, width = table_width, height = table_height)
   )
 
-  # Add species name
-  ppt <- ph_with(
-    ppt,
-    value = species,
-    location = ph_location_type(type = "body", type_idx = 5)  # assumes the text box is the body placeholder
+
+
+  # Create formatted paragraph
+  species_text <- fpar(
+    ftext(species, prop = fp_text(color = "black", font.size = 20, font.family = "Segoe UI Semibold", bold = TRUE)),
+    fp_p = fp_par(text.align = "left")
   )
 
 
 
-  # ✅ Add map
+  # Add species text box
+  ppt <- ph_with(
+    ppt,
+    value = species_text,
+    location = ph_location(left = table_x, top = species_y, width = table_width, height = species_height)
+  )
+
+
+
+
+  # Add map
   if (file.exists(fraser_map)) {
     ppt <- ph_with(
       ppt,
