@@ -8,11 +8,6 @@ library(dplyr)
 library(magrittr)
 
 
-library(officer)
-library(flextable)
-library(dplyr)
-library(magrittr)
-
 # ----------------------------
 # Load data
 # ----------------------------
@@ -49,6 +44,18 @@ adjust_font <- function(ft) {
 ppt <- read_pptx("draftPrelimPres.pptx")
 layout_name <- "1_Title and Content"
 master_name <- "DFO-pp-template"
+
+# Inspect layout of slides
+layout_summary(ppt)
+layout_properties(ppt, layout = "1_Title and Content", master = "DFO-pp-template")
+
+
+
+
+
+
+
+
 
 # ----------------------------
 # Slide dimensions
@@ -100,7 +107,7 @@ for (nm in names(table_list)) {
   # ✅ Add title
   ppt <- ph_with(
     ppt,
-    value = paste("OUTLOOKS"),
+    value = paste0("OUTLOOKS – ", area),  # en dash between OUTLOOKS and area
     location = ph_location_type(type = "title")
   )
 
@@ -110,6 +117,15 @@ for (nm in names(table_list)) {
     value = ft,
     location = ph_location(left = table_x, top = table_y, width = table_width, height = table_height)
   )
+
+  # Add species name
+  ppt <- ph_with(
+    ppt,
+    value = species,
+    location = ph_location_type(type = "body", type_idx = 5)  # assumes the text box is the body placeholder
+  )
+
+
 
   # ✅ Add map
   if (file.exists(fraser_map)) {
