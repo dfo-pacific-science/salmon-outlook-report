@@ -1,10 +1,11 @@
-############ STPEHEN I THINK THE CHECK THING STOPPED WORKING??????
-# MAKE SURE SMU SHOWS UP AS -
-# ALSO REMEMBER TO ADD NOTES
 
-
-
-
+# ----------------------------
+# Load libraries
+# ----------------------------
+library(officer)
+library(flextable)
+library(dplyr)
+library(magrittr)
 
 
 library(officer)
@@ -12,14 +13,14 @@ library(flextable)
 library(dplyr)
 library(magrittr)
 
-## ----------------------------
-## Load real table data
-## ----------------------------
+# ----------------------------
+# Load data
+# ----------------------------
 source("tableTest4.R")   # defines tabPrep and builds table_list
 
-## ----------------------------
-## Helpers: styling functions
-## ----------------------------
+# ----------------------------
+# Styling helpers
+# ----------------------------
 style_table <- function(ft) {
   ft <- bg(ft, part = "header", bg = "#3B4A5A") |>
     color(part = "header", color = "white") |>
@@ -42,28 +43,25 @@ adjust_font <- function(ft) {
   return(ft)
 }
 
-## ----------------------------
-## Read pptx & pick a layout
-## ----------------------------
+# ----------------------------
+# Read PPTX and set layout
+# ----------------------------
 ppt <- read_pptx("draftPrelimPres.pptx")
+layout_name <- "1_Title and Content"
+master_name <- "DFO-pp-template"
 
-lsum <- layout_summary(ppt)
-layout_name <- lsum$layout[1]      # Use first available layout
-master_name <- lsum$master[1]
-
-## ----------------------------
-## Slide + object dimensions
-## ----------------------------
+# ----------------------------
+# Slide dimensions
+# ----------------------------
 sz <- slide_size(ppt)
 slide_w <- sz$width
 slide_h <- sz$height
 
 left_margin  <- 0.5
 right_margin <- 0.5
-
 map_width    <- 7.95
 map_height   <- 5.14
-table_width  <- 4.2   # ✅ Exact width you want
+table_width  <- 4.2
 table_height <- map_height
 
 map_y   <- (slide_h - map_height) / 2
@@ -73,37 +71,47 @@ map_x   <- slide_w - map_width - right_margin
 
 fraser_map <- "data/maps/fraserMap.png"
 
-## ----------------------------
-## Loop to add slides for real tables
-## ----------------------------
+# ----------------------------
+# Loop to add slides
+# ----------------------------
 for (nm in names(table_list)) {
-  df <- table_list[[nm]]
+  # Split nm into area and species
+  area_species <- strsplit(nm, "_")[[1]]
+  area <- area_species[1]
+  species <- area_species[2]
 
-  # ✅ Apply transformations for CHECK
-  df <- df %>%
+  # Prepare table data
+  df <- table_list[[nm]] %>%
     mutate(
-      SMU = if_else(grepl("CHECK", SMU),
-                    sub("(CHECK).*", "\\1", SMU),
-                    SMU),
-      Outlook = if_else(grepl("CHECK", Outlook),
-                        "CHECK",
-                        Outlook)
+      SMU = if_else(is.na(SMU) | SMU == "", "-", SMU),
+      SMU = if_else(grepl("CHECK", SMU), "CHECK", SMU),
+      Outlook = if_else(grepl("CHECK", Outlook), "CHECK", Outlook)
     )
 
-  # ✅ Create flextable and force width
+  # Create flextable and adjust width
   ft <- flextable(df) |> adjust_font()
   col_count <- ncol(df)
   col_width <- table_width / col_count
-  ft <- width(ft, j = 1:col_count, width = col_width)  # ✅ Force total width
+  ft <- width(ft, j = 1:col_count, width = col_width)
 
+  # Add new slide
   ppt <- add_slide(ppt, layout = layout_name, master = master_name)
 
+  # ✅ Add title
+  ppt <- ph_with(
+    ppt,
+    value = paste("OUTLOOKS"),
+    location = ph_location_type(type = "title")
+  )
+
+  # ✅ Add table
   ppt <- ph_with(
     ppt,
     value = ft,
-    location = ph_location(left = table_x, top = table_y, width = table_width)
+    location = ph_location(left = table_x, top = table_y, width = table_width, height = table_height)
   )
 
+  # ✅ Add map
   if (file.exists(fraser_map)) {
     ppt <- ph_with(
       ppt,
@@ -113,9 +121,32 @@ for (nm in names(table_list)) {
   } else {
     warning(paste("Image not found:", fraser_map))
   }
-}
 
-## ----------------------------
-## Save updated presentation
-## ----------------------------
+
+  # ✅ Add notes from tabPrep
+  if (all(c("smu_area", "smu_species", "Narrative") %in% names(tabPrep))) {
+    narratives_df <- tabPrep %>%
+      filter(trimws(smu_area) == trimws(area),
+             trimws(smu_species) == trimws(species)) %>%
+      distinct(smu_name, Narrative)  # ✅ Remove duplicates based on SMU and Narrative
+
+    if (nrow(narratives_df) > 0) {
+      notes_text <- narratives_df %>%
+        mutate(note_line = paste0(smu_name, ": ", coalesce(Narrative, ""))) %>%
+        pull(note_line) %>%
+        unique() %>%  # ✅ Extra safeguard
+        paste(collapse = "\n")
+    } else {
+      notes_text <- "No notes available"
+    }
+
+
+    }
+    ppt <- set_notes(ppt, value = notes_text, location = notes_location_type("body"))
+  }
+
+
+# ----------------------------
+# Save presentation
+# ----------------------------
 print(ppt, target = "updated_presentation.pptx")
