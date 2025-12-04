@@ -49,6 +49,6 @@ The code in this repository supports:
 
 ## Additional Notes
 - Connect RStudio to this GitHub repository. If you’re unfamiliar with the process, see this [UC Davis Git/GitHub Guide](https://ucd-r-davis.github.io/R-DAVIS/setting_up_git.html).
-- You may also need instructions from the `csasdown` package. See instructions Initial Setup instructions in the [csasdown guide](https://github.com/pbs-assess/csasdown/tree/main).
+- You may also need initial Setup instructions in the [csasdown guide](https://github.com/pbs-assess/csasdown/tree/main). Will investigate and clarify.
 
 ---
