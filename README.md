@@ -1,6 +1,8 @@
 
 # Salmon Outlook Report
 
+**Note:** This repository is a work in progress. Instructions and code may change as development continues.
+
 ## Overview
 The Salmon Outlook is an annual process that provides categorical and numeric estimates of salmon abundance for the upcoming year by Stock Management Unit (SMU) and/or Conservation Unit (CU). These estimates help inform harvest planning decisions.
 
