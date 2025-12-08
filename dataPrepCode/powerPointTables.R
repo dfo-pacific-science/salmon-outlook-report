@@ -11,7 +11,51 @@ library(magrittr)
 # ----------------------------
 # Load data
 # ----------------------------
-source("tableTest4.R")   # defines tabPrep and builds table_list
+source("dataPrepCode/statusTables.R")   # defines tabPrep and builds table_list
+
+
+########## STEPHEN ADD GITHUB REPO TO THE SLIDES + ANY OTHER INFO
+
+
+
+#####
+
+
+
+# ----------------------------
+# Build table_list: SMU, Resolution, CU, Outlook
+# ----------------------------
+need <- c("smu_area", "smu_species", "smu_name", "Resolution", "Name", "Outlook")
+if (!exists("tabPrep")) stop("tabPrep not found after sourcing statusTables.R")
+if (!all(need %in% names(tabPrep))) {
+  stop(paste("tabPrep is missing columns:",
+             paste(setdiff(need, names(tabPrep)), collapse = ", ")))
+}
+
+tp_min <- tabPrep %>%
+  dplyr::select(smu_area, smu_species, smu_name, Resolution, Name, Outlook)
+
+# Keep only SMU rows and CU rows (singular or aggregate)
+tp_long <- tp_min %>%
+  dplyr::filter(Resolution == "SMU" | grepl("^CU", Resolution)) %>%
+  dplyr::mutate(
+    SMU      = smu_name,
+    CU       = dplyr::if_else(Resolution == "SMU", "-", Name),
+    Outlook  = dplyr::coalesce(Outlook, "")
+  ) %>%
+  dplyr::select(smu_area, smu_species, SMU, Resolution, CU, Outlook) %>%
+  dplyr::arrange(smu_area, smu_species, SMU, Resolution, CU)
+
+# Build a named list keyed by "AREA_SPECIES"
+keys <- paste(tp_long$smu_area, tp_long$smu_species, sep = "_")
+table_list <- split(tp_long[, c("SMU", "Resolution", "CU", "Outlook")], keys)
+
+# Drop empties
+table_list <- Filter(function(df) is.data.frame(df) && nrow(df) > 0, table_list)
+
+if (length(table_list) == 0) stop("table_list is empty — check tabPrep contents.")
+
+
 
 # ----------------------------
 # Styling helpers
@@ -97,6 +141,7 @@ for (nm in names(table_list)) {
       SMU = if_else(grepl("CHECK", SMU), "CHECK", SMU),
       Outlook = if_else(grepl("CHECK", Outlook), "CHECK", Outlook)
     )
+  df = table_list[[nm]]
 
   # Create flextable and adjust width
   ft <- flextable(df) |> adjust_font()
@@ -153,18 +198,18 @@ for (nm in names(table_list)) {
   }
 
 
-  # ✅ Add notes from tabPrep
+  # dd notes from tabPrep
   if (all(c("smu_area", "smu_species", "Narrative") %in% names(tabPrep))) {
     narratives_df <- tabPrep %>%
       filter(trimws(smu_area) == trimws(area),
              trimws(smu_species) == trimws(species)) %>%
-      distinct(smu_name, Narrative)  # ✅ Remove duplicates based on SMU and Narrative
+      distinct(smu_name, Narrative)  # emove duplicates based on SMU and Narrative
 
     if (nrow(narratives_df) > 0) {
       notes_text <- narratives_df %>%
         mutate(note_line = paste0(smu_name, ": ", coalesce(Narrative, ""))) %>%
         pull(note_line) %>%
-        unique() %>%  # ✅ Extra safeguard
+        unique() %>%  # extra safeguard
         paste(collapse = "\n")
     } else {
       notes_text <- "No notes available"
