@@ -352,27 +352,28 @@ build_block = function(df_smu) {
 
   row1 = data.frame(
     Resolution = "SMU", Name = "Narrative",
-    `Avg Run/Avg Spawners` = "", `LRP/LBB` = "", `Mgmt Target` = "",
+    #`Avg Run/Avg Spawners` = "", `LRP/LBB` = "", `Mgmt Target` = "",
     Forecast = "", Outlook = "",
     check.names = FALSE, stringsAsFactors = FALSE
   )
   row2 = data.frame(
     Resolution = smu, Name = narr,
-    `Avg Run/Avg Spawners` = "", `LRP/LBB` = "", `Mgmt Target` = "",
+    #`Avg Run/Avg Spawners` = "", `LRP/LBB` = "", `Mgmt Target` = "",
     Forecast = "", Outlook = "",
     check.names = FALSE, stringsAsFactors = FALSE
   )
 
   row3 = data.frame(
     Resolution = "Resolution", Name = "Name",
-    `Avg Run/Avg Spawners` = "Avg Run/Avg Spawners",
-    `LRP/LBB` = "LRP/LBB", `Mgmt Target` = "Mgmt Target",
+    #`Avg Run/Avg Spawners` = "Avg Run/Avg Spawners",
+    #`LRP/LBB` = "LRP/LBB", `Mgmt Target` = "Mgmt Target",
     Forecast = "Forecast", Outlook = "Outlook",
     check.names = FALSE, stringsAsFactors = FALSE
   )
 
   data_rows = df_smu %>%
-    select(Resolution, Name, `Avg Run/Avg Spawners`, `LRP/LBB`, `Mgmt Target`, Forecast, Outlook)
+    #select(Resolution, Name, `Avg Run/Avg Spawners`, `LRP/LBB`, `Mgmt Target`, Forecast, Outlook)
+    select(Resolution, Name, Forecast, Outlook)
 
   bind_rows(row1, row2, row3, data_rows)
 }
@@ -395,8 +396,11 @@ style_smu_table = function(big_df) {
   ft = border_inner_v(ft, border = fp_border(color = "black", width = 1))
 
   for (i in idx_label) {
-    ft = merge_at(ft, i = i, j = 2:7)
-    ft = merge_at(ft, i = i + 1, j = 2:7)
+    # ft = merge_at(ft, i = i, j = 2:7)
+    # ft = merge_at(ft, i = i + 1, j = 2:7)
+    ft = merge_at(ft, i = i, j = 2:4)
+    ft = merge_at(ft, i = i + 1, j = 2:4)
+
   }
 
   if (length(idx_label) > 1) {
