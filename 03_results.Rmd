@@ -5,7 +5,8 @@ library(dplyr)
 library(knitr)
 library(stringr)
 
-source("dataPrepCode/statusTables.R")
+#source("dataPrepCode/statusTables.R")
+source("statusTableWithOthers.R")
 
 # Pull all SMUs from crosswalkList
 all_smus = crosswalkList %>%
