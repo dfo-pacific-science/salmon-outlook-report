@@ -56,7 +56,7 @@ crosswalkList = as.data.frame(crosswalkList, stringsAsFactors = FALSE)
 
 # crosswalkList = read.csv("data/phase1culookup.csv", stringsAsFactors = FALSE)
 
-dummyPath = "data/testData3.xlsx"
+dummyPath = "data/testData4.xlsx"
 sheet_names = readxl::excel_sheets(dummyPath)
 df_list = map(sheet_names, ~ read_excel(dummyPath, sheet = .x)) %>% set_names(sheet_names)
 list2env(df_list, envir = .GlobalEnv)
@@ -446,7 +446,7 @@ make_table = function(area, species, data = tabPrep) {
 
 ################################################################################
 # Example usage (unchanged)
-make_table("FRASER AND INTERIOR", "Chinook")
-make_table("SOUTH COAST", "Chinook")
+#make_table("FRASER AND INTERIOR", "Chinook")
+#make_table("SOUTH COAST", "Chinook")
 
 # End of script
