@@ -356,100 +356,140 @@ tabPrep = tabPrep %>%
 ### Table building and styling functions (unchanged)
 
 build_block = function(df_smu) {
-  smu = unique(df_smu$smu_name)
+  smu  = unique(df_smu$smu_name)
   narr = unique(df_smu$Narrative)
 
   row1 = data.frame(
-    Resolution = "SMU", Name = "Narrative",
-    #`Avg Run/Avg Spawners` = "", `LRP/LBB` = "", `Mgmt Target` = "",
-    Forecast = "", Outlook = "",
-    check.names = FALSE, stringsAsFactors = FALSE
+    Resolution = "SMU",
+    Name = "Narrative",
+    Forecast = "",
+    Outlook  = "",
+    stringsAsFactors = FALSE
   )
+
   row2 = data.frame(
-    Resolution = smu, Name = narr,
-    #`Avg Run/Avg Spawners` = "", `LRP/LBB` = "", `Mgmt Target` = "",
-    Forecast = "", Outlook = "",
-    check.names = FALSE, stringsAsFactors = FALSE
+    Resolution = smu,
+    Name = narr,
+    Forecast = "",
+    Outlook  = "",
+    stringsAsFactors = FALSE
   )
 
   row3 = data.frame(
-    Resolution = "Resolution", Name = "Name",
-    #`Avg Run/Avg Spawners` = "Avg Run/Avg Spawners",
-    #`LRP/LBB` = "LRP/LBB", `Mgmt Target` = "Mgmt Target",
-    Forecast = "Forecast", Outlook = "Outlook",
-    check.names = FALSE, stringsAsFactors = FALSE
+    Resolution = "Resolution",
+    Name = "Name",
+    Forecast = "Forecast",
+    Outlook  = "Outlook",
+    stringsAsFactors = FALSE
   )
 
   data_rows = df_smu %>%
-    #select(Resolution, Name, `Avg Run/Avg Spawners`, `LRP/LBB`, `Mgmt Target`, Forecast, Outlook)
     select(Resolution, Name, Forecast, Outlook)
 
   bind_rows(row1, row2, row3, data_rows)
 }
 
-style_smu_table = function(big_df) {
-  ft = flextable(big_df)
-  ft = delete_part(ft, part = "header")
+################################################################################
 
+style_smu_table = function(big_df) {
+
+  # ---- Identify structural rows ONCE ----
   idx_label  = which(big_df$Resolution == "SMU" & big_df$Name == "Narrative")
   idx_header = which(big_df$Resolution == "Resolution")
 
+  # Draw separator BELOW the previous SMU block
+  idx_separators = idx_label[-1] - 1
+
+  ft = flextable(big_df)
+  ft = delete_part(ft, part = "header")
+
+  # ---- Reset all borders ----
+  ft = border_remove(ft)
+
+  # ---- Thick SMU separators FIRST (before merges) ----
+  if (length(idx_separators) > 0) {
+    ft = border(
+      ft,
+      i = idx_separators,
+      j = 1:ncol(big_df),
+      border.bottom = fp_border(width = 2),
+      part = "body"
+    )
+  }
+
+  # ---- Standard table borders ----
+  ft = border_outer(ft, fp_border(width = 1))
+  ft = border_inner_v(ft, fp_border(width = 1))
+  # ft = border_inner_h(ft, fp_border(width = 1))
+
+  all_rows = seq_len(nrow(big_df))
+  thin_rows = setdiff(all_rows, idx_separators)
+
+  ft = border(
+    ft,
+    i = thin_rows,
+    j = 1:ncol(big_df),
+    border.bottom = fp_border(width= 1),
+    part = "body"
+
+  )
+
+
+  # ---- Merge rows ONLY after borders are done ----
+  for (i in idx_label) {
+    ft = merge_at(ft, i = i,     j = 2:4)
+    ft = merge_at(ft, i = i + 1, j = 2:4)
+  }
+
+  # ---- Styling (safe after merges) ----
   ft = bg(ft, i = idx_label,  bg = "gray90")
   ft = bold(ft, i = idx_label, bold = TRUE)
+
   ft = bg(ft, i = idx_header, bg = "gray90")
   ft = bold(ft, i = idx_header, bold = TRUE)
 
-  ft = border_remove(ft)
-  ft = border_outer(ft, border = fp_border(color = "black", width = 1))
-  ft = border_inner_h(ft, border = fp_border(color = "black", width = 1))
-  ft = border_inner_v(ft, border = fp_border(color = "black", width = 1))
-
-  for (i in idx_label) {
-    # ft = merge_at(ft, i = i, j = 2:7)
-    # ft = merge_at(ft, i = i + 1, j = 2:7)
-    ft = merge_at(ft, i = i, j = 2:4)
-    ft = merge_at(ft, i = i + 1, j = 2:4)
-
-  }
-
-  if (length(idx_label) > 1) {
-    idx_separators = idx_label[-1]
-    for (i in idx_separators) {
-      ft = border(ft, i = i, j = 1:ncol(big_df),
-                  border.top = fp_border(color = "black", width = 2), part = "body")
-    }
-  }
-
   ft = autofit(ft)
   ft = set_table_properties(ft, layout = "autofit")
+
   ft
 }
 
+################################################################################
+
 make_caption = function(species, area, year = format(Sys.Date(), "%Y")) {
+
   area_titleCase = area %>%
-    tolower() %>% tools::toTitleCase() %>%
-    gsub("\bAnd\b", "and", .)
+    tolower() %>%
+    tools::toTitleCase() %>%
+    gsub("\\bAnd\\b", "and", .)
 
   paste0(
     "Summary of metrics informing the annual status evaluation for ",
-    species, " in the ", area_titleCase, " area during the ", year, " management cycle. ",
-    "Values are presented for each stock management unit (SMU), and where applicable, for associated singular conservation units (CUs), CU aggregations, and Hatchery or Indicator stocks. ",
-    #"Reported values include recent average run size or spawner abundance, biological reference points (limit reference point [LRP] and lower biological benchmark [LBB]), and management (mgmt.) targets or operational control points used to interpret current conditions. ",
-    "The forecast provides a numerical abundance estimate for the return year, while the outlook indicates the categorical status classification (see definitions in Table 1)."
+    species, " in the ", area_titleCase, " area during the ", year,
+    " management cycle. Values are presented for each stock management unit (SMU), ",
+    "and where applicable, for associated singular conservation units (CUs), CU ",
+    "aggregations, and Hatchery or Indicator stocks."
   )
 }
 
-make_table = function(area, species, data = tabPrep) {
-  df_filtered = data %>% filter(smu_area == area, smu_species == species)
-  if (nrow(df_filtered) == 0) stop(paste("No data found for:", area, "/", species))
+################################################################################
 
-  smu_list = split(df_filtered, df_filtered$smu_name)
+make_table = function(area, species, data = tabPrep) {
+
+  df_filtered = data %>%
+    filter(smu_area == area, smu_species == species)
+
+  if (nrow(df_filtered) == 0) {
+    stop(paste("No data found for:", area, "/", species))
+  }
+
+  smu_list   = split(df_filtered, df_filtered$smu_name)
   block_list = lapply(smu_list, build_block)
-  big_df = bind_rows(block_list)
+  big_df     = bind_rows(block_list)
 
   ft = style_smu_table(big_df)
-  caption_text = make_caption(species = species, area = area)
-  ft = set_caption(ft, caption = caption_text)
+  ft = set_caption(ft, caption = make_caption(species, area))
+
   ft
 }
 
