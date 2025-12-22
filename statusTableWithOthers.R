@@ -1,3 +1,12 @@
+# STEPHEN TO DO:
+# Make it so you enter Year --> that determines Pink Even vs Pink Odd
+# NORTH COAST: species = Pink not Pink even/odd
+
+
+
+
+
+
 ################################################################################
 # Script Name: statusTables_rewrite.R
 #
@@ -56,7 +65,7 @@ crosswalkList = as.data.frame(crosswalkList, stringsAsFactors = FALSE)
 
 # crosswalkList = read.csv("data/phase1culookup.csv", stringsAsFactors = FALSE)
 
-dummyPath = "data/testData4.xlsx"
+dummyPath = "data/22Dec2025Data.xlsx"
 sheet_names = readxl::excel_sheets(dummyPath)
 df_list = map(sheet_names, ~ read_excel(dummyPath, sheet = .x)) %>% set_names(sheet_names)
 list2env(df_list, envir = .GlobalEnv)
@@ -285,9 +294,9 @@ tabPrep = tabPrep %>%
 tabPrep = tabPrep %>%
   group_by(smu_name_display, Resolution, smu_prelim_forecast, smu_outlook_assignment, outlook_narrative) %>%
   mutate(
-    CU_Forecast  = paste(na.omit(cu_prelim_forecast), collapse = ", "),
-    CU_Outlook   = paste(na.omit(cu_outlook_assignment), collapse = ", "),
-    CU_CodeList  = paste(na.omit(cu_outlook_selection), collapse = ", ")
+    CU_Forecast  = paste(unique(na.omit(cu_prelim_forecast)), collapse = ", "),
+    CU_Outlook   = paste(unique(na.omit(cu_outlook_assignment)), collapse = ", "),
+    CU_CodeList  = paste(unique(na.omit(cu_outlook_selection)), collapse = ", ")
   ) %>%
   ungroup() %>%
   mutate(
@@ -425,7 +434,7 @@ make_caption = function(species, area, year = format(Sys.Date(), "%Y")) {
     "Summary of metrics informing the annual status evaluation for ",
     species, " in the ", area_titleCase, " area during the ", year, " management cycle. ",
     "Values are presented for each stock management unit (SMU), and where applicable, for associated singular conservation units (CUs), CU aggregations, and Hatchery or Indicator stocks. ",
-    "Reported values include recent average run size or spawner abundance, biological reference points (limit reference point [LRP] and lower biological benchmark [LBB]), and management (mgmt.) targets or operational control points used to interpret current conditions. ",
+    #"Reported values include recent average run size or spawner abundance, biological reference points (limit reference point [LRP] and lower biological benchmark [LBB]), and management (mgmt.) targets or operational control points used to interpret current conditions. ",
     "The forecast provides a numerical abundance estimate for the return year, while the outlook indicates the categorical status classification (see definitions in Table 1)."
   )
 }
