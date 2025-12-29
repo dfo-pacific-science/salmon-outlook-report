@@ -74,6 +74,7 @@ type:
 # End of options to set
 knit: (function(input, ...) csasdown::render())
 site: bookdown::bookdown_site
+#site: NULL
 link-citations: true
 bibliography: bib/refs.bib
 # Any extra LaTeX code for the header:
