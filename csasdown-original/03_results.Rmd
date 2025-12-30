@@ -1,0 +1,545 @@
+# Results
+
+```{r missing-smus, echo=FALSE}
+
+## Message from Dawn on order of results: generally do YUK/Trans, NCA, SCA, FIA, then species SK, PK, CN, CO, CM
+# Areas presented North --> South (kind of..). Unsure why for species order. It's the standard for some reason.
+
+
+library(dplyr)
+library(knitr)
+library(stringr)
+
+#source("dataPrepCode/statusTables.R")
+source("statusTableWithOthers.R")
+
+# Pull all SMUs from crosswalkList
+all_smus = crosswalkList %>%
+  distinct(area, species, smu)
+
+# Identify SMUs **not reported at all** in cu_outlook_records_enriched
+reported_smus = cu_outlook_records_enriched %>%
+  pull(smu_name) %>%
+  str_remove("—.*$") %>%      # remove trailing notes
+  str_remove("CHECK:.*$") %>% # remove trailing CHECKs
+  str_trim() %>%
+  unique()
+
+missing_smus = all_smus %>%
+  filter(!smu %in% reported_smus) %>%
+  arrange(area, species, smu)
+
+# Display table
+if (nrow(missing_smus) == 0) {
+  knitr::kable(data.frame(Message = "All SMUs are accounted for in the survey results."))
+} else {
+  knitr::kable(
+    missing_smus,
+    col.names = c("Area", "Species", "Missing SMU"),
+    caption = "Missing SMUs grouped by Area and Species"
+  )
+}
+
+```
+
+```{r missing-cus, echo=FALSE}
+
+# Get all the reported CUs
+reported_cus = cu_outlook_records_enriched %>%
+  filter(
+    !is.na(cu_outlook_selection),
+    !cu_outlook_selection %in% c(
+      "CHECK: No data entered",
+      "Outlook assigned but no CU specified"
+    ),
+    !str_detect(cu_outlook_selection, "CHECK")
+  ) %>%
+  pull(cu_outlook_selection) %>%
+  str_split(",") %>%
+  unlist() %>%
+  str_trim() %>%
+  toupper() %>%
+  unique()
+
+# Get the list of SMUs to exclude
+reported_smus = cu_outlook_records_enriched %>%
+  pull(smu_name) %>%
+  str_remove("—.*$") %>%
+  str_remove("CHECK:.*$") %>%
+  str_trim() %>%
+  unique()
+
+# Remove the CUs associated with the SMUs that have been reported
+reference_cus = crosswalkList %>%
+  mutate(
+    CU_Code = toupper(str_trim(name)),
+    smu_clean = str_remove(smu, "—.*$") %>% str_remove("CHECK:.*$") %>% str_trim()
+  ) %>%
+  filter(!smu_clean %in% reported_smus)
+
+# Remove the CUs that were already reported
+missing_cus = reference_cus %>%
+  filter(!CU_Code %in% reported_cus) %>%
+  distinct(area, species, CU_Code, CU_Name = label) %>%
+  arrange(area, species, CU_Code)
+
+# Make a table to display info
+if (nrow(missing_cus) == 0) {
+  knitr::kable(data.frame(Message = "All CUs are accounted for in the survey results."))
+} else {
+  knitr::kable(
+    missing_cus,
+    col.names = c("Area", "Species", "CU Code", "CU Name"),
+    caption = "Missing CUs (Area, Species, Code, Name). Note that CUs belonging to SMUs that have already been reported are excluded."
+  )
+}
+
+```
+
+
+
+## Yukon Transboundary
+
+### Sockeye Lake Type
+
+```{r ytSockeyeLTTable}
+
+ft = tryCatch(
+  make_table("YUKON TRANSBOUNDARY", "Sockeye Lake Type"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+
+```
+
+### Sockeye River Type
+
+```{r ytSockeyeRTTable}
+
+ft = tryCatch(
+  make_table("YUKON TRANSBOUNDARY", "Sockeye River Type"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+
+```
+
+### Pink Even
+
+```{r ytPinkEvenTable}
+
+ft = tryCatch(
+  make_table("YUKON TRANSBOUNDARY", "Pink Even"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+
+```
+
+
+### Chinook
+
+```{r ytChinookTable}
+
+ft = tryCatch(
+  make_table("YUKON TRANSBOUNDARY", "Chinook"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+
+```
+
+### Coho
+
+```{r ytCohoTable}
+
+ft = tryCatch(
+  make_table("YUKON TRANSBOUNDARY", "Coho"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+
+```
+
+### Chum
+
+```{r ytChumTable}
+
+ft = tryCatch(
+  make_table("YUKON TRANSBOUNDARY", "Chum"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+
+```
+
+
+## North Coast Area
+
+### Sockeye Lake Type
+
+```{r northSockeyeLakeTable}
+
+ft = tryCatch(
+  make_table("NORTH COAST", "Sockeye Lake Type"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+```
+
+### Sockeye River Type
+
+```{r northSockeyeRiverTable}
+
+ft = tryCatch(
+  make_table("NORTH COAST", "Sockeye River Type"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+```
+
+### Pink Even
+
+```{r northPinkEvenTable}
+
+ft = tryCatch(
+  make_table("NORTH COAST", "Pink"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+```
+
+### Chinook
+
+```{r northChinookTable}
+
+ft = tryCatch(
+  make_table("NORTH COAST", "Chinook"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+```
+
+### Coho
+
+```{r northCohoTable}
+
+ft = tryCatch(
+  make_table("NORTH COAST", "Coho"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+```
+
+### Chum
+
+```{r northchumTable}
+
+ft = tryCatch(
+  make_table("NORTH COAST", "Chum"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+```
+
+
+## South Coast Area
+
+### Sockeye (Lake Type)
+
+```{r scsockeyLTTable}
+
+ft = tryCatch(
+  make_table("SOUTH COAST", "Sockeye Lake Type"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+
+```
+
+### Sockeye (River Type)
+
+```{r scsockeyRTTable}
+
+ft = tryCatch(
+  make_table("SOUTH COAST", "Sockeye River Type"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+
+```
+
+### Pink Even
+
+```{r scPinkTable}
+
+ft = tryCatch(
+  make_table("SOUTH COAST", "Pink Even"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+
+```
+
+### Chinook
+
+```{r scChinookTable}
+
+ft = tryCatch(
+  make_table("SOUTH COAST", "Chinook"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+
+
+```
+
+### Coho
+
+```{r scCohoTable}
+
+ft = tryCatch(
+  make_table("SOUTH COAST", "Coho"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+
+```
+
+
+### Chum
+
+```{r scChumTable}
+
+ft = tryCatch(
+  make_table("SOUTH COAST", "Chum"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+
+
+```
+
+## Fraser and Interior
+
+### Sockeye Lake Type
+
+```{r fiaSockeyeLakeTypeTable}
+
+ft = tryCatch(
+  make_table("FRASER AND INTERIOR", "Sockeye Lake Type"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+```
+
+### Sockeye River Type
+
+```{r fiaSockeyeRiverTypeTable}
+
+ft = tryCatch(
+  make_table("FRASER AND INTERIOR", "Sockeye River Type"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+```
+
+### Pink Even
+
+```{r fiaPinkEvenTable}
+
+ft = tryCatch(
+  make_table("FRASER AND INTERIOR", "Pink Even"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+```
+
+### Chinook
+
+```{r fiaChinookTable, results = "asis"}
+
+ft = tryCatch(
+  make_table("FRASER AND INTERIOR", "Chinook"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+
+```
+
+### Coho
+
+```{r fiaCohoTable}
+
+ft = tryCatch(
+  make_table("FRASER AND INTERIOR", "Coho"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+
+```
+
+### Chum
+
+```{r fiaChumTable, results = "asis"}
+
+ft = tryCatch(
+  make_table("FRASER AND INTERIOR", "Chum"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+
+```
+
+
+
+
+
+
+
+
+
