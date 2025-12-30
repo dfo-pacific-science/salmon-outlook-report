@@ -31,13 +31,36 @@ missing_smus = all_smus %>%
 
 # Display table
 if (nrow(missing_smus) == 0) {
-  knitr::kable(data.frame(Message = "All SMUs are accounted for in the survey results."))
-} else {
-  knitr::kable(
-    missing_smus,
-    col.names = c("Area", "Species", "Missing SMU"),
+
+  ft <- flextable::flextable(
+    data.frame(Message = "All SMUs are accounted for in the survey results.")
+  )
+  ft <- flextable::set_caption(
+    ft,
     caption = "Missing SMUs grouped by Area and Species"
   )
+  ft = flextable::autofit(ft)
+  ft = flextable::set_table_properties(ft, layout = "autofit")
+  ft
+
+} else {
+  ft <- flextable::flextable(
+    missing_smus,
+    col_keys = c("area", "species", "smu")
+  )
+  ft <- flextable::set_header_labels(
+    ft,
+    area    = "Area",
+    species = "Species",
+    smu     = "Missing SMU"
+  )
+  ft <- flextable::set_caption(
+    ft,
+    caption = "Missing SMUs grouped by Area and Species"
+  )
+  ft = flextable::autofit(ft)
+  ft = flextable::set_table_properties(ft, layout = "autofit")
+  ft
 }
 
 ```
@@ -85,15 +108,44 @@ missing_cus = reference_cus %>%
 
 # Make a table to display info
 if (nrow(missing_cus) == 0) {
-  knitr::kable(data.frame(Message = "All CUs are accounted for in the survey results."))
-} else {
-  knitr::kable(
-    missing_cus,
-    col.names = c("Area", "Species", "CU Code", "CU Name"),
+
+  ft <- flextable::flextable(
+    data.frame(Message = "All CUs are accounted for in the survey results.")
+  )
+
+  ft <- flextable::set_caption(
+    ft,
     caption = "Missing CUs (Area, Species, Code, Name). Note that CUs belonging to SMUs that have already been reported are excluded."
   )
-}
 
+  ft = flextable::autofit(ft)
+  ft = flextable::set_table_properties(ft, layout = "autofit")
+  ft
+
+} else {
+
+  ft <- flextable::flextable(
+    missing_cus,
+    col_keys = c("area", "species", "CU_Code", "CU_Name")
+  )
+
+  ft <- flextable::set_header_labels(
+    ft,
+    area    = "Area",
+    species = "Species",
+    CU_Code = "CU Code",
+    CU_Name = "CU Name"
+  )
+
+  ft <- flextable::set_caption(
+    ft,
+    caption = "Missing CUs (Area, Species, Code, Name). Note that CUs belonging to SMUs that have already been reported are excluded."
+  )
+
+  ft = flextable::autofit(ft)
+  ft = flextable::set_table_properties(ft, layout = "autofit")
+  ft
+}
 ```
 
 
