@@ -110,7 +110,8 @@ keep_cols_other = c(
 Outlook_Repeat_Test = Salmon_Outlook_Report %>% select(all_of(keep_cols_repeat))
 
 ################################################################################
-### Prepare cu_outlook_records (same as original)
+### Prepare CU-level data
+
 cu_outlook_records = cu_outlook_records %>%
   select(any_of(keep_cols_cu)) %>%
   mutate(
@@ -139,7 +140,8 @@ cu_outlook_records = cu_outlook_records %>%
   )
 
 ################################################################################
-### Prepare other_records (if present) and align to CU schema
+### Prepare other_records (if present)
+
 if (has_other) {
   other_prep = other_records %>% select(any_of(keep_cols_other)) %>%
     rename(
@@ -252,10 +254,10 @@ tabPrep = tabPrep %>%
   mutate(
     smu_n_distinct_parent = n_distinct(parentrowid),
     smu_duplicate = smu_n_distinct_parent > 1L,
-    smu_name_display = if_else(
-      smu_duplicate,
-      paste0(smu_name, " — CHECK: Data entered for the same SMU more than once"),
-      smu_name
+    smu_name_display = case_when(
+      smu_name == "CENTRAL COAST COHO SALMON" ~ smu_name, # PFMA exception
+      smu_duplicate ~ paste0(smu_name, " — CHECK: Data entered for the same SMU more than once"),
+      TRUE ~ smu_name
     ),
     cu_count_calc = case_when(
       cu_empty ~ 0L,
@@ -263,6 +265,8 @@ tabPrep = tabPrep %>%
       TRUE ~ str_count(coalesce(cu_outlook_selection, ""), ",") + 1L
     ),
     needs_check = case_when(
+      smu_name == "SKEENA COHO SALMON" ~ FALSE,
+      smu_area == "FRASER AND INTERIOR" & ((smu_numeric | smu_dd) & (cu_numeric | cu_dd)) ~ FALSE,
       (smu_empty & cu_empty) ~ TRUE,
       (smu_numeric & cu_numeric) ~ TRUE,
       (smu_numeric & cu_dd) ~ TRUE,
@@ -270,6 +274,8 @@ tabPrep = tabPrep %>%
       TRUE ~ FALSE
     ),
     check_reason = case_when(
+      smu_name == "SKEENA COHO SALMON" ~ NA_character_,
+      smu_area == "FRASER AND INTERIOR" & ((smu_numeric | smu_dd) & (cu_numeric | cu_dd)) ~ NA_character_,
       (smu_empty & cu_empty) ~ "Only NA entered",
       (smu_numeric & cu_numeric) ~ "SMU and CU both numeric",
       (smu_numeric & cu_dd) ~ "SMU numeric but CU data deficient",
@@ -280,10 +286,12 @@ tabPrep = tabPrep %>%
   ungroup() %>%
   mutate(
     cu_count = coalesce(cu_count, cu_count_calc),
-    # For rows coming from other_records, set Resolution to Hatchery/Indicator override
     Resolution = case_when(
+      smu_name == "CENTRAL COAST COHO SALMON" ~ "PFMA",
       source == "other" ~ "Hatchery or Indicator Stock",
       smu_empty & cu_empty ~ "CHECK: Only NA entered",
+      smu_name == "SKEENA COHO SALMON" ~ "SMU",
+      smu_area == "FRASER AND INTERIOR" & ((smu_numeric | smu_dd) & (cu_numeric | cu_dd)) ~ "SMU",
       smu_numeric & cu_numeric ~ "CHECK: SMU and CU both numeric",
       smu_numeric & cu_dd ~ "CHECK: SMU numeric but CU data deficient",
       smu_dd & cu_numeric ~ "CHECK: SMU data deficient but CU numeric",
