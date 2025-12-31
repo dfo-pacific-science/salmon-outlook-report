@@ -41,6 +41,21 @@ library(purrr)
 library(stringr)
 
 ################################################################################
+###  Exceptions / Overrides
+# 1. PFMA exception:
+#    - SMU: "CENTRAL COAST COHO SALMON"
+#    - Set Resolution = "PFMA" (gets entered as SMU)
+#    - Ignore duplicate SMU checks
+# 2. SKEENA COHO exception:
+#    - SMU: "SKEENA COHO SALMON"
+#    - Allow numeric or data-deficient entries for both SMU and CU
+#    - Do not flag as check
+# 3. FRASER AND INTERIOR exception:
+#    - Area: "FRASER AND INTERIOR"
+#    - Allow numeric or data-deficient for both SMU and CU
+#    - Do not flag as check
+
+################################################################################
 ### Prep Data: read in required files
 
 
