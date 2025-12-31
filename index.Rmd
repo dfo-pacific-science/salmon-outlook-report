@@ -107,6 +107,7 @@ flextable::set_flextable_defaults(
 ```
 
 ```{r load-libraries-user}
+library(dplyr)
 library(ggplot2)
 library(readr)
 library(tibble)
