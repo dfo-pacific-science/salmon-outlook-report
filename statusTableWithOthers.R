@@ -58,7 +58,6 @@ library(stringr)
 ################################################################################
 ### Prep Data: read in required files
 
-
 # Set the path to workbook
 lookup_xl_path = "data/lookupTables.xlsx"
 
@@ -66,17 +65,13 @@ lookup_xl_path = "data/lookupTables.xlsx"
 crosswalkList = read_excel(
   path  = lookup_xl_path,
   sheet = "phase1culookup"
-)
+) %>% as.data.frame(stringsAsFactors = FALSE)
 
 # Read the hatchery/indicator table from the Excel sheet
 hatcheryIndicator = read_excel(
   path  = lookup_xl_path,
   sheet = "hatcheryIndicator"
-)
-
-# Turn it into data frame
-crosswalkList = as.data.frame(crosswalkList, stringsAsFactors = FALSE)
-
+) %>% as.data.frame(stringsAsFactors = FALSE)
 
 # crosswalkList = read.csv("data/phase1culookup.csv", stringsAsFactors = FALSE)
 
