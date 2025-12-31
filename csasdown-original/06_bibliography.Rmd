@@ -6,7 +6,7 @@
 
 \clearpage
 
-# References
+# REFERENCES
 
 <div id="refs" custom-style = "citation"></div>
 
