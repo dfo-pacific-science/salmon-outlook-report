@@ -3,6 +3,8 @@
 .RData
 .DS_Store
 
+data/
+
 _book
 csas-style
 knitr-cache-docx
