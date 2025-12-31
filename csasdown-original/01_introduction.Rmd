@@ -1,4 +1,4 @@
-# Introduction {#sec:introduction}
+# INTRODUCTION 
 
 <!-- An example of how to include text based on the language. The two chunks below shows how switching the toggle in the YAML header for french allows inclusion/rejection of a paragraph. -->
 
