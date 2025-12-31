@@ -1,4 +1,4 @@
-# Results
+# RESULTS
 
 ```{r missing-smus, echo=FALSE}
 
@@ -150,7 +150,7 @@ if (nrow(missing_cus) == 0) {
 
 
 
-## Yukon Transboundary
+## YUKON TRANSBOUNDARY AREA
 
 ### Sockeye Lake Type
 
@@ -262,7 +262,7 @@ if(!is.null(ft)){
 ```
 
 
-## North Coast Area
+## NORTH COAST AREA
 
 ### Sockeye Lake Type
 
@@ -367,7 +367,7 @@ if(!is.null(ft)){
 ```
 
 
-## South Coast Area
+## SOUTH COAST AREA
 
 ### Sockeye (Lake Type)
 
@@ -480,7 +480,7 @@ if(!is.null(ft)){
 
 ```
 
-## Fraser and Interior
+## FRASER AND INTERIOR AREA
 
 ### Sockeye Lake Type
 
