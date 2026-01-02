@@ -3,10 +3,6 @@
 # NORTH COAST: species = Pink not Pink even/odd
 
 
-
-
-
-
 ################################################################################
 # Script Name: statusTables_rewrite.R
 #
@@ -256,6 +252,7 @@ tabPrep = tabPrep %>%
     smu_duplicate = smu_n_distinct_parent > 1L,
     smu_name_display = case_when(
       smu_name == "CENTRAL COAST COHO SALMON" ~ smu_name, # PFMA exception
+      smu_name == "NO DESIGNATED SMU" ~ smu_name, # it's fine for this to be entered more than once
       smu_duplicate ~ paste0(smu_name, " — CHECK: Data entered for the same SMU more than once"),
       TRUE ~ smu_name
     ),
@@ -319,14 +316,14 @@ tabPrep = tabPrep %>%
   ungroup() %>%
   mutate(
     Name = case_when(
-      Resolution == "SMU" ~ smu_name_display,
+      Resolution %in% c("SMU", "PFMA") ~ smu_name_display,
       Resolution %in% c("CU (aggregate)", "CU (singular)") ~ CU_Names,
       Resolution == "Hatchery or Indicator Stock" & !is.na(Other_RawSelection) & Other_RawSelection != "" ~ Other_RawSelection,
       str_detect(Resolution, "^CHECK:") ~ CU_Names,
       TRUE ~ NA_character_
     ),
     Forecast = case_when(
-      Resolution == "SMU" ~ smu_prelim_forecast,
+      Resolution %in% c("SMU", "PFMA") ~ smu_prelim_forecast,
       Resolution %in% c("CU (aggregate)", "CU (singular)") ~ CU_Forecast,
       Resolution == "Hatchery or Indicator Stock" ~ CU_Forecast,
       str_detect(Resolution, "^CHECK:") ~ paste0(
@@ -338,7 +335,7 @@ tabPrep = tabPrep %>%
       TRUE ~ NA_character_
     ),
     Outlook = case_when(
-      Resolution == "SMU" ~ coalesce(smu_outlook_assignment, NA_character_),
+      Resolution %in% c("SMU", "PFMA") ~ coalesce(smu_outlook_assignment, NA_character_),
       Resolution %in% c("CU (aggregate)", "CU (singular)") ~ coalesce(cu_outlook_assignment, NA_character_),
       Resolution == "Hatchery or Indicator Stock" ~ coalesce(cu_outlook_assignment, NA_character_),
       str_detect(Resolution, "^CHECK:") ~ paste0(
