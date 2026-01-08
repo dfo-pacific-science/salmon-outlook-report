@@ -318,17 +318,17 @@ tabPrep =
   ) %>%
   mutate(
     CU_Forecast = if_else(
-      smu_area %in% c("FRASER AND INTERIOR", "SKEENA COHO SALMON"),
+      smu_area == "FRASER AND INTERIOR AREA" | smu_name == "SKEENA COHO SALMON",
       cu_prelim_forecast,  ### keep row-level forecasts
       paste(unique(na.omit(cu_prelim_forecast)), collapse = ", ")
     ),
     CU_Outlook = if_else(
-      smu_area %in% c("FRASER AND INTERIOR", "SKEENA COHO SALMON"),
+      smu_area == "FRASER AND INTERIOR AREA" | smu_name == "SKEENA COHO SALMON",
       cu_outlook_assignment,  ### keep row-level outlooks
       paste(unique(na.omit(cu_outlook_assignment)), collapse = ", ")
     ),
     CU_CodeList = if_else(
-      smu_area %in% c("FRASER AND INTERIOR", "SKEENA COHO SALMON"),
+      smu_area == "FRASER AND INTERIOR AREA" | smu_name == "SKEENA COHO SALMON",
       cu_outlook_selection,  ### keep row-level CU codes
       paste(unique(na.omit(cu_outlook_selection)), collapse = ", ")
     )
