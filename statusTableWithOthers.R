@@ -307,16 +307,31 @@ tabPrep =
 ################################################################################
 ### Combine Forecasts / Outlooks
 
+### Combine Forecasts / Outlooks (with Fraser & SKEENA fix)
+
 tabPrep =
   tabPrep %>%
   group_by(
     smu_name_display, Resolution,
-    smu_prelim_forecast, smu_outlook_assignment, outlook_narrative
+    smu_prelim_forecast, smu_outlook_assignment, outlook_narrative,
+    smu_area
   ) %>%
   mutate(
-    CU_Forecast = paste(unique(na.omit(cu_prelim_forecast)), collapse = ", "),
-    CU_Outlook  = paste(unique(na.omit(cu_outlook_assignment)), collapse = ", "),
-    CU_CodeList = paste(unique(na.omit(cu_outlook_selection)), collapse = ", ")
+    CU_Forecast = if_else(
+      smu_area %in% c("FRASER AND INTERIOR", "SKEENA COHO SALMON"),
+      cu_prelim_forecast,  ### keep row-level forecasts
+      paste(unique(na.omit(cu_prelim_forecast)), collapse = ", ")
+    ),
+    CU_Outlook = if_else(
+      smu_area %in% c("FRASER AND INTERIOR", "SKEENA COHO SALMON"),
+      cu_outlook_assignment,  ### keep row-level outlooks
+      paste(unique(na.omit(cu_outlook_assignment)), collapse = ", ")
+    ),
+    CU_CodeList = if_else(
+      smu_area %in% c("FRASER AND INTERIOR", "SKEENA COHO SALMON"),
+      cu_outlook_selection,  ### keep row-level CU codes
+      paste(unique(na.omit(cu_outlook_selection)), collapse = ", ")
+    )
   ) %>%
   ungroup() %>%
   mutate(
@@ -339,7 +354,7 @@ tabPrep =
     ),
     Outlook = case_when(
       Resolution %in% c("SMU", "PFMA") ~ smu_outlook_assignment,
-      Resolution %in% c("CU (aggregate)", "CU (singular)", "Hatchery or Indicator Stock") ~ cu_outlook_assignment,
+      Resolution %in% c("CU (aggregate)", "CU (singular)", "Hatchery or Indicator Stock") ~ CU_Outlook,
       str_detect(Resolution, "^CHECK:") ~ paste0(
         "CHECK VALUE: SMU = ", coalesce(smu_outlook_assignment, "NA"),
         "; CU = ", coalesce(CU_Outlook, "NA"),
@@ -349,6 +364,7 @@ tabPrep =
     ),
     Narrative = outlook_narrative
   )
+
 
 ################################################################################
 ### Final Table Prep
