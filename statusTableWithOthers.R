@@ -51,7 +51,7 @@ hatcheryIndicator = read_excel(
   sheet = "hatcheryIndicator"
 ) %>% as.data.frame(stringsAsFactors = FALSE)
 
-dummyPath = "data/05Jan2026Data.xlsx"
+dummyPath = "data/08Jan2026Data.xlsx"
 sheet_names = readxl::excel_sheets(dummyPath)
 df_list = map(sheet_names, ~ read_excel(dummyPath, sheet = .x)) %>% set_names(sheet_names)
 list2env(df_list, envir = .GlobalEnv)
@@ -271,7 +271,6 @@ tabPrep =
   mutate(
     cu_count = coalesce(cu_count, cu_count_calc),
 
-    # ---- CRITICAL FIX: identify CU rows ----
     is_cu_row =
       !cu_empty &
       !cu_outlook_selection %in%
@@ -284,13 +283,18 @@ tabPrep =
 
       smu_name == "SKEENA COHO SALMON" & !is_cu_row ~ "SMU",
 
-      smu_area == "FRASER AND INTERIOR" &
-        !is_cu_row &
-        ((smu_numeric | smu_dd) & (cu_numeric | cu_dd)) ~ "SMU",
+      ### CHANGED: Fraser allows parallel SMU + CU reporting
+      smu_area == "FRASER AND INTERIOR" & !is_cu_row ~ "SMU",
 
-      smu_numeric & cu_numeric ~ "CHECK: SMU and CU both numeric",
-      smu_numeric & cu_dd ~ "CHECK: SMU numeric but CU data deficient",
-      smu_dd & cu_numeric ~ "CHECK: SMU data deficient but CU numeric",
+      ### CHANGED: conflict checks disabled for Fraser & Interior
+      smu_area != "FRASER AND INTERIOR" & smu_numeric & cu_numeric ~
+        "CHECK: SMU and CU both numeric",
+
+      smu_area != "FRASER AND INTERIOR" & smu_numeric & cu_dd ~
+        "CHECK: SMU numeric but CU data deficient",
+
+      smu_area != "FRASER AND INTERIOR" & smu_dd & cu_numeric ~
+        "CHECK: SMU data deficient but CU numeric",
 
       cu_empty ~ "SMU",
       is_cu_row & cu_count == 1 ~ "CU (singular)",
