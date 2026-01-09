@@ -36,8 +36,7 @@ library(readxl)
 library(purrr)
 library(stringr)
 
-################################################################################
-### Prep Data: read in required files
+### Prep Data
 
 lookup_xl_path = "data/lookupTables.xlsx"
 
@@ -55,9 +54,6 @@ dummyPath = "data/08Jan2026Data.xlsx"
 sheet_names = readxl::excel_sheets(dummyPath)
 df_list = map(sheet_names, ~ read_excel(dummyPath, sheet = .x)) %>% set_names(sheet_names)
 list2env(df_list, envir = .GlobalEnv)
-
-################################################################################
-### Initial check
 
 if (!exists("Salmon_Outlook_Report") | !exists("cu_outlook_records")) {
   stop("Required data frames Salmon_Outlook_Report or cu_outlook_records are missing.")
@@ -114,10 +110,8 @@ cu_outlook_records =
       cu_outlook_selection
     ),
     cu_count = case_when(
-      cu_outlook_selection %in% c(
-        "CHECK: No data entered",
-        "Outlook assigned but no CU specified"
-      ) ~ 1L,
+      cu_outlook_selection %in%
+        c("CHECK: No data entered", "Outlook assigned but no CU specified") ~ 1L,
       TRUE ~ str_count(coalesce(cu_outlook_selection, ""), ",") + 1L
     )
   )
@@ -155,10 +149,8 @@ if (has_other) {
         cu_outlook_selection
       ),
       cu_count = case_when(
-        cu_outlook_selection %in% c(
-          "CHECK: No data entered",
-          "Outlook assigned but no CU specified"
-        ) ~ 1L,
+        cu_outlook_selection %in%
+          c("CHECK: No data entered", "Outlook assigned but no CU specified") ~ 1L,
         TRUE ~ str_count(coalesce(cu_outlook_selection, ""), ",") + 1L
       )
     )
@@ -195,10 +187,7 @@ tabPrep =
 
 get_labels = function(cu_string, ref_df) {
   if (is.na(cu_string) | cu_string == "") return(NA_character_)
-  if (cu_string %in% c(
-    "CHECK: No data entered",
-    "Outlook assigned but no CU specified"
-  )) return(cu_string)
+  if (cu_string %in% c("CHECK: No data entered", "Outlook assigned but no CU specified")) return(cu_string)
 
   cu_codes =
     str_split(cu_string, ",")[[1]] %>%
@@ -230,10 +219,8 @@ tabPrep =
 ################################################################################
 ### Data checks and flagging
 
-empty_vals = c(
-  NA_character_, "", "N/A", "NA", "n/a", "na",
-  "No data entered", "CHECK: No data entered"
-)
+empty_vals = c(NA_character_, "", "N/A", "NA", "n/a", "na",
+               "No data entered", "CHECK: No data entered")
 
 tabPrep =
   tabPrep %>%
@@ -262,8 +249,7 @@ tabPrep =
     ),
     cu_count_calc = case_when(
       cu_empty ~ 0L,
-      cu_outlook_selection %in%
-        c("CHECK: No data entered", "Outlook assigned but no CU specified") ~ 1L,
+      cu_outlook_selection %in% c("CHECK: No data entered", "Outlook assigned but no CU specified") ~ 1L,
       TRUE ~ str_count(coalesce(cu_outlook_selection, ""), ",") + 1L
     )
   ) %>%
@@ -273,28 +259,23 @@ tabPrep =
 
     is_cu_row =
       !cu_empty &
-      !cu_outlook_selection %in%
-      c("CHECK: No data entered", "Outlook assigned but no CU specified"),
+      !cu_outlook_selection %in% c("CHECK: No data entered", "Outlook assigned but no CU specified"),
 
     Resolution = case_when(
       smu_name == "CENTRAL COAST COHO SALMON" ~ "PFMA",
       source == "other" ~ "Hatchery or Indicator Stock",
       smu_empty & cu_empty ~ "CHECK: Only NA entered",
 
+      ### SKEENA fix: no checks for SMU rows
       smu_name == "SKEENA COHO SALMON" & !is_cu_row ~ "SMU",
 
-      ### CHANGED: Fraser allows parallel SMU + CU reporting
+      ### Fraser & Interior: show SMU rows even if CU exists
       smu_area == "FRASER AND INTERIOR" & !is_cu_row ~ "SMU",
 
-      ### CHANGED: conflict checks disabled for Fraser & Interior
-      smu_area != "FRASER AND INTERIOR" & smu_numeric & cu_numeric ~
-        "CHECK: SMU and CU both numeric",
-
-      smu_area != "FRASER AND INTERIOR" & smu_numeric & cu_dd ~
-        "CHECK: SMU numeric but CU data deficient",
-
-      smu_area != "FRASER AND INTERIOR" & smu_dd & cu_numeric ~
-        "CHECK: SMU data deficient but CU numeric",
+      ### Conflict checks elsewhere
+      smu_area != "FRASER AND INTERIOR" & smu_numeric & cu_numeric ~ "CHECK: SMU and CU both numeric",
+      smu_area != "FRASER AND INTERIOR" & smu_numeric & cu_dd ~ "CHECK: SMU numeric but CU data deficient",
+      smu_area != "FRASER AND INTERIOR" & smu_dd & cu_numeric ~ "CHECK: SMU data deficient but CU numeric",
 
       cu_empty ~ "SMU",
       is_cu_row & cu_count == 1 ~ "CU (singular)",
@@ -305,32 +286,27 @@ tabPrep =
   )
 
 ################################################################################
-### Combine Forecasts / Outlooks
-
-### Combine Forecasts / Outlooks (with Fraser & SKEENA fix)
+### Combine Forecasts / Outlooks + create Name/Forecast/Outlook
 
 tabPrep =
   tabPrep %>%
   group_by(
     smu_name_display, Resolution,
-    smu_prelim_forecast, smu_outlook_assignment, outlook_narrative,
-    smu_area
+    parentrowid, smu_prelim_forecast, smu_outlook_assignment,
+    outlook_narrative, smu_area
   ) %>%
   mutate(
-    CU_Forecast = if_else(
-      smu_area == "FRASER AND INTERIOR AREA" | smu_name == "SKEENA COHO SALMON",
-      cu_prelim_forecast,  ### keep row-level forecasts
-      paste(unique(na.omit(cu_prelim_forecast)), collapse = ", ")
+    CU_Forecast = case_when(
+      Resolution %in% c("CU (aggregate)") ~ paste(unique(na.omit(cu_prelim_forecast)), collapse = ", "),
+      TRUE ~ cu_prelim_forecast
     ),
-    CU_Outlook = if_else(
-      smu_area == "FRASER AND INTERIOR AREA" | smu_name == "SKEENA COHO SALMON",
-      cu_outlook_assignment,  ### keep row-level outlooks
-      paste(unique(na.omit(cu_outlook_assignment)), collapse = ", ")
+    CU_Outlook = case_when(
+      Resolution %in% c("CU (aggregate)") ~ paste(unique(na.omit(cu_outlook_assignment)), collapse = ", "),
+      TRUE ~ cu_outlook_assignment
     ),
-    CU_CodeList = if_else(
-      smu_area == "FRASER AND INTERIOR AREA" | smu_name == "SKEENA COHO SALMON",
-      cu_outlook_selection,  ### keep row-level CU codes
-      paste(unique(na.omit(cu_outlook_selection)), collapse = ", ")
+    CU_CodeList = case_when(
+      Resolution %in% c("CU (aggregate)") ~ paste(unique(na.omit(cu_outlook_selection)), collapse = ", "),
+      TRUE ~ cu_outlook_selection
     )
   ) %>%
   ungroup() %>%
@@ -364,7 +340,6 @@ tabPrep =
     ),
     Narrative = outlook_narrative
   )
-
 
 ################################################################################
 ### Final Table Prep
