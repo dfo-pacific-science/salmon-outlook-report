@@ -39,17 +39,60 @@ tp_long <- tp_min %>%
     Outlook  = dplyr::coalesce(Outlook, ""),
     Forecast = dplyr::coalesce(Forecast, "")
   ) %>%
-  dplyr::select(smu_area, smu_species, SMU, Resolution, CU, Outlook, Forecast) %>%
-  dplyr::arrange(smu_area, smu_species, SMU, Resolution, CU)
+  dplyr::select(smu_area, smu_species, SMU, Resolution, CU, Outlook, Forecast)
 
-# Build a named list keyed by "AREA_SPECIES"
+# ----------------------------
+# Define custom slide order
+# ----------------------------
+area_order <- c("YUKON TRANSBOUNDARY", "NORTH COAST", "SOUTH COAST", "FRASER AND INTERIOR")
+
+species_order <- c(
+  "Sockeye Lake Type",
+  "Sockeye River Type",
+  "Sockeye",             # FRASER AND INTERIOR only
+  "Pink Even",           # not for NORTH COAST
+  "Pink",                # NORTH COAST
+  "Chinook",
+  "Coho",
+  "Chum"
+)
+
+# ----------------------------
+# Build a named list keyed by "AREA_SPECIES" and sort it
+# ----------------------------
 keys <- paste(tp_long$smu_area, tp_long$smu_species, sep = "_")
 table_list <- split(tp_long[, c("SMU", "Resolution", "CU", "Outlook", "Forecast")], keys)
 
 # Drop empties
 table_list <- Filter(function(df) is.data.frame(df) && nrow(df) > 0, table_list)
 
-if (length(table_list) == 0) stop("table_list is empty — check tabPrep contents.")
+# Reorder table_list by area and species
+reorder_table_list <- function(tbl) {
+  # Extract area and species from names
+  nm_split <- do.call(rbind, strsplit(names(tbl), "_"))
+  df_order <- data.frame(
+    name = names(tbl),
+    area = nm_split[,1],
+    species = nm_split[,2],
+    stringsAsFactors = FALSE
+  )
+
+  # Map area and species to numeric order
+  df_order$area_rank <- match(df_order$area, area_order)
+  df_order$species_rank <- match(df_order$species, species_order)
+
+  # For species not in species_order, put at end
+  df_order$species_rank[is.na(df_order$species_rank)] <- max(df_order$species_rank, na.rm = TRUE) + 1
+
+  # Order
+  df_order <- df_order %>%
+    arrange(area_rank, species_rank)
+
+  # Reorder list
+  tbl[df_order$name]
+}
+
+table_list <- reorder_table_list(table_list)
 
 
 # ----------------------------
