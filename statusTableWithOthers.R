@@ -150,6 +150,40 @@ cu_outlook_records_enriched =
     by = c("parentrowid" = "uniquerowid")
   )
 
+################################################################################
+### *** REQUIRED FIX: EXPLICITLY RESTORE SMU ROWS WHEN CU ROWS EXIST ***
+
+smu_only_rows =
+  Outlook_Repeat_Test %>%
+  filter(
+    !is.na(smu_outlook_assignment),
+    smu_outlook_assignment != ""
+  ) %>%
+  mutate(
+    cu_outlook_selection  = NA_character_,
+    cu_outlook_assignment = NA_character_,
+    cu_prelim_forecast    = NA_character_,
+    cu_count              = NA_integer_,
+    source                = "smu",
+    parentrowid           = uniquerowid
+  )
+
+cu_outlook_records_enriched =
+  bind_rows(
+    cu_outlook_records_enriched,
+    smu_only_rows
+  ) %>%
+  distinct(
+    parentrowid,
+    cu_outlook_selection,
+    cu_outlook_assignment,
+    source,
+    .keep_all = TRUE
+  )
+
+################################################################################
+### Begin main table prep
+
 tabPrep =
   cu_outlook_records_enriched %>%
   mutate(
@@ -157,7 +191,7 @@ tabPrep =
     `LRP/LBB` = "n/a",
     `Mgmt Target` = "10,000",
 
-    ### ONLY NEW FLAG
+    ### ONLY NEW FLAG (unchanged)
     no_check_smu =
       smu_area == "FRASER AND INTERIOR" |
       smu_name == "SKEENA COHO SALMON"
@@ -168,7 +202,8 @@ tabPrep =
 
 get_labels = function(cu_string, ref_df) {
   if (is.na(cu_string) | cu_string == "") return(NA_character_)
-  if (cu_string %in% c("CHECK: No data entered", "Outlook assigned but no CU specified")) return(cu_string)
+  if (cu_string %in% c("CHECK: No data entered", "Outlook assigned but no CU specified"))
+    return(cu_string)
 
   cu_codes =
     str_split(cu_string, ",")[[1]] %>%
@@ -251,7 +286,6 @@ tabPrep =
 
       !is_cu_row ~ "SMU",
 
-      ### CHECKS — SUPPRESSED ONLY WHERE REQUIRED
       !no_check_smu & smu_numeric & cu_numeric ~ "CHECK: SMU and CU both numeric",
       !no_check_smu & smu_numeric & cu_dd ~ "CHECK: SMU numeric but CU data deficient",
       !no_check_smu & smu_dd & cu_numeric ~ "CHECK: SMU data deficient but CU numeric",
@@ -339,6 +373,7 @@ tabPrep =
     `Avg Run/Avg Spawners`, `LRP/LBB`, `Mgmt Target`,
     Forecast, Outlook
   )
+
 
 ################################################################################
 ### Table building and styling functions (unchanged)
