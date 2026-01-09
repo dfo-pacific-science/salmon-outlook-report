@@ -151,14 +151,11 @@ cu_outlook_records_enriched =
   )
 
 ################################################################################
-### *** REQUIRED FIX: EXPLICITLY RESTORE SMU ROWS WHEN CU ROWS EXIST ***
+### REQUIRED FIX: restore explicit SMU rows
 
 smu_only_rows =
   Outlook_Repeat_Test %>%
-  filter(
-    !is.na(smu_outlook_assignment),
-    smu_outlook_assignment != ""
-  ) %>%
+  filter(!is.na(smu_outlook_assignment), smu_outlook_assignment != "") %>%
   mutate(
     cu_outlook_selection  = NA_character_,
     cu_outlook_assignment = NA_character_,
@@ -169,15 +166,9 @@ smu_only_rows =
   )
 
 cu_outlook_records_enriched =
-  bind_rows(
-    cu_outlook_records_enriched,
-    smu_only_rows
-  ) %>%
+  bind_rows(cu_outlook_records_enriched, smu_only_rows) %>%
   distinct(
-    parentrowid,
-    cu_outlook_selection,
-    cu_outlook_assignment,
-    source,
+    parentrowid, cu_outlook_selection, cu_outlook_assignment, source,
     .keep_all = TRUE
   )
 
@@ -191,7 +182,6 @@ tabPrep =
     `LRP/LBB` = "n/a",
     `Mgmt Target` = "10,000",
 
-    ### ONLY NEW FLAG (unchanged)
     no_check_smu =
       smu_area == "FRASER AND INTERIOR" |
       smu_name == "SKEENA COHO SALMON"
@@ -217,11 +207,8 @@ get_labels = function(cu_string, ref_df) {
     arrange(match(cu, cu_codes)) %>%
     pull(label)
 
-  if (length(labels) == 0) {
-    paste(cu_codes, collapse = ", ")
-  } else {
-    paste(labels, collapse = ", ")
-  }
+  if (length(labels) == 0) paste(cu_codes, collapse = ", ")
+  else paste(labels, collapse = ", ")
 }
 
 tabPrep =
@@ -233,7 +220,7 @@ tabPrep =
   )
 
 ################################################################################
-### Data checks and flagging (PFMA PRESERVED)
+### Data checks and flagging (FIXED NA CHECK LOGIC)
 
 empty_vals = c(NA_character_, "", "N/A", "NA", "n/a", "na",
                "No data entered", "CHECK: No data entered")
@@ -252,6 +239,7 @@ tabPrep =
   ) %>%
   group_by(smu_name) %>%
   mutate(
+    smu_has_any_data = any(!smu_empty),
     smu_n_distinct_parent = n_distinct(parentrowid),
     smu_duplicate = smu_n_distinct_parent > 1L,
     smu_name_display = case_when(
@@ -282,7 +270,8 @@ tabPrep =
     Resolution = case_when(
       smu_name == "CENTRAL COAST COHO SALMON" ~ "PFMA",
       source == "other" ~ "Hatchery or Indicator Stock",
-      smu_empty & cu_empty ~ "CHECK: Only NA entered",
+
+      smu_empty & cu_empty & !smu_has_any_data ~ "CHECK: Only NA entered",
 
       !is_cu_row ~ "SMU",
 
@@ -308,20 +297,20 @@ tabPrep =
     outlook_narrative, smu_area
   ) %>%
   mutate(
-    CU_Forecast = case_when(
-      Resolution == "CU (aggregate)" ~
-        paste(unique(na.omit(cu_prelim_forecast)), collapse = ", "),
-      TRUE ~ cu_prelim_forecast
+    CU_Forecast = if_else(
+      Resolution == "CU (aggregate)",
+      paste(unique(na.omit(cu_prelim_forecast)), collapse = ", "),
+      cu_prelim_forecast
     ),
-    CU_Outlook = case_when(
-      Resolution == "CU (aggregate)" ~
-        paste(unique(na.omit(cu_outlook_assignment)), collapse = ", "),
-      TRUE ~ cu_outlook_assignment
+    CU_Outlook = if_else(
+      Resolution == "CU (aggregate)",
+      paste(unique(na.omit(cu_outlook_assignment)), collapse = ", "),
+      cu_outlook_assignment
     ),
-    CU_CodeList = case_when(
-      Resolution == "CU (aggregate)" ~
-        paste(unique(na.omit(cu_outlook_selection)), collapse = ", "),
-      TRUE ~ cu_outlook_selection
+    CU_CodeList = if_else(
+      Resolution == "CU (aggregate)",
+      paste(unique(na.omit(cu_outlook_selection)), collapse = ", "),
+      cu_outlook_selection
     )
   ) %>%
   ungroup() %>%
@@ -353,14 +342,22 @@ tabPrep =
       ),
       TRUE ~ NA_character_
     ),
-    Narrative = outlook_narrative
+    Narrative = outlook_narrative,
+
+    ### ORDERING KEY (SMU FIRST)
+    row_order = case_when(
+      Resolution %in% c("SMU", "PFMA") ~ 1L,
+      Resolution %in% c("CU (singular)", "CU (aggregate)") ~ 2L,
+      TRUE ~ 3L
+    )
   )
 
 ################################################################################
-### Final Table Prep (STOP POINT — FORMATTING STARTS AFTER THIS)
+### Final Table Prep (STOP POINT)
 
 tabPrep =
   tabPrep %>%
+  arrange(smu_area, smu_species, smu_name_display, row_order) %>%
   distinct(
     smu_area, smu_species, smu_name_display,
     Narrative, Resolution, Name,
@@ -373,7 +370,6 @@ tabPrep =
     `Avg Run/Avg Spawners`, `LRP/LBB`, `Mgmt Target`,
     Forecast, Outlook
   )
-
 
 ################################################################################
 ### Table building and styling functions (unchanged)
