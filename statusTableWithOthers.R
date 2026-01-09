@@ -36,6 +36,7 @@ library(readxl)
 library(purrr)
 library(stringr)
 
+################################################################################
 ### Prep Data
 
 lookup_xl_path = "data/lookupTables.xlsx"
@@ -128,32 +129,7 @@ if (has_other) {
       cu_outlook_assignment = other_outlook_assignment,
       cu_prelim_forecast    = other_prelim_forecast
     ) %>%
-    mutate(
-      source = "other",
-      cu_outlook_selection = if_else(
-        (is.na(cu_outlook_selection) | cu_outlook_selection == "") &
-          (is.na(cu_outlook_assignment) | cu_outlook_assignment == ""),
-        "CHECK: No data entered",
-        cu_outlook_selection
-      ),
-      cu_outlook_assignment = if_else(
-        (is.na(cu_outlook_selection) | cu_outlook_selection == "") &
-          (is.na(cu_outlook_assignment) | cu_outlook_assignment == ""),
-        "CHECK: No data entered",
-        cu_outlook_assignment
-      ),
-      cu_outlook_selection = if_else(
-        (is.na(cu_outlook_selection) | cu_outlook_selection == "") &
-          (!is.na(cu_outlook_assignment) & cu_outlook_assignment != ""),
-        "Outlook assigned but no CU specified",
-        cu_outlook_selection
-      ),
-      cu_count = case_when(
-        cu_outlook_selection %in%
-          c("CHECK: No data entered", "Outlook assigned but no CU specified") ~ 1L,
-        TRUE ~ str_count(coalesce(cu_outlook_selection, ""), ",") + 1L
-      )
-    )
+    mutate(source = "other")
 } else {
   other_prep = tibble()
 }
@@ -179,7 +155,12 @@ tabPrep =
   mutate(
     `Avg Run/Avg Spawners` = "50,000",
     `LRP/LBB` = "n/a",
-    `Mgmt Target` = "10,000"
+    `Mgmt Target` = "10,000",
+
+    ### ONLY NEW FLAG
+    no_check_smu =
+      smu_area == "FRASER AND INTERIOR" |
+      smu_name == "SKEENA COHO SALMON"
   )
 
 ################################################################################
@@ -217,7 +198,7 @@ tabPrep =
   )
 
 ################################################################################
-### Data checks and flagging
+### Data checks and flagging (PFMA PRESERVED)
 
 empty_vals = c(NA_character_, "", "N/A", "NA", "n/a", "na",
                "No data entered", "CHECK: No data entered")
@@ -249,7 +230,8 @@ tabPrep =
     ),
     cu_count_calc = case_when(
       cu_empty ~ 0L,
-      cu_outlook_selection %in% c("CHECK: No data entered", "Outlook assigned but no CU specified") ~ 1L,
+      cu_outlook_selection %in%
+        c("CHECK: No data entered", "Outlook assigned but no CU specified") ~ 1L,
       TRUE ~ str_count(coalesce(cu_outlook_selection, ""), ",") + 1L
     )
   ) %>%
@@ -259,25 +241,21 @@ tabPrep =
 
     is_cu_row =
       !cu_empty &
-      !cu_outlook_selection %in% c("CHECK: No data entered", "Outlook assigned but no CU specified"),
+      !cu_outlook_selection %in%
+      c("CHECK: No data entered", "Outlook assigned but no CU specified"),
 
     Resolution = case_when(
       smu_name == "CENTRAL COAST COHO SALMON" ~ "PFMA",
       source == "other" ~ "Hatchery or Indicator Stock",
       smu_empty & cu_empty ~ "CHECK: Only NA entered",
 
-      ### SKEENA fix: no checks for SMU rows
-      smu_name == "SKEENA COHO SALMON" & !is_cu_row ~ "SMU",
+      !is_cu_row ~ "SMU",
 
-      ### Fraser & Interior: show SMU rows even if CU exists
-      smu_area == "FRASER AND INTERIOR" & !is_cu_row ~ "SMU",
+      ### CHECKS — SUPPRESSED ONLY WHERE REQUIRED
+      !no_check_smu & smu_numeric & cu_numeric ~ "CHECK: SMU and CU both numeric",
+      !no_check_smu & smu_numeric & cu_dd ~ "CHECK: SMU numeric but CU data deficient",
+      !no_check_smu & smu_dd & cu_numeric ~ "CHECK: SMU data deficient but CU numeric",
 
-      ### Conflict checks elsewhere
-      smu_area != "FRASER AND INTERIOR" & smu_numeric & cu_numeric ~ "CHECK: SMU and CU both numeric",
-      smu_area != "FRASER AND INTERIOR" & smu_numeric & cu_dd ~ "CHECK: SMU numeric but CU data deficient",
-      smu_area != "FRASER AND INTERIOR" & smu_dd & cu_numeric ~ "CHECK: SMU data deficient but CU numeric",
-
-      cu_empty ~ "SMU",
       is_cu_row & cu_count == 1 ~ "CU (singular)",
       is_cu_row & cu_count > 1 ~ "CU (aggregate)",
 
@@ -286,7 +264,7 @@ tabPrep =
   )
 
 ################################################################################
-### Combine Forecasts / Outlooks + create Name/Forecast/Outlook
+### Combine Forecasts / Outlooks + Name fields
 
 tabPrep =
   tabPrep %>%
@@ -297,15 +275,18 @@ tabPrep =
   ) %>%
   mutate(
     CU_Forecast = case_when(
-      Resolution %in% c("CU (aggregate)") ~ paste(unique(na.omit(cu_prelim_forecast)), collapse = ", "),
+      Resolution == "CU (aggregate)" ~
+        paste(unique(na.omit(cu_prelim_forecast)), collapse = ", "),
       TRUE ~ cu_prelim_forecast
     ),
     CU_Outlook = case_when(
-      Resolution %in% c("CU (aggregate)") ~ paste(unique(na.omit(cu_outlook_assignment)), collapse = ", "),
+      Resolution == "CU (aggregate)" ~
+        paste(unique(na.omit(cu_outlook_assignment)), collapse = ", "),
       TRUE ~ cu_outlook_assignment
     ),
     CU_CodeList = case_when(
-      Resolution %in% c("CU (aggregate)") ~ paste(unique(na.omit(cu_outlook_selection)), collapse = ", "),
+      Resolution == "CU (aggregate)" ~
+        paste(unique(na.omit(cu_outlook_selection)), collapse = ", "),
       TRUE ~ cu_outlook_selection
     )
   ) %>%
@@ -342,7 +323,7 @@ tabPrep =
   )
 
 ################################################################################
-### Final Table Prep
+### Final Table Prep (STOP POINT — FORMATTING STARTS AFTER THIS)
 
 tabPrep =
   tabPrep %>%
