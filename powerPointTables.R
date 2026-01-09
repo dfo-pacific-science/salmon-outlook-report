@@ -1,13 +1,4 @@
 # ----------------------------
-# Load libraries
-# ----------------------------
-library(officer)
-library(flextable)
-library(dplyr)
-library(magrittr)
-
-
-# ----------------------------
 # Load data
 # ----------------------------
 source("statusTableWithOthers.R")   # defines tabPrep and builds table_list
@@ -68,7 +59,6 @@ table_list <- Filter(function(df) is.data.frame(df) && nrow(df) > 0, table_list)
 
 # Reorder table_list by area and species
 reorder_table_list <- function(tbl) {
-  # Extract area and species from names
   nm_split <- do.call(rbind, strsplit(names(tbl), "_"))
   df_order <- data.frame(
     name = names(tbl),
@@ -76,24 +66,14 @@ reorder_table_list <- function(tbl) {
     species = nm_split[,2],
     stringsAsFactors = FALSE
   )
-
-  # Map area and species to numeric order
   df_order$area_rank <- match(df_order$area, area_order)
   df_order$species_rank <- match(df_order$species, species_order)
-
-  # For species not in species_order, put at end
   df_order$species_rank[is.na(df_order$species_rank)] <- max(df_order$species_rank, na.rm = TRUE) + 1
-
-  # Order
   df_order <- df_order %>%
     arrange(area_rank, species_rank)
-
-  # Reorder list
   tbl[df_order$name]
 }
-
 table_list <- reorder_table_list(table_list)
-
 
 # ----------------------------
 # Styling helpers
@@ -120,14 +100,12 @@ adjust_font <- function(ft) {
   return(ft)
 }
 
-
 # ----------------------------
 # Read PPTX and set layout
 # ----------------------------
 ppt <- read_pptx("draftPrelimPres.pptx")
 layout_name <- "1_Title and Content"
 master_name <- "DFO-pp-template"
-
 
 # ----------------------------
 # Slide dimensions
@@ -155,91 +133,104 @@ table_y <- table_y + species_height
 
 fraser_map <- "data/maps/fraserMap.png"
 
-
 # ----------------------------
 # Loop to add slides
 # ----------------------------
 for (nm in names(table_list)) {
-  # Split nm into area and species
+  df_full <- table_list[[nm]]
   area_species <- strsplit(nm, "_")[[1]]
   area <- area_species[1]
   species <- area_species[2]
 
-  # Prepare table data
-  df <- table_list[[nm]] %>%
-    mutate(
-      SMU      = if_else(is.na(SMU) | SMU == "", "-", SMU),
-      SMU      = if_else(grepl("CHECK", SMU), "CHECK", SMU),
-      Outlook  = if_else(grepl("CHECK", Outlook), "CHECK", Outlook),
-      Forecast = if_else(grepl("CHECK", Forecast), "CHECK", Forecast)
-    )
+  # Split FRASER AND INTERIOR Chinook/Sockeye by SMU
+  if (area == "FRASER AND INTERIOR" & species %in% c("Chinook", "Sockeye")) {
+    smus <- unique(df_full$SMU)
+    for (smu_val in smus) {
+      df <- df_full %>% filter(SMU == smu_val)
+      # create slide
+      ft <- flextable(df) |> adjust_font()
+      col_count <- ncol(df)
+      col_width <- table_width / col_count
+      ft <- width(ft, j = 1:col_count, width = col_width)
 
-  # Create flextable and adjust width
-  ft <- flextable(df) |> adjust_font()
-  col_count <- ncol(df)
-  col_width <- table_width / col_count
-  ft <- width(ft, j = 1:col_count, width = col_width)
+      ppt <- add_slide(ppt, layout = layout_name, master = master_name)
+      ppt <- ph_with(ppt, value = paste0("OUTLOOKS – ", area), location = ph_location_type(type = "title"))
+      ppt <- ph_with(ppt, value = ft, location = ph_location(left = table_x, top = table_y, width = table_width, height = table_height))
 
-  # Add new slide
-  ppt <- add_slide(ppt, layout = layout_name, master = master_name)
+      species_text <- fpar(
+        ftext(species, prop = fp_text(color = "black", font.size = 20, font.family = "Segoe UI Semibold", bold = TRUE)),
+        fp_p = fp_par(text.align = "left")
+      )
+      ppt <- ph_with(ppt, value = species_text, location = ph_location(left = table_x, top = species_y, width = table_width, height = species_height))
 
-  # Add title
-  ppt <- ph_with(
-    ppt,
-    value = paste0("OUTLOOKS – ", area),
-    location = ph_location_type(type = "title")
-  )
+      if (file.exists(fraser_map)) {
+        ppt <- ph_with(
+          ppt,
+          value = external_img(fraser_map, width = map_width, height = map_height),
+          location = ph_location(left = map_x, top = map_y, width = map_width, height = map_height)
+        )
+      }
 
-  # Add table
-  ppt <- ph_with(
-    ppt,
-    value = ft,
-    location = ph_location(left = table_x, top = table_y, width = table_width, height = table_height)
-  )
-
-  # Add species text box
-  species_text <- fpar(
-    ftext(species, prop = fp_text(color = "black", font.size = 20, font.family = "Segoe UI Semibold", bold = TRUE)),
-    fp_p = fp_par(text.align = "left")
-  )
-  ppt <- ph_with(
-    ppt,
-    value = species_text,
-    location = ph_location(left = table_x, top = species_y, width = table_width, height = species_height)
-  )
-
-  # Add map
-  if (file.exists(fraser_map)) {
-    ppt <- ph_with(
-      ppt,
-      value = external_img(fraser_map, width = map_width, height = map_height),
-      location = ph_location(left = map_x, top = map_y, width = map_width, height = map_height)
-    )
+      # Add notes
+      if (all(c("smu_area", "smu_species", "Narrative") %in% names(tabPrep))) {
+        narratives_df <- tabPrep %>%
+          filter(trimws(smu_area) == trimws(area),
+                 trimws(smu_species) == trimws(species),
+                 trimws(smu_name) == trimws(smu_val)) %>%
+          distinct(smu_name, Narrative)
+        notes_text <- if (nrow(narratives_df) > 0) {
+          narratives_df %>%
+            mutate(note_line = paste0(smu_name, ": ", coalesce(Narrative, ""))) %>%
+            pull(note_line) %>% unique() %>% paste(collapse = "\n")
+        } else {
+          "No notes available"
+        }
+        ppt <- set_notes(ppt, value = notes_text, location = notes_location_type("body"))
+      }
+    }
   } else {
-    warning(paste("Image not found:", fraser_map))
-  }
+    # Regular slide for all other species/areas
+    df <- df_full
+    ft <- flextable(df) |> adjust_font()
+    col_count <- ncol(df)
+    col_width <- table_width / col_count
+    ft <- width(ft, j = 1:col_count, width = col_width)
 
-  # Add notes from tabPrep
-  if (all(c("smu_area", "smu_species", "Narrative") %in% names(tabPrep))) {
-    narratives_df <- tabPrep %>%
-      filter(trimws(smu_area) == trimws(area),
-             trimws(smu_species) == trimws(species)) %>%
-      distinct(smu_name, Narrative)
+    ppt <- add_slide(ppt, layout = layout_name, master = master_name)
+    ppt <- ph_with(ppt, value = paste0("OUTLOOKS – ", area), location = ph_location_type(type = "title"))
+    ppt <- ph_with(ppt, value = ft, location = ph_location(left = table_x, top = table_y, width = table_width, height = table_height))
 
-    if (nrow(narratives_df) > 0) {
-      notes_text <- narratives_df %>%
-        mutate(note_line = paste0(smu_name, ": ", coalesce(Narrative, ""))) %>%
-        pull(note_line) %>%
-        unique() %>%
-        paste(collapse = "\n")
-    } else {
-      notes_text <- "No notes available"
+    species_text <- fpar(
+      ftext(species, prop = fp_text(color = "black", font.size = 20, font.family = "Segoe UI Semibold", bold = TRUE)),
+      fp_p = fp_par(text.align = "left")
+    )
+    ppt <- ph_with(ppt, value = species_text, location = ph_location(left = table_x, top = species_y, width = table_width, height = species_height))
+
+    if (file.exists(fraser_map)) {
+      ppt <- ph_with(
+        ppt,
+        value = external_img(fraser_map, width = map_width, height = map_height),
+        location = ph_location(left = map_x, top = map_y, width = map_width, height = map_height)
+      )
     }
 
-    ppt <- set_notes(ppt, value = notes_text, location = notes_location_type("body"))
+    # Add notes
+    if (all(c("smu_area", "smu_species", "Narrative") %in% names(tabPrep))) {
+      narratives_df <- tabPrep %>%
+        filter(trimws(smu_area) == trimws(area),
+               trimws(smu_species) == trimws(species)) %>%
+        distinct(smu_name, Narrative)
+      notes_text <- if (nrow(narratives_df) > 0) {
+        narratives_df %>%
+          mutate(note_line = paste0(smu_name, ": ", coalesce(Narrative, ""))) %>%
+          pull(note_line) %>% unique() %>% paste(collapse = "\n")
+      } else {
+        "No notes available"
+      }
+      ppt <- set_notes(ppt, value = notes_text, location = notes_location_type("body"))
+    }
   }
 }
-
 
 # ----------------------------
 # Save presentation
