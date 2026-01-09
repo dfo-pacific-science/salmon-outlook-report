@@ -152,7 +152,7 @@ if (nrow(missing_cus) == 0) {
 
 ## YUKON TRANSBOUNDARY AREA
 
-### Sockeye Lake Type
+### Sockeye (Lake Type)
 
 ```{r ytSockeyeLTTable}
 
@@ -170,7 +170,7 @@ if(!is.null(ft)){
 
 ```
 
-### Sockeye River Type
+### Sockeye (River Type)
 
 ```{r ytSockeyeRTTable}
 
@@ -264,7 +264,7 @@ if(!is.null(ft)){
 
 ## NORTH COAST AREA
 
-### Sockeye Lake Type
+### Sockeye (Lake Type)
 
 ```{r northSockeyeLakeTable}
 
@@ -281,7 +281,7 @@ if(!is.null(ft)){
 }
 ```
 
-### Sockeye River Type
+### Sockeye (River Type)
 
 ```{r northSockeyeRiverTable}
 
@@ -298,9 +298,9 @@ if(!is.null(ft)){
 }
 ```
 
-### Pink Even
+### Pink
 
-```{r northPinkEvenTable}
+```{r northPinkTable}
 
 ft = tryCatch(
   make_table("NORTH COAST", "Pink"),
@@ -482,7 +482,7 @@ if(!is.null(ft)){
 
 ## FRASER AND INTERIOR AREA
 
-### Sockeye Lake Type
+### Sockeye (Lake Type)
 
 ```{r fiaSockeyeLakeTypeTable}
 
@@ -499,7 +499,7 @@ if(!is.null(ft)){
 }
 ```
 
-### Sockeye River Type
+### Sockeye (River Type)
 
 ```{r fiaSockeyeRiverTypeTable}
 
@@ -515,6 +515,25 @@ if(!is.null(ft)){
   ft
 }
 ```
+
+### Sockeye
+
+```{r fiaSockeyeTable}
+
+ft = tryCatch(
+  make_table("FRASER AND INTERIOR", "Sockeye"),
+  error = function(e){
+    print("No data for this species/area combination.")
+    return(NULL)
+  }
+)
+
+if(!is.null(ft)){
+  ft
+}
+```
+
+
 
 ### Pink Even
 
