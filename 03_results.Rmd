@@ -1,6 +1,6 @@
 # RESULTS
 
-```{r missing-smus, echo=FALSE}
+```{r missing-smus, echo=FALSE, results = FALSE}
 
 ## Message from Dawn on order of results: generally do YUK/Trans, NCA, SCA, FIA, then species SK, PK, CN, CO, CM
 # Areas presented North --> South (kind of..). Unsure why for species order. It's the standard for some reason.
@@ -65,7 +65,7 @@ if (nrow(missing_smus) == 0) {
 
 ```
 
-```{r missing-cus, echo=FALSE}
+```{r missing-cus, echo=FALSE, results = FALSE}
 
 # Get all the reported CUs
 reported_cus = cu_outlook_records_enriched %>%
