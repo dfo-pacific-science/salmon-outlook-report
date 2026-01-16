@@ -37,59 +37,63 @@ library(purrr)
 library(stringr)
 
 ################################################################################
-### Prep Data
+### Load Lookup Tables
 
-lookup_xl_path = "data/lookupTables.xlsx"
+lookup_xl_path <- "data/lookupTables.xlsx"
 
-crosswalkList = read_excel(
+crosswalkList <- read_excel(
   path  = lookup_xl_path,
   sheet = "phase1culookup"
 ) %>% as.data.frame(stringsAsFactors = FALSE)
 
-hatcheryIndicator = read_excel(
+hatcheryIndicator <- read_excel(
   path  = lookup_xl_path,
   sheet = "hatcheryIndicator"
 ) %>% as.data.frame(stringsAsFactors = FALSE)
 
-dummyPath = "data/08Jan2026Data.xlsx"
-sheet_names = readxl::excel_sheets(dummyPath)
-df_list = map(sheet_names, ~ read_excel(dummyPath, sheet = .x)) %>% set_names(sheet_names)
+################################################################################
+### Load Data Sheets
+
+dummyPath <- "data/09Jan2026Data.xlsx"
+sheet_names <- readxl::excel_sheets(dummyPath)
+
+df_list <- map(sheet_names, ~ read_excel(dummyPath, sheet = .x)) %>%
+  set_names(sheet_names)
+
 list2env(df_list, envir = .GlobalEnv)
 
 if (!exists("Salmon_Outlook_Report") | !exists("cu_outlook_records")) {
   stop("Required data frames Salmon_Outlook_Report or cu_outlook_records are missing.")
 }
 
-has_other = exists("other_records")
+has_other <- exists("other_records")
 
 ################################################################################
 ### Column Selection
 
-keep_cols_repeat = c(
+keep_cols_repeat <- c(
   "globalid", "uniquerowid",
   "smu_area", "smu_species", "smu_name",
   "outlook_narrative", "smu_outlook_assignment", "smu_prelim_forecast"
 )
 
-keep_cols_cu = c(
+keep_cols_cu <- c(
   "cu_outlook_selection", "cu_outlook_assignment",
   "cu_prelim_forecast", "cu_count", "parentrowid"
 )
 
-keep_cols_other = c(
+keep_cols_other <- c(
   "other_outlook_selection", "other_outlook_assignment",
   "other_prelim_forecast", "parentrowid"
 )
 
-Outlook_Repeat_Test =
-  Salmon_Outlook_Report %>%
+Outlook_Repeat_Test <- Salmon_Outlook_Report %>%
   select(all_of(keep_cols_repeat))
 
 ################################################################################
-### Prepare CU-level data
+### Prepare CU-level Data
 
-cu_outlook_records =
-  cu_outlook_records %>%
+cu_outlook_records <- cu_outlook_records %>%
   select(any_of(keep_cols_cu)) %>%
   mutate(
     cu_outlook_selection = if_else(
@@ -121,8 +125,7 @@ cu_outlook_records =
 ### Prepare other_records (if present)
 
 if (has_other) {
-  other_prep =
-    other_records %>%
+  other_prep <- other_records %>%
     select(any_of(keep_cols_other)) %>%
     rename(
       cu_outlook_selection  = other_outlook_selection,
@@ -131,30 +134,27 @@ if (has_other) {
     ) %>%
     mutate(source = "other")
 } else {
-  other_prep = tibble()
+  other_prep <- tibble()
 }
 
 ################################################################################
 ### Merge SMU and CU/Other Data
 
-combined_cu_other =
-  bind_rows(
-    cu_outlook_records %>% mutate(source = "cu"),
-    other_prep
-  )
+combined_cu_other <- bind_rows(
+  cu_outlook_records %>% mutate(source = "cu"),
+  other_prep
+)
 
-cu_outlook_records_enriched =
-  full_join(
-    combined_cu_other,
-    Outlook_Repeat_Test,
-    by = c("parentrowid" = "uniquerowid")
-  )
+cu_outlook_records_enriched <- full_join(
+  combined_cu_other,
+  Outlook_Repeat_Test,
+  by = c("parentrowid" = "uniquerowid")
+)
 
 ################################################################################
-### REQUIRED FIX: restore explicit SMU rows
+### Explicit SMU-only Rows
 
-smu_only_rows =
-  Outlook_Repeat_Test %>%
+smu_only_rows <- Outlook_Repeat_Test %>%
   filter(!is.na(smu_outlook_assignment), smu_outlook_assignment != "") %>%
   mutate(
     cu_outlook_selection  = NA_character_,
@@ -165,68 +165,19 @@ smu_only_rows =
     parentrowid           = uniquerowid
   )
 
-cu_outlook_records_enriched =
-  bind_rows(cu_outlook_records_enriched, smu_only_rows) %>%
+cu_outlook_records_enriched <- bind_rows(cu_outlook_records_enriched, smu_only_rows) %>%
   distinct(
     parentrowid, cu_outlook_selection, cu_outlook_assignment, source,
     .keep_all = TRUE
   )
 
 ################################################################################
-### Begin main table prep
+### Prepare Flags, Static Columns, and CU Check Logic
 
-tabPrep =
-  cu_outlook_records_enriched %>%
-  mutate(
-    `Avg Run/Avg Spawners` = "50,000",
-    `LRP/LBB` = "n/a",
-    `Mgmt Target` = "10,000",
+empty_vals <- c(NA_character_, "", "N/A", "NA", "n/a", "na",
+                "No data entered", "CHECK: No data entered")
 
-    no_check_smu =
-      smu_area == "FRASER AND INTERIOR" |
-      smu_name == "SKEENA COHO SALMON"
-  )
-
-################################################################################
-### CU Names
-
-get_labels = function(cu_string, ref_df) {
-  if (is.na(cu_string) | cu_string == "") return(NA_character_)
-  if (cu_string %in% c("CHECK: No data entered", "Outlook assigned but no CU specified"))
-    return(cu_string)
-
-  cu_codes =
-    str_split(cu_string, ",")[[1]] %>%
-    str_trim() %>%
-    toupper()
-
-  labels =
-    ref_df %>%
-    mutate(cu = toupper(cu)) %>%
-    filter(cu %in% cu_codes) %>%
-    arrange(match(cu, cu_codes)) %>%
-    pull(label)
-
-  if (length(labels) == 0) paste(cu_codes, collapse = ", ")
-  else paste(labels, collapse = ", ")
-}
-
-tabPrep =
-  tabPrep %>%
-  mutate(
-    CU_Names = map_chr(cu_outlook_selection, ~ get_labels(.x, crosswalkList)),
-    Other_RawSelection =
-      if_else(source == "other", coalesce(cu_outlook_selection, ""), NA_character_)
-  )
-
-################################################################################
-### Data checks and flagging (FIXED NA CHECK LOGIC)
-
-empty_vals = c(NA_character_, "", "N/A", "NA", "n/a", "na",
-               "No data entered", "CHECK: No data entered")
-
-tabPrep =
-  tabPrep %>%
+tabPrep <- cu_outlook_records_enriched %>%
   mutate(
     smu_raw = smu_outlook_assignment,
     cu_raw  = cu_outlook_assignment,
@@ -235,7 +186,9 @@ tabPrep =
     smu_dd    = tolower(coalesce(smu_raw, "")) == "data deficient",
     cu_dd     = tolower(coalesce(cu_raw, "")) == "data deficient",
     smu_numeric = suppressWarnings(!is.na(as.numeric(smu_raw))),
-    cu_numeric  = suppressWarnings(!is.na(as.numeric(cu_raw)))
+    cu_numeric  = suppressWarnings(!is.na(as.numeric(cu_raw))),
+    no_check_smu = smu_area == "FRASER AND INTERIOR" |
+      smu_name == "SKEENA COHO SALMON"
   ) %>%
   group_by(smu_name) %>%
   mutate(
@@ -245,10 +198,7 @@ tabPrep =
     smu_name_display = case_when(
       smu_name == "CENTRAL COAST COHO SALMON" ~ smu_name,
       smu_name == "NO DESIGNATED SMU" ~ smu_name,
-      smu_duplicate ~ paste0(
-        smu_name,
-        " — CHECK: Data entered for the same SMU more than once"
-      ),
+      smu_duplicate ~ paste0(smu_name, " — CHECK: Data entered for the same SMU more than once"),
       TRUE ~ smu_name
     ),
     cu_count_calc = case_when(
@@ -261,36 +211,74 @@ tabPrep =
   ungroup() %>%
   mutate(
     cu_count = coalesce(cu_count, cu_count_calc),
-
     is_cu_row =
       !cu_empty &
       !cu_outlook_selection %in%
       c("CHECK: No data entered", "Outlook assigned but no CU specified"),
 
+    ### STATIC COLUMNS REQUIRED FOR LATER TABLE BUILDING
+    `Avg Run/Avg Spawners` = "50,000",
+    `LRP/LBB` = "n/a",
+    `Mgmt Target` = "10,000"
+  )
+
+################################################################################
+### Resolution Logic
+
+tabPrep <- tabPrep %>%
+  mutate(
     Resolution = case_when(
       smu_name == "CENTRAL COAST COHO SALMON" ~ "PFMA",
       source == "other" ~ "Hatchery or Indicator Stock",
 
       smu_empty & cu_empty & !smu_has_any_data ~ "CHECK: Only NA entered",
 
+      # CHECKs for numeric/data deficient combinations (priority)
+      !no_check_smu & smu_numeric & cu_numeric ~ "CHECK: SMU and CU both numeric",
+      !no_check_smu & smu_numeric & cu_dd      ~ "CHECK: SMU numeric but CU data deficient",
+      !no_check_smu & smu_dd      & cu_numeric ~ "CHECK: SMU data deficient but CU numeric",
+
+      # SMU-only rows
       !is_cu_row ~ "SMU",
 
-      !no_check_smu & smu_numeric & cu_numeric ~ "CHECK: SMU and CU both numeric",
-      !no_check_smu & smu_numeric & cu_dd ~ "CHECK: SMU numeric but CU data deficient",
-      !no_check_smu & smu_dd & cu_numeric ~ "CHECK: SMU data deficient but CU numeric",
-
+      # CU rows
       is_cu_row & cu_count == 1 ~ "CU (singular)",
-      is_cu_row & cu_count > 1 ~ "CU (aggregate)",
+      is_cu_row & cu_count > 1  ~ "CU (aggregate)",
 
       TRUE ~ "CHECK: unexpected combination"
     )
   )
 
 ################################################################################
-### Combine Forecasts / Outlooks + Name fields
+### CU Name Mapping Function
 
-tabPrep =
-  tabPrep %>%
+get_labels <- function(cu_string, ref_df) {
+  if (is.na(cu_string) | cu_string == "") return(NA_character_)
+  if (cu_string %in% c("CHECK: No data entered", "Outlook assigned but no CU specified"))
+    return(cu_string)
+
+  cu_codes <- str_split(cu_string, ",")[[1]] %>% str_trim() %>% toupper()
+
+  labels <- ref_df %>%
+    mutate(cu = toupper(cu)) %>%
+    filter(cu %in% cu_codes) %>%
+    arrange(match(cu, cu_codes)) %>%
+    pull(label)
+
+  if (length(labels) == 0) paste(cu_codes, collapse = ", ") else paste(labels, collapse = ", ")
+}
+
+tabPrep <- tabPrep %>%
+  mutate(
+    CU_Names = map_chr(cu_outlook_selection, ~ get_labels(.x, crosswalkList)),
+    Other_RawSelection =
+      if_else(source == "other", coalesce(cu_outlook_selection, ""), NA_character_)
+  )
+
+################################################################################
+### Combine Forecasts / Outlooks + Name Fields
+
+tabPrep <- tabPrep %>%
   group_by(
     smu_name_display, Resolution,
     parentrowid, smu_prelim_forecast, smu_outlook_assignment,
@@ -343,15 +331,12 @@ tabPrep =
       TRUE ~ NA_character_
     ),
     Narrative = outlook_narrative,
-
-    ### ORDERING KEY (SMU FIRST)
     row_order = case_when(
       Resolution %in% c("SMU", "PFMA") ~ 1L,
       Resolution %in% c("CU (singular)", "CU (aggregate)") ~ 2L,
       TRUE ~ 3L
     )
   )
-
 ################################################################################
 ### Final Table Prep (STOP POINT)
 
@@ -369,7 +354,15 @@ tabPrep =
     smu_area, smu_species, smu_name, Narrative, Resolution, Name,
     `Avg Run/Avg Spawners`, `LRP/LBB`, `Mgmt Target`,
     Forecast, Outlook
-  )
+  ) %>%
+  ##### STEPHEN TO LOOK INTO A BETTER WAY OF FIXING
+  #### FOR SOME REASON NAS ARE GETTING INCORPORATED IE CHECK: Only NA entered
+  ### I believe this is because of my exceptions for FRASER AND INTERIOR data
+  # Which allow for SMU AND CU data to be displayed.
+  # For now, I am just going to remove any rows with this info
+  filter(Resolution != "CHECK: Only NA entered")
+
+
 
 ################################################################################
 ### Table building and styling functions (unchanged)
