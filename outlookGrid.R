@@ -33,13 +33,20 @@ tp_clean <- tp_long %>%
 
   mutate(
     Outlook = case_when(
-      CU == "MIDDLE FRASER-FRASER CANYON_SP_1.3, LOWER FRASER RIVER_SP_1.3" ~ 1,
-      CU == "MIDDLE FRASER RIVER_SP_1.3, NORTH THOMPSON_SP_1.3" ~ 2,
-      CU == "MIDDLE FRASER RIVER-PORTAGE_FA_1.3, LOWER FRASER RIVER-UPPER PITT_SU_1.3" ~ 1,
+      CU == "MIDDLE FRASER-FRASER CANYON_SP_1.3, LOWER FRASER RIVER_SP_1.3" ~ "1",
+      CU == "MIDDLE FRASER RIVER_SP_1.3, NORTH THOMPSON_SP_1.3" ~ "2",
+      CU == "MIDDLE FRASER RIVER-PORTAGE_FA_1.3, LOWER FRASER RIVER-UPPER PITT_SU_1.3" ~ "1",
       CU == "MIDDLE FRASER RIVER_SU_1.3, NORTH THOMPSON_SU_1.3" ~ "2 to 3",
-      TRUE ~ Outlook
+      TRUE ~ as.character(Outlook)
     )
-  )
+    ) %>%
+
+      filter(
+        CU != "CK-02",
+        CU != "OKANAGAN_0.X"
+      )
+
+
 
 
 # =========================
@@ -157,7 +164,8 @@ p <- ggplot(tp_plot) +
       ymax = row_id + ROW_HEIGHT / 2,
       fill = Outlook
     ),
-    color = NA
+    color = NA,
+    alpha = 0.7
   ) +
   geom_text(
     aes(
@@ -195,14 +203,14 @@ p <- ggplot(tp_plot) +
   ) +
   scale_fill_manual(
     values = c(
-      "1"  = "#d73027",
-      "1 to 2" = "#f46d43",
-      "2"  = "#fdae61",
-      "2 to 3" = "#fee08b",
-      "3"  = "#a6d96a",
-      "3 to 4" = "#66bd63",
-      "4"  = "#1a9850",   # darkest green
-      "DD" = "grey70"
+      "1"  = "#E4453C",
+      "1 to 2" = "#FF8181",
+      "2"  = "#F3953C",
+      "2 to 3" = "#F0D27D",
+      "3"  = "#D4EEC7",
+      "3 to 4" = "#8BCE69",
+      "4"  = "#1C854F",
+      "DD" = "#9E9E9E"
     ),
     labels = outlook_labels,
     name   = "Outlook"
@@ -228,15 +236,16 @@ p <- ggplot(tp_plot) +
     # ),
     strip.text.x = element_text(
       face = "bold",
-      size = 11
+      size = 13
     ),
     strip.text.y = element_text(
       face = "bold",
-      size = 11,
+      size = 13,
       lineheight = 0.9
     ),
 
-    legend.position  = "right",
+    #legend.position  = "right",
+    legend.position = "none",
 
     panel.spacing.x  = unit(0.8, "lines"),
     panel.spacing.y  = unit(0.8, "lines")
