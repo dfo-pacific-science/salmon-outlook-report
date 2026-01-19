@@ -1,6 +1,16 @@
 # ----------------------------
 # Load data
 # ----------------------------
+
+### PowerPoint notes from Dawn:
+# North Coast Coho: Order should be Nass, Skeena, Haida, Central
+# South Coast: order should be wcvi group, ecvi group for all south coast slides
+# Okanagan Sockeye and Chinook on same table.
+# 1) OKANAGAN SOCKEYE SALMON
+# 2) NO DESIGNATED SMU (CK-02) AND
+# 3) OKANAGAN CHINOOK SALMON (OKANAGAN_.X)
+
+
 source("statusTableWithOthers.R")   # defines tabPrep and builds table_list
 
 
