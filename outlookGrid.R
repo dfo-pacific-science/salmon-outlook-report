@@ -1,4 +1,3 @@
-
 library(dplyr)
 library(ggplot2)
 library(stringr)
@@ -24,12 +23,12 @@ tp_clean <- tp_long %>%
     SMU = str_squish(SMU),
     Outlook = recode(Outlook, "Data Deficient" = "DD"),
 
-  ### Update Species
+    ### Update Species
     smu_species = case_when(
       smu_species %in% c("Sockeye Lake Type", "Sockeye River Type") ~ "Sockeye",
       smu_species == "Pink Even" ~ "Pink",
       TRUE ~ smu_species)
-    ) %>%
+  ) %>%
 
   mutate(
     Outlook = case_when(
@@ -39,15 +38,11 @@ tp_clean <- tp_long %>%
       CU == "MIDDLE FRASER RIVER_SU_1.3, NORTH THOMPSON_SU_1.3" ~ "2 to 3",
       TRUE ~ as.character(Outlook)
     )
-    ) %>%
-
-      filter(
-        CU != "CK-02",
-        CU != "OKANAGAN_0.X"
-      )
-
-
-
+  ) %>%
+  filter(
+    CU != "CK-02",
+    CU != "OKANAGAN_0.X"
+  )
 
 # =========================
 # FACET ORDERING
@@ -99,7 +94,19 @@ tp_plot <- tp_clean %>%
   ungroup() %>%
   group_by(smu_area, smu_species) %>%
   mutate(row_id = dense_rank(SMU)) %>%
-  ungroup()
+  ungroup() %>%
+
+  # =========================
+# STACK SPECIFIC OUTLOOK LABELS
+# =========================
+mutate(
+  Outlook_label = Outlook, # create default label
+  Outlook_label = if_else(
+    SMU == "FRASER SOCKEYE - EARLY SUMMER" & Outlook %in% c("1 to 2", "3 to 4"),
+    str_replace_all(Outlook, " to ", "\n"),
+    Outlook_label
+  )
+)
 
 # =========================
 # LABEL DATA
@@ -171,12 +178,13 @@ p <- ggplot(tp_plot) +
     aes(
       x = x_mid,
       y = row_id,
-      label = Outlook
+      label = Outlook_label
     ),
     fontface = "bold",
-    size = 2.8,
+    size = 3.1,
     vjust = 0.5,
-    hjust = 0.5
+    hjust = 0.5,
+    lineheight = 0.9
   ) +
   geom_text(
     data = smu_labels,
@@ -189,7 +197,7 @@ p <- ggplot(tp_plot) +
     hjust = 1,
     vjust = 0.5,
     lineheight = 1,
-    size = 2.6
+    size = 2.8
   ) +
   facet_grid(
     smu_species ~ smu_area,
@@ -244,13 +252,11 @@ p <- ggplot(tp_plot) +
       lineheight = 0.9
     ),
 
-    #legend.position  = "right",
-    legend.position = "none",
+    legend.position  = "right",
+    #legend.position = "none",
 
     panel.spacing.x  = unit(0.8, "lines"),
     panel.spacing.y  = unit(0.8, "lines")
   )
 
 p
-
-
