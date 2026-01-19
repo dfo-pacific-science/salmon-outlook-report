@@ -10,6 +10,7 @@
 # 2) NO DESIGNATED SMU (CK-02) AND
 # 3) OKANAGAN CHINOOK SALMON (OKANAGAN_.X)
 
+# Remember to also add in the area names to the title
 
 source("statusTableWithOthers.R")   # defines tabPrep and builds table_list
 
