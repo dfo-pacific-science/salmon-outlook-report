@@ -1,7 +1,10 @@
 # STEPHEN TO DO:
 # Make it so you enter Year --> that determines Pink Even vs Pink Odd
 # NORTH COAST: species = Pink not Pink even/odd
+# Check lookup table col: which one is actually needed
+# Change: include full name of CU in spreadsheet in addition to codes
 
+# Make sure it's clear where to put in file name. Also check name of each sheet
 
 ################################################################################
 # Script Name: statusTables_rewrite.R
@@ -37,15 +40,20 @@ library(stringr)
 
 ################################################################################
 ### Load Lookup Tables
+# These come from the Salmon Space Crosswalk
+# Contain official names for SMUs/CUs, are used to detect missing SMUs/CUs
+# And also contain both codes and full names for CUs
+# Also includes all names for Hatchery and Indicator stocks. Note that not all
+# Hatchery and Indicator stocks are required for the Outlook.
 
-lookup_xl_path <- "data/lookupTables.xlsx"
+lookup_xl_path = "data/lookupTables.xlsx"
 
-crosswalkList <- read_excel(
+crosswalkList = read_excel(
   path  = lookup_xl_path,
   sheet = "phase1culookup"
 ) %>% as.data.frame(stringsAsFactors = FALSE)
 
-hatcheryIndicator <- read_excel(
+hatcheryIndicator = read_excel(
   path  = lookup_xl_path,
   sheet = "hatcheryIndicator"
 ) %>% as.data.frame(stringsAsFactors = FALSE)
@@ -53,10 +61,13 @@ hatcheryIndicator <- read_excel(
 ################################################################################
 ### Load Data Sheets
 
-dummyPath <- "data/09Jan2026Data.xlsx"
-sheet_names <- readxl::excel_sheets(dummyPath)
+# HERE IS WHERE TO ENTER THE FILE PATH FOR THE DATA
+dummyPath = "data/09Jan2026Data.xlsx"
 
-df_list <- map(sheet_names, ~ read_excel(dummyPath, sheet = .x)) %>%
+# Creates a new data frame from each sheet from the data file
+sheet_names = readxl::excel_sheets(dummyPath)
+
+df_list = map(sheet_names, ~ read_excel(dummyPath, sheet = .x)) %>%
   set_names(sheet_names)
 
 list2env(df_list, envir = .GlobalEnv)
@@ -65,34 +76,37 @@ if (!exists("Salmon_Outlook_Report") | !exists("cu_outlook_records")) {
   stop("Required data frames Salmon_Outlook_Report or cu_outlook_records are missing.")
 }
 
-has_other <- exists("other_records")
+has_other = exists("other_records")
 
 ################################################################################
 ### Column Selection
+# Not all columns in the data spreadsheet are required for the Report/PowerPoint
+# Only keep the required ones
 
-keep_cols_repeat <- c(
+
+keep_cols_repeat = c(
   "globalid", "uniquerowid",
   "smu_area", "smu_species", "smu_name",
   "outlook_narrative", "smu_outlook_assignment", "smu_prelim_forecast"
 )
 
-keep_cols_cu <- c(
+keep_cols_cu = c(
   "cu_outlook_selection", "cu_outlook_assignment",
   "cu_prelim_forecast", "cu_count", "parentrowid"
 )
 
-keep_cols_other <- c(
+keep_cols_other = c(
   "other_outlook_selection", "other_outlook_assignment",
   "other_prelim_forecast", "parentrowid"
 )
 
-Outlook_Repeat_Test <- Salmon_Outlook_Report %>%
+Outlook_Repeat_Test = Salmon_Outlook_Report %>%
   select(all_of(keep_cols_repeat))
 
 ################################################################################
 ### Prepare CU-level Data
 
-cu_outlook_records <- cu_outlook_records %>%
+cu_outlook_records = cu_outlook_records %>%
   select(any_of(keep_cols_cu)) %>%
   mutate(
     cu_outlook_selection = if_else(
@@ -124,7 +138,7 @@ cu_outlook_records <- cu_outlook_records %>%
 ### Prepare other_records (if present)
 
 if (has_other) {
-  other_prep <- other_records %>%
+  other_prep = other_records %>%
     select(any_of(keep_cols_other)) %>%
     rename(
       cu_outlook_selection  = other_outlook_selection,
@@ -139,12 +153,12 @@ if (has_other) {
 ################################################################################
 ### Merge SMU and CU/Other Data
 
-combined_cu_other <- bind_rows(
+combined_cu_other = bind_rows(
   cu_outlook_records %>% mutate(source = "cu"),
   other_prep
 )
 
-cu_outlook_records_enriched <- full_join(
+cu_outlook_records_enriched = full_join(
   combined_cu_other,
   Outlook_Repeat_Test,
   by = c("parentrowid" = "uniquerowid")
@@ -153,7 +167,7 @@ cu_outlook_records_enriched <- full_join(
 ################################################################################
 ### Explicit SMU-only Rows
 
-smu_only_rows <- Outlook_Repeat_Test %>%
+smu_only_rows = Outlook_Repeat_Test %>%
   filter(!is.na(smu_outlook_assignment), smu_outlook_assignment != "") %>%
   mutate(
     cu_outlook_selection  = NA_character_,
@@ -164,7 +178,7 @@ smu_only_rows <- Outlook_Repeat_Test %>%
     parentrowid           = uniquerowid
   )
 
-cu_outlook_records_enriched <- bind_rows(cu_outlook_records_enriched, smu_only_rows) %>%
+cu_outlook_records_enriched = bind_rows(cu_outlook_records_enriched, smu_only_rows) %>%
   distinct(
     parentrowid, cu_outlook_selection, cu_outlook_assignment, source,
     .keep_all = TRUE
@@ -173,7 +187,7 @@ cu_outlook_records_enriched <- bind_rows(cu_outlook_records_enriched, smu_only_r
 ################################################################################
 ### Prepare Flags, Static Columns, and CU Check Logic
 
-empty_vals <- c(NA_character_, "", "N/A", "NA", "n/a", "na",
+empty_vals = c(NA_character_, "", "N/A", "NA", "n/a", "na",
                 "No data entered", "CHECK: No data entered")
 
 tabPrep <- cu_outlook_records_enriched %>%
@@ -381,7 +395,7 @@ tabPrep =
 
 
 ################################################################################
-### Table building and styling functions (unchanged)
+### Table building and styling functions
 
 build_block = function(df_smu) {
   smu  = unique(df_smu$smu_name)
@@ -431,10 +445,10 @@ style_smu_table = function(big_df) {
   ft = flextable(big_df)
   ft = delete_part(ft, part = "header")
 
-  # ---- Reset all borders ----
+  # Reset all borders
   ft = border_remove(ft)
 
-  # ---- Thick SMU separators FIRST (before merges) ----
+  # Thick SMU separators
   if (length(idx_separators) > 0) {
     ft = border(
       ft,
@@ -445,10 +459,9 @@ style_smu_table = function(big_df) {
     )
   }
 
-  # ---- Standard table borders ----
+  # Standard table borders
   ft = border_outer(ft, fp_border(width = 1))
   ft = border_inner_v(ft, fp_border(width = 1))
-  # ft = border_inner_h(ft, fp_border(width = 1))
 
   all_rows = seq_len(nrow(big_df))
   thin_rows = setdiff(all_rows, idx_separators)
@@ -463,13 +476,13 @@ style_smu_table = function(big_df) {
   )
 
 
-  # ---- Merge rows ONLY after borders are done ----
+  # Merge rows ONLY after borders are done
   for (i in idx_label) {
     ft = merge_at(ft, i = i,     j = 2:4)
     ft = merge_at(ft, i = i + 1, j = 2:4)
   }
 
-  # ---- Styling (safe after merges) ----
+  # Styling (safe after merges)
   ft = bg(ft, i = idx_label,  bg = "gray90")
   ft = bold(ft, i = idx_label, bold = TRUE)
 
