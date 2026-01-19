@@ -360,8 +360,25 @@ tabPrep =
   ### I believe this is because of my exceptions for FRASER AND INTERIOR data
   # Which allow for SMU AND CU data to be displayed.
   # For now, I am just going to remove any rows with this info
-  filter(Resolution != "CHECK: Only NA entered")
+  filter(Resolution != "CHECK: Only NA entered") %>%
 
+  ### Change the
+  mutate(
+
+    smu_species = case_when(
+      smu_species %in% c("Sockeye Lake Type", "Sockeye River Type") ~ "Sockeye",
+      smu_species == "Pink Even" ~ "Pink",
+      TRUE ~ smu_species)
+  ) %>%
+  mutate(
+    Outlook = case_when(
+      Name == "MIDDLE FRASER-FRASER CANYON_SP_1.3, LOWER FRASER RIVER_SP_1.3" ~ "1",
+      Name == "MIDDLE FRASER RIVER_SP_1.3, NORTH THOMPSON_SP_1.3" ~ "2",
+      Name == "MIDDLE FRASER RIVER-PORTAGE_FA_1.3, LOWER FRASER RIVER-UPPER PITT_SU_1.3" ~ "1",
+      Name == "MIDDLE FRASER RIVER_SU_1.3, NORTH THOMPSON_SU_1.3" ~ "2 to 3",
+      TRUE ~ as.character(Outlook)
+    )
+  )
 
 
 ################################################################################
