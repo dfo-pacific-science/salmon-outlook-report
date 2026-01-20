@@ -7,25 +7,27 @@
 # Make sure it's clear where to put in file name. Also check name of each sheet
 
 ################################################################################
-# Script Name: statusTables_rewrite.R
+### SCRIPT PURPOSE
+# This script prepares SMU- and CU-level salmon outlook data for reporting.
+# It combines:
+#   - SMU-level outlooks
+#   - CU-level outlooks
+#   - optional Hatchery/Indicator stock records
 #
-# Purpose:
-#   Rewritten from original tableTest3.R to merge CU-level records and an
-#   additional `other_records` data frame (Hatchery or Indicator stocks) into
-#   the SMU/CU status table workflow. The `other_records` entries are treated
-#   similarly to cu_outlook_records and are assigned Resolution =
-#   "Hatchery or Indicator Stock".
-#
-# Inputs: (same as original script plus `other_records` sheet if present)
-#   - data/phase1culookup.csv
-#   - data/testData3.xlsx (sheets: Salmon_Outlook_Report, cu_outlook_records,
-#       optionally other_records)
-#
-# Outputs:
-#   - tabPrep: combined and cleaned SMU/CU/Other tibble with added flags and
-#     labels.
-#   - make_table(): function for generating styled output tables.
+# The script:
+#   1. Reads data from Excel
+#   2. Validates SMU/CU combinations
+#   3. Flags missing or inconsistent data with  CHECK messages
+#   4. Assigns each row a "Resolution" category
+#   5. Produces formatted tables for Word output
+
+# IMPORTANT CONCEPTS
+# - parentrowid links CU/Other rows to SMU rows
+# - Resolution is the core decision variable that drives output structure
+# - CHECK rows indicate data problems that should be reviewed manually
+
 ################################################################################
+### LOAD LIBRARIES
 
 library(dplyr)
 library(ggplot2)
@@ -59,7 +61,16 @@ hatcheryIndicator = read_excel(
 ) %>% as.data.frame(stringsAsFactors = FALSE)
 
 ################################################################################
-### Load Data Sheets
+### LOAD DATA SHEETS
+# This section reads all sheets from the input Excel file and loads them
+# into the global environment as separate data frames.
+#
+# REQUIRED SHEETS:
+#   - Salmon_Outlook_Report  (SMU-level data)
+#   - cu_outlook_records     (CU-level data)
+# OPTIONAL SHEETS:
+#   - other_records          (Hatchery / Indicator stocks)
+# The script will STOP if required sheets are missing.
 
 # HERE IS WHERE TO ENTER THE FILE PATH FOR THE DATA
 dummyPath = "data/09Jan2026Data.xlsx"
@@ -76,13 +87,13 @@ if (!exists("Salmon_Outlook_Report") | !exists("cu_outlook_records")) {
   stop("Required data frames Salmon_Outlook_Report or cu_outlook_records are missing.")
 }
 
+# Track whether optional Hatchery / Indicator data is present
 has_other = exists("other_records")
 
 ################################################################################
 ### Column Selection
 # Not all columns in the data spreadsheet are required for the Report/PowerPoint
 # Only keep the required ones
-
 
 keep_cols_repeat = c(
   "globalid", "uniquerowid",
@@ -104,11 +115,26 @@ Outlook_Repeat_Test = Salmon_Outlook_Report %>%
   select(all_of(keep_cols_repeat))
 
 ################################################################################
-### Prepare CU-level Data
+### PREPARE CU-LEVEL DATA
+# This block standardizes CU entries and  flags missing or incorrectly-entered CU
+# data using CHECK messages.
+# Note there are more checks later in the script when these get merged with SMU data
+#
+# CHECK LOGIC:
+#   - If BOTH CU selection and CU outlook are missing:
+#       - "CHECK: No data entered"
+#   - If an outlook is assigned but no CU is specified:
+#       - "Outlook assigned but no CU specified"
+#
+# cu_count:
+#   - Counts number of CU codes supplied (comma-separated)
+#   - Used later to distinguish singular vs aggregate CU rows
 
 cu_outlook_records = cu_outlook_records %>%
   select(any_of(keep_cols_cu)) %>%
   mutate(
+
+    # CHECK: no CU information provided was provided
     cu_outlook_selection = if_else(
       (is.na(cu_outlook_selection) | cu_outlook_selection == "") &
         (is.na(cu_outlook_assignment) | cu_outlook_assignment == ""),
@@ -121,12 +147,16 @@ cu_outlook_records = cu_outlook_records %>%
       "CHECK: No data entered",
       cu_outlook_assignment
     ),
+
+    # CHECK: Outlook assigned, but no CU specified
     cu_outlook_selection = if_else(
       (is.na(cu_outlook_selection) | cu_outlook_selection == "") &
         (!is.na(cu_outlook_assignment) & cu_outlook_assignment != ""),
       "Outlook assigned but no CU specified",
       cu_outlook_selection
     ),
+
+    # Count number of CUs listed (comma-separated)
     cu_count = case_when(
       cu_outlook_selection %in%
         c("CHECK: No data entered", "Outlook assigned but no CU specified") ~ 1L,
@@ -135,7 +165,9 @@ cu_outlook_records = cu_outlook_records %>%
   )
 
 ################################################################################
-### Prepare other_records (if present)
+### PREPARE OTHER_RECORDS (HATCHERY / INDICATOR STOCKS)
+
+# These records are treated similarly to CU records but are tagged separately
 
 if (has_other) {
   other_prep = other_records %>%
@@ -153,6 +185,9 @@ if (has_other) {
 ################################################################################
 ### Merge SMU and CU/Other Data
 
+# parentrowid (CU/Other) - uniquerowid (SMU) defines the relationship.
+# A full join is used since not all SMUs will have CU-level information reported.
+
 combined_cu_other = bind_rows(
   cu_outlook_records %>% mutate(source = "cu"),
   other_prep
@@ -165,7 +200,10 @@ cu_outlook_records_enriched = full_join(
 )
 
 ################################################################################
-### Explicit SMU-only Rows
+### EXPLICIT SMU-ONLY ROWS: COME BACK TO THIS ONE AND CLARIFY
+
+# Some SMUs have valid SMU-level outlooks but NO CU entries.
+# This block ensures those SMUs still appear in the final tables.
 
 smu_only_rows = Outlook_Repeat_Test %>%
   filter(!is.na(smu_outlook_assignment), smu_outlook_assignment != "") %>%
@@ -185,21 +223,38 @@ cu_outlook_records_enriched = bind_rows(cu_outlook_records_enriched, smu_only_ro
   )
 
 ################################################################################
-### Prepare Flags, Static Columns, and CU Check Logic
+### PREPARE FLAGS AND VALIDATION CHECKS
+# COME BACK TO THIS ONE TOO
+
+# This section derives logical flags describing WHAT KIND of data was entered.
+# These flags are later used to assign a Resolution.
+#
+# IMPORTANT:
+# - Flags do not directly appear in output
+# - They exist only to support Resolution logic
 
 empty_vals = c(NA_character_, "", "N/A", "NA", "n/a", "na",
                 "No data entered", "CHECK: No data entered")
 
 tabPrep <- cu_outlook_records_enriched %>%
   mutate(
+    # Preserve raw values for diagnostics
     smu_raw = smu_outlook_assignment,
     cu_raw  = cu_outlook_assignment,
+
+    # Empty checks
     smu_empty = smu_raw %in% empty_vals,
     cu_empty  = cu_raw %in% empty_vals,
+
+    # Data-deficient checks
     smu_dd    = tolower(coalesce(smu_raw, "")) == "data deficient",
     cu_dd     = tolower(coalesce(cu_raw, "")) == "data deficient",
+
+    # Numeric checks
     smu_numeric = suppressWarnings(!is.na(as.numeric(smu_raw))),
     cu_numeric  = suppressWarnings(!is.na(as.numeric(cu_raw))),
+
+    # SMUs exempt from certain numeric/DD checks
     no_check_smu = smu_area == "FRASER AND INTERIOR" |
       smu_name == "SKEENA COHO SALMON"
   ) %>%
