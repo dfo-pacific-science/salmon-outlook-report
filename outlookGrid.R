@@ -18,8 +18,11 @@ ROW_HEIGHT  <- 0.8
 
 tp_clean <- tp_long %>%
 
-
-  group_by(SMU) %>%
+  # =========================
+# SAFE IN-PLACE EDIT:
+# MIDDLE GEORGIA STRAIT CHINOOK SALMON
+# =========================
+group_by(SMU) %>%
   mutate(
     CU = case_when(
       SMU == "MIDDLE GEORGIA STRAIT CHINOOK SALMON" & row_number() == 1 ~
@@ -37,9 +40,7 @@ tp_clean <- tp_long %>%
       TRUE ~ Outlook
     )
   ) %>%
-  ungroup()
-
-
+  ungroup() %>%
 
   # =========================
 # SPLIT FINICKY SMUs / CUs
@@ -89,38 +90,35 @@ tp_clean <- tp_long %>%
       )
   )
 
-  # ---- REMOVE ORIGINAL AGGREGATES ----
+  # ---- REMOVE ORIGINALS + ADD SPLITS ----
   base %>%
     filter(
       !SMU %in% c(
         "HAIDA GWAII PINK SALMON",
         "CENTRAL COAST PINK SALMON"
-      ),
-      !(SMU == "MIDDLE GEORGIA STRAIT CHINOOK SALMON" &
-          str_detect(CU, "SOUTHERN MAINLAND-GEORGIA STRAIT_FA_0.X"))
+      )
     ) %>%
     bind_rows(
       haida_split,
-      central_coast_split,
-      mgs_dd
+      central_coast_split
     )
 } %>%
 
+  # =========================
+# STANDARD CLEANING
+# =========================
+mutate(
+  SMU = str_remove(SMU, regex("\\bSALMON\\b", ignore_case = TRUE)),
+  SMU = str_remove(SMU, regex("\\p{Pd}\\s*CHECK:?\\s*.*$", ignore_case = TRUE)),
+  SMU = str_squish(SMU),
+  Outlook = recode(Outlook, "Data Deficient" = "DD"),
 
-
-
-  mutate(
-    SMU = str_remove(SMU, regex("\\bSALMON\\b", ignore_case = TRUE)),
-    SMU = str_remove(SMU, regex("\\p{Pd}\\s*CHECK:?\\s*.*$", ignore_case = TRUE)),
-    SMU = str_squish(SMU),
-    Outlook = recode(Outlook, "Data Deficient" = "DD"),
-
-    ### Update Species
-    smu_species = case_when(
-      smu_species %in% c("Sockeye Lake Type", "Sockeye River Type") ~ "Sockeye",
-      smu_species == "Pink Even" ~ "Pink",
-      TRUE ~ smu_species)
-  ) %>%
+  smu_species = case_when(
+    smu_species %in% c("Sockeye Lake Type", "Sockeye River Type") ~ "Sockeye",
+    smu_species == "Pink Even" ~ "Pink",
+    TRUE ~ smu_species
+  )
+) %>%
 
   mutate(
     Outlook = case_when(
