@@ -17,6 +17,98 @@ ROW_HEIGHT  <- 0.8
 # =========================
 
 tp_clean <- tp_long %>%
+
+
+  group_by(SMU) %>%
+  mutate(
+    CU = case_when(
+      SMU == "MIDDLE GEORGIA STRAIT CHINOOK SALMON" & row_number() == 1 ~
+        "MGS CHINOOK – PLACEHOLDER A",
+      SMU == "MIDDLE GEORGIA STRAIT CHINOOK SALMON" & row_number() == 2 ~
+        "MGS CHINOOK – PLACEHOLDER B",
+      SMU == "MIDDLE GEORGIA STRAIT CHINOOK SALMON" & row_number() == 3 ~
+        "MGS CHINOOK – PLACEHOLDER C",
+      TRUE ~ CU
+    ),
+    Outlook = case_when(
+      SMU == "MIDDLE GEORGIA STRAIT CHINOOK SALMON" & row_number() == 1 ~ "DD",
+      SMU == "MIDDLE GEORGIA STRAIT CHINOOK SALMON" & row_number() == 2 ~ "1 to 2",
+      SMU == "MIDDLE GEORGIA STRAIT CHINOOK SALMON" & row_number() == 3 ~ "4",
+      TRUE ~ Outlook
+    )
+  ) %>%
+  ungroup()
+
+
+
+  # =========================
+# SPLIT FINICKY SMUs / CUs
+# =========================
+{
+  base <- .
+
+  # ---- HAIDA GWAII PINK SALMON ----
+  haida_template <- base %>%
+    filter(SMU == "HAIDA GWAII PINK SALMON") %>%
+    slice(1) %>%
+    select(-CU, -Outlook, -Resolution)
+
+  haida_split <- bind_rows(
+    haida_template %>%
+      mutate(
+        CU = "EAST HAIDA GWAII",
+        Resolution = "CU (singular)",
+        Outlook = "4"
+      ),
+    haida_template %>%
+      mutate(
+        CU = "NORTH HAIDA GWAII, WEST HAIDA GWAII",
+        Resolution = "CU (aggregate)",
+        Outlook = "DD"
+      )
+  )
+
+  # ---- CENTRAL COAST PINK SALMON ----
+  central_template <- base %>%
+    filter(SMU == "CENTRAL COAST PINK SALMON") %>%
+    slice(1) %>%
+    select(-CU, -Outlook, -Resolution)
+
+  central_coast_split <- bind_rows(
+    central_template %>%
+      mutate(
+        CU = "HECATE LOWLANDS, HECATE STRAIT-FJORDS",
+        Resolution = "CU (aggregate)",
+        Outlook = "4"
+      ),
+    central_template %>%
+      mutate(
+        CU = "HOMATHKO-KLINAKLINI-SMITH-RIVERS-BELLA-COOLA-DEAN",
+        Resolution = "CU (singular)",
+        Outlook = "DD"
+      )
+  )
+
+  # ---- REMOVE ORIGINAL AGGREGATES ----
+  base %>%
+    filter(
+      !SMU %in% c(
+        "HAIDA GWAII PINK SALMON",
+        "CENTRAL COAST PINK SALMON"
+      ),
+      !(SMU == "MIDDLE GEORGIA STRAIT CHINOOK SALMON" &
+          str_detect(CU, "SOUTHERN MAINLAND-GEORGIA STRAIT_FA_0.X"))
+    ) %>%
+    bind_rows(
+      haida_split,
+      central_coast_split,
+      mgs_dd
+    )
+} %>%
+
+
+
+
   mutate(
     SMU = str_remove(SMU, regex("\\bSALMON\\b", ignore_case = TRUE)),
     SMU = str_remove(SMU, regex("\\p{Pd}\\s*CHECK:?\\s*.*$", ignore_case = TRUE)),
