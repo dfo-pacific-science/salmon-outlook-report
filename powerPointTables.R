@@ -1,6 +1,20 @@
-# ----------------------------
-# Load data
-# ----------------------------
+################################################################################
+### PRELIMINARY OUTLOOK PRESENTATION
+
+# This code puts together slides for the Preliminary Outlook Presentation
+# that is presented in mid-January
+
+# It creates tables from the Outlook data survey results, and adds tables for
+# each species and area as new slides
+# e.g., 1 table (slide) for Yukon Transboundary Sockeye, another slide for
+# Yukon Transboundary Chinook, etc.
+
+#
+
+################################################################################
+
+
+
 
 ### PowerPoint notes from Dawn:
 # North Coast Coho: Order should be Nass, Skeena, Haida, Central
@@ -11,6 +25,8 @@
 # 3) OKANAGAN CHINOOK SALMON (OKANAGAN_.X)
 
 # Remember to also add in the area names to the title
+
+# Yukon Transboundary Chinook order: alsek stikine taku at top, then yukon and porcupine for this area
 
 source("statusTableWithOthers.R")   # defines tabPrep and builds table_list
 
