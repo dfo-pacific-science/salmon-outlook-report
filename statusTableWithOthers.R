@@ -279,6 +279,8 @@ tabPrep <- cu_outlook_records_enriched %>%
   ungroup() %>%
   mutate(
     cu_count = coalesce(cu_count, cu_count_calc),
+
+    # Identify rows that genuinely represent CU entries
     is_cu_row =
       !cu_empty &
       !cu_outlook_selection %in%
@@ -293,7 +295,23 @@ tabPrep <- cu_outlook_records_enriched %>%
 ################################################################################
 ### Resolution Logic
 
-tabPrep <- tabPrep %>%
+# This section adds the "Resolution" of the data
+# i.e., do they report by SMU, CU (singular), CU (aggregate) etc.
+
+# The options include:
+# Resolution categories:
+#   - "SMU": SMU-only row
+#   - "CU (singular)": One CU linked to an SMU
+#   - "CU (aggregate)": Multiple CUs aggregated under an SMU
+#   - "Hatchery or Indicator Stock"
+#   - "PFMA": Special case for Central Coast Coho
+#   - "CHECK: <message>": Explicit data issues requiring review
+#
+# IMPORTANT:
+# - Order matters: earlier conditions override later ones
+# - Numeric / Data Deficient conflicts are prioritized over SMU/CU classification
+
+tabPrep = tabPrep %>%
   mutate(
     Resolution = case_when(
       smu_name == "CENTRAL COAST COHO SALMON" ~ "PFMA",
@@ -319,24 +337,43 @@ tabPrep <- tabPrep %>%
 
 ################################################################################
 ### CU Name Mapping Function
+# This could maybe be removed if we just add full CU names to data spreadsheet
 
-get_labels <- function(cu_string, ref_df) {
+
+# Converts CU codes (e.g., "CU1, CU2") into full CU names using lookup table.
+#
+# INPUTS:
+#   - cu_string : character string of comma-separated CU codes
+#   - ref_df    : lookup table with columns `cu` and `label`
+#
+# OUTPUT:
+#   - character string of full CU names in original order
+
+
+get_labels = function(cu_string, ref_df) {
+  # Return NA if no CU information exists
   if (is.na(cu_string) | cu_string == "") return(NA_character_)
+
+  # Preserve CHECK messages
   if (cu_string %in% c("CHECK: No data entered", "Outlook assigned but no CU specified"))
     return(cu_string)
 
-  cu_codes <- str_split(cu_string, ",")[[1]] %>% str_trim() %>% toupper()
+  # Split comma-separated CU codes
+  cu_codes = str_split(cu_string, ",")[[1]] %>% str_trim() %>% toupper()
 
-  labels <- ref_df %>%
+  # Look up full CU names in reference table
+  labels = ref_df %>%
     mutate(cu = toupper(cu)) %>%
     filter(cu %in% cu_codes) %>%
     arrange(match(cu, cu_codes)) %>%
     pull(label)
 
+  # If lookup fails, return original codes
   if (length(labels) == 0) paste(cu_codes, collapse = ", ") else paste(labels, collapse = ", ")
 }
 
-tabPrep <- tabPrep %>%
+# Apply CU name mapping and retain raw selections for Hatchery rows
+tabPrep = tabPrep %>%
   mutate(
     CU_Names = map_chr(cu_outlook_selection, ~ get_labels(.x, crosswalkList)),
     Other_RawSelection =
@@ -344,25 +381,36 @@ tabPrep <- tabPrep %>%
   )
 
 ################################################################################
-### Combine Forecasts / Outlooks + Name Fields
+### COMBINE FORECASTS / OUTLOOKS + NAME FIELDS
+#
+# This section collapses CU-level values when aggregation is required and
+# prepares final display fields used in the output tables.
+#
+# GROUPING:
+#   - Rows are grouped by SMU + Resolution
+#   - Aggregated CUs are collapsed into comma-separated strings
 
-tabPrep <- tabPrep %>%
+tabPrep = tabPrep %>%
   group_by(
     smu_name_display, Resolution,
     parentrowid, smu_prelim_forecast, smu_outlook_assignment,
     outlook_narrative, smu_area
   ) %>%
   mutate(
+
+    # Collapse CU forecasts for aggregated rows
     CU_Forecast = if_else(
       Resolution == "CU (aggregate)",
       paste(unique(na.omit(cu_prelim_forecast)), collapse = ", "),
       cu_prelim_forecast
     ),
+    # Collapse CU outlook assignments
     CU_Outlook = if_else(
       Resolution == "CU (aggregate)",
       paste(unique(na.omit(cu_outlook_assignment)), collapse = ", "),
       cu_outlook_assignment
     ),
+    # Collapse CU code lists
     CU_CodeList = if_else(
       Resolution == "CU (aggregate)",
       paste(unique(na.omit(cu_outlook_selection)), collapse = ", "),
@@ -371,6 +419,7 @@ tabPrep <- tabPrep %>%
   ) %>%
   ungroup() %>%
   mutate(
+    # Display Name column depends on Resolution
     Name = case_when(
       Resolution %in% c("SMU", "PFMA") ~ smu_name_display,
       Resolution %in% c("CU (aggregate)", "CU (singular)") ~ CU_Names,
@@ -378,19 +427,23 @@ tabPrep <- tabPrep %>%
       str_detect(Resolution, "^CHECK:") ~ CU_Names,
       TRUE ~ NA_character_
     ),
+    # Forecast column depends on Resolution
     Forecast = case_when(
       Resolution %in% c("SMU", "PFMA") ~ smu_prelim_forecast,
       Resolution %in% c("CU (aggregate)", "CU (singular)", "Hatchery or Indicator Stock") ~ CU_Forecast,
-      str_detect(Resolution, "^CHECK:") ~ paste0(
+      # CHECK rows explicitly show both SMU and CU values
+       str_detect(Resolution, "^CHECK:") ~ paste0(
         "CHECK VALUE: SMU = ", coalesce(smu_prelim_forecast, "NA"),
         "; CU = ", coalesce(CU_Forecast, "NA"),
         " [", CU_CodeList, "]"
       ),
       TRUE ~ NA_character_
     ),
+    # Outlook column mirrors Forecast logic
     Outlook = case_when(
       Resolution %in% c("SMU", "PFMA") ~ smu_outlook_assignment,
       Resolution %in% c("CU (aggregate)", "CU (singular)", "Hatchery or Indicator Stock") ~ CU_Outlook,
+
       str_detect(Resolution, "^CHECK:") ~ paste0(
         "CHECK VALUE: SMU = ", coalesce(smu_outlook_assignment, "NA"),
         "; CU = ", coalesce(CU_Outlook, "NA"),
@@ -406,7 +459,7 @@ tabPrep <- tabPrep %>%
     )
   )
 ################################################################################
-### Final Table Prep (STOP POINT)
+### Final Table Prep
 
 tabPrep =
   tabPrep %>%
@@ -452,10 +505,18 @@ tabPrep =
 ################################################################################
 ### Table building and styling functions
 
+# Each SMU gets its own “block” consisting of:
+#  1) a grey SMU label row
+#  2) the narrative text
+#  3) a column header row
+#  4) the actual data rows
+
+
 build_block = function(df_smu) {
   smu  = unique(df_smu$smu_name)
   narr = unique(df_smu$Narrative)
 
+  # Row that just labels the start of a new SMU block
   row1 = data.frame(
     Resolution = "SMU",
     Name = "Narrative",
@@ -464,6 +525,7 @@ build_block = function(df_smu) {
     stringsAsFactors = FALSE
   )
 
+  # Row that actually contains the narrative text
   row2 = data.frame(
     Resolution = smu,
     Name = narr,
@@ -472,6 +534,7 @@ build_block = function(df_smu) {
     stringsAsFactors = FALSE
   )
 
+  # Row with next set of column names
   row3 = data.frame(
     Resolution = "Resolution",
     Name = "Name",
@@ -480,6 +543,7 @@ build_block = function(df_smu) {
     stringsAsFactors = FALSE
   )
 
+  # Actual SMU / CU data rows
   data_rows = df_smu %>%
     select(Resolution, Name, Forecast, Outlook)
 
@@ -487,23 +551,28 @@ build_block = function(df_smu) {
 }
 
 ################################################################################
+# This part defines the shading/colouring/line thickness etc of the tables
 
 style_smu_table = function(big_df) {
 
-  # ---- Identify structural rows ONCE ----
+  # Row where a new SMU block starts
   idx_label  = which(big_df$Resolution == "SMU" & big_df$Name == "Narrative")
+
+  # Row that acts as the column header
   idx_header = which(big_df$Resolution == "Resolution")
 
-  # Draw separator BELOW the previous SMU block
+  # Draw a thick line *before* each new SMU block except the first one
   idx_separators = idx_label[-1] - 1
 
   ft = flextable(big_df)
+
+  # Need to delete the real header on purpose to manage flextable styling challenges
   ft = delete_part(ft, part = "header")
 
   # Reset all borders
   ft = border_remove(ft)
 
-  # Thick SMU separators
+  # Add thick horizontal lines to visually split SMUs
   if (length(idx_separators) > 0) {
     ft = border(
       ft,
