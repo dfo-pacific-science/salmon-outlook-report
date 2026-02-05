@@ -65,15 +65,24 @@ basins = basins |>
 # Trick to get all the items to show up in the legend
 # Some data bins aren't present in data, so you need to have a workaround
 # Adds these as dummy data to the basins data frame, so they still show up
-missing_bins = setdiff(legend_levels, as.character(unique(basins$sbi_cat)))
+
+# Adds these as dummy data to the basins data frame, so they still show up
+missing_bins <- setdiff(legend_levels, as.character(unique(basins$sbi_cat)))
 
 basins = basins %>%
   bind_rows(
-    st_sf(
-      sbi_cat  = factor(missing_bins, levels = legend_levels),
-      geometry = st_sfc(rep(st_geometrycollection(), length(missing_bins)), crs = 3005)
-    )
+    tibble::tibble(
+      sbi_cat = factor(missing_bins, levels = legend_levels)
+    ) %>%
+      mutate(
+        geometry = sf::st_as_sfc(
+          rep("GEOMETRYCOLLECTION EMPTY", dplyr::n()),
+          crs = 3005
+        )
+      ) %>%
+      sf::st_as_sf()
   )
+
 ################################################################################
 # Choose a colour scheme for these bins
 sbi_cols = c(
