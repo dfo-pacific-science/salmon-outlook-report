@@ -1,5 +1,5 @@
 ################################################################################
-#### BC Snow Basin Index Map
+#### BC SNOW BASIN INDEX MAP
 
 # Made by Stephen Finnis in February 2026
 # This is to make a map used in the "Major Stocks/Infographic Presentation"
