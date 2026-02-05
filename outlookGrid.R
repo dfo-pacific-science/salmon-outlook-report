@@ -1,27 +1,44 @@
+################################################################################
+### OUTLOOK OVERVIEW GRID FIGURE
+
+# Created by Stephen Finnis 2026
+
+# This is the code to make the Outlook Overview figure for the Outlook report
+# It gives a breakdown of all the Outlooks in one image
+# Has a grid format: Areas make up the columns, salmon species as rows
+# Within each grid is the info for Stock Management Units (SMU)
+# The full SMU name is written out. Beside it is colours representing the Outlook
+# The colours are displayed as squares/rectangles - one for each SMU, or multiple
+# if Outlooks were provided per Conservation Unit (CU)
+
+# This grid goes in the Preliminary Outlook presentation (January of each year)
+# and the written report that is also submitted at the same time.
+
+# It is easiest to not have it add to the PowerPoint/reports automatically
+# Instead, just figure out the exact size in the plotting window, and then save it
+# as an image. Then copy/paste into the Reports/PowerPoints as required
+
+################################################################################
+
+# Read in the script that creates the tables for the PowerPoint
+# It uses the data from that
+source("powerPointTables.R")
+
+################################################################################
+## Load required libraries
+
 library(dplyr)
 library(ggplot2)
 library(stringr)
 library(grid)
 
-# =========================
-# SETTINGS
-# =========================
+################################################################################
+## Make edits to the data
+# Ideally this would be
 
-TOTAL_WIDTH <- 3
-LABEL_PAD   <- 0.2
-WRAP_WIDTH  <- 18
-ROW_HEIGHT  <- 0.8
+tp_clean = tp_long %>%
 
-# =========================
-# CLEAN DATA
-# =========================
 
-tp_clean <- tp_long %>%
-
-  # =========================
-# SAFE IN-PLACE EDIT:
-# MIDDLE GEORGIA STRAIT CHINOOK SALMON
-# =========================
 group_by(SMU) %>%
   mutate(
     CU = case_when(
@@ -153,18 +170,19 @@ mutate(
 
 
 
-# =========================
-# FACET ORDERING
-# =========================
+################################################################################
+## FACET ORDERING
 
-area_levels <- c(
+# This is the preferred order for Areas (so results are North --> South)
+area_levels = c(
   "YUKON TRANSBOUNDARY",
   "NORTH COAST",
   "SOUTH COAST",
   "FRASER AND INTERIOR"
 )
 
-species_levels <- c(
+# This is the preferred order for species (idk why)
+species_levels = c(
   "Sockeye",
   "Pink",
   "Chinook",
@@ -172,26 +190,26 @@ species_levels <- c(
   "Chum"
 )
 
-tp_clean <- tp_clean %>%
+# Reorganize the data into the specified order above
+tp_clean = tp_clean %>%
   mutate(
     smu_area    = factor(smu_area, levels = area_levels),
     smu_species = factor(smu_species, levels = species_levels)
   )
 
-# =========================
-# GLOBAL SMU ORDER
-# =========================
+# Extract the SMU names for later plotting
 
-smu_levels <- tp_clean %>%
-  distinct(SMU) %>%
-  arrange(SMU) %>%
-  pull(SMU)
 
-# =========================
+smu_levels = tp_clean %>%
+  distinct(SMU) %>% # Get unique SMu names
+  arrange(SMU) %>% # Sort them alphabetically
+  pull(SMU) # extract them as a vector
+
+################################################################################
 # COMPUTE SEGMENTS
-# =========================
 
-tp_plot <- tp_clean %>%
+
+tp_plot = tp_clean %>%
   mutate(SMU = factor(SMU, levels = smu_levels)) %>%
   arrange(smu_area, smu_species, SMU, Outlook) %>%
   group_by(smu_area, smu_species, SMU) %>%
@@ -205,11 +223,16 @@ tp_plot <- tp_clean %>%
   mutate(row_id = dense_rank(SMU)) %>%
   ungroup() %>%
 
-  # =========================
-# STACK SPECIFIC OUTLOOK LABELS
-# =========================
+################################################################################
+## Fix how the "__ to ___" labels show up in the graphic
+
+# For FIA Sockeye there are so many CUs reporting results, that instead of having
+# them written out as e.g., "1 to 2", the numbers 1 and 2 are stacked vertically
+# I visually identified them on the grid (they belonged to early summer SMU)
+# and then corrected them manually
+
 mutate(
-  Outlook_label = Outlook, # create default label
+  Outlook_label = Outlook,
   Outlook_label = if_else(
     SMU == "FRASER SOCKEYE - EARLY SUMMER" & Outlook %in% c("1 to 2", "3 to 4"),
     str_replace_all(Outlook, " to ", "\n"),
@@ -217,9 +240,16 @@ mutate(
   )
 )
 
-# =========================
-# LABEL DATA
-# =========================
+################################################################################
+## Label data
+
+
+TOTAL_WIDTH <- 3
+LABEL_PAD   <- 0.2
+WRAP_WIDTH  <- 18
+ROW_HEIGHT  <- 0.8
+
+
 
 smu_labels <- tp_plot %>%
   distinct(smu_area, smu_species, SMU, row_id) %>%
@@ -227,9 +257,9 @@ smu_labels <- tp_plot %>%
     SMU_wrapped = str_wrap(as.character(SMU), WRAP_WIDTH)
   )
 
-# =========================
+################################################################################
 # GLOBAL LABEL WIDTH
-# =========================
+
 
 pushViewport(viewport())
 GLOBAL_LABEL_MM <- max(
@@ -241,11 +271,12 @@ popViewport()
 MM_PER_TILE <- 20
 GLOBAL_LABEL_WIDTH <- GLOBAL_LABEL_MM / MM_PER_TILE + LABEL_PAD
 
-# =========================
-# RECT COORDINATES
-# =========================
 
-tp_plot <- tp_plot %>%
+################################################################################
+# RECT COORDINATES
+
+
+tp_plot = tp_plot %>%
   mutate(
     xmax   = GLOBAL_LABEL_WIDTH + TOTAL_WIDTH - (seg_id - 1) * seg_width,
     xmin   = xmax - seg_width,
@@ -255,11 +286,13 @@ tp_plot <- tp_plot %>%
 smu_labels <- smu_labels %>%
   mutate(x_label = GLOBAL_LABEL_WIDTH - LABEL_PAD)
 
-# =========================
-# OUTLOOK LABELS
-# =========================
+################################################################################
+## Outlook labels
 
-outlook_labels <- c(
+# Only the whole numbers have textual descriptions. Make sure to clarify them
+# so they show up in the legend
+
+outlook_labels = c(
   "1"  = "1: Well below average",
   "2"  = "2: Below average",
   "3"  = "3: Near average",
@@ -267,11 +300,11 @@ outlook_labels <- c(
   "DD" = "DD: Data Deficient"
 )
 
-# =========================
-# PLOT
-# =========================
+################################################################################
+## Make the final plot
 
-p <- ggplot(tp_plot) +
+
+p = ggplot(tp_plot) +
   geom_rect(
     aes(
       xmin = xmin,
@@ -281,8 +314,11 @@ p <- ggplot(tp_plot) +
       fill = Outlook
     ),
     color = NA,
+    # Need to adjust transparency, since they are slightly transparent on the map
     alpha = 0.7
   ) +
+
+  # Add the Outlook numeric value in bold over each square
   geom_text(
     aes(
       x = x_mid,
@@ -295,6 +331,8 @@ p <- ggplot(tp_plot) +
     hjust = 0.5,
     lineheight = 0.9
   ) +
+
+  # Add the SMU names
   geom_text(
     data = smu_labels,
     aes(
@@ -308,6 +346,8 @@ p <- ggplot(tp_plot) +
     lineheight = 1,
     size = 2.8
   ) +
+
+  # Area as columns, species as rows
   facet_grid(
     smu_species ~ smu_area,
     scales = "free_y",
@@ -318,6 +358,8 @@ p <- ggplot(tp_plot) +
     limits = c(0, GLOBAL_LABEL_WIDTH + TOTAL_WIDTH),
     expand = c(0, 0)
   ) +
+
+  # Hex codes are from Chelsea. Set to 70% transparency, as with the maps
   scale_fill_manual(
     values = c(
       "1"  = "#E4453C",
@@ -329,9 +371,11 @@ p <- ggplot(tp_plot) +
       "4"  = "#1C854F",
       "DD" = "#9E9E9E"
     ),
-    labels = outlook_labels,
+    labels = outlook_labels, # This has the text description beside the whole numbers
     name   = "Outlook"
   ) +
+
+  # Visual updates
   labs(x = NULL, y = NULL) +
   theme_minimal(base_size = 11) +
   theme(
@@ -344,13 +388,8 @@ p <- ggplot(tp_plot) +
       fill   = NA,
       linewidth = 0.4
     ),
-
     strip.background = element_blank(),
-    # strip.background = element_rect(
-    #   fill = "grey85",
-    #   colour = "grey40",
-    #   linewidth = 0.6
-    # ),
+
     strip.text.x = element_text(
       face = "bold",
       size = 13
@@ -360,10 +399,7 @@ p <- ggplot(tp_plot) +
       size = 13,
       lineheight = 0.9
     ),
-
     legend.position  = "right",
-    #legend.position = "none",
-
     panel.spacing.x  = unit(0.8, "lines"),
     panel.spacing.y  = unit(0.8, "lines")
   )
