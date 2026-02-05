@@ -132,7 +132,26 @@ mutate(
   filter(
     CU != "CK-02",
     CU != "OKANAGAN_0.X"
+  )  %>%
+
+  filter(
+    !(smu_area == "SOUTH COAST" &
+        smu_species == "Sockeye" &
+        SMU == "NO DESIGNATED SMU")
+  ) %>%
+  mutate(
+    SMU = if_else(
+      smu_area == "FRASER AND INTERIOR" &
+        smu_species == "Chinook" &
+        SMU == "NO DESIGNATED SMU",
+      "NO DESIGNATED SMU*",
+      SMU
+    )
   )
+
+
+
+
 
 # =========================
 # FACET ORDERING
