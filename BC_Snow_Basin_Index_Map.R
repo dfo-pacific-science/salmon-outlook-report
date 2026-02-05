@@ -11,15 +11,14 @@
 # And then choose the ESRI Rest Server data
 
 ################################################################################
-
-# Load appropriate libraries
+## Load appropriate libraries
 library(sf)
 library(dplyr)
 library(ggplot2)
 library(rnaturalearth)
 
 ################################################################################
-# 1) Read Snow Basin Index data and project to BC Albers (crs = 3005)
+## Read Snow Basin Index data and project to BC Albers (crs = 3005)
 
 # Read in the data from the ESRI Rest server (this will be for 2026 data)
 url = "https://services6.arcgis.com/ubm4tcTYICKBpist/arcgis/rest/services/Snow_Basins_Indices_View/FeatureServer/0/query?where=1%3D1&outFields=*&f=geojson"
@@ -29,12 +28,10 @@ basins = st_read(url, quiet = TRUE) %>%
   st_transform(3005)
 
 ################################################################################
-
-# Define legend bins
+## Define legend bins
 # This just copies the ones that the province used
 # Could probably reduce number of bins or justify other choices
 
-# These are the
 legend_levels = c(
   "No Data", "0-49%", "50-59%", "60-69%", "70-79%", "80-89%",
   "90-109%", "110-125%", "125-140%", "> 140%"
@@ -60,7 +57,7 @@ basins = basins |>
   )
 
 ################################################################################
-# Force all legend bins to appear (even if unused)
+## Force all legend bins to appear (even if unused)
 
 # Trick to get all the items to show up in the legend
 # Some data bins aren't present in data, so you need to have a workaround
@@ -84,7 +81,7 @@ basins = basins %>%
   )
 
 ################################################################################
-# Choose a colour scheme for these bins
+## Choose a colour scheme for these bins
 sbi_cols = c(
   "No Data"   = "#f0f0f0",
   "0-49%"     = "#b22222",
@@ -99,7 +96,7 @@ sbi_cols = c(
 )
 
 ################################################################################
-# Get data for neighbouring states/provinces and reproject to BC Albers
+## Get data for neighbouring states/provinces and reproject to BC Albers
 
 # Get Canadian province boundaries. Exclude BC so it doesnt cause overlap issues
 can_prov = ne_states(country = "canada", returnclass = "sf") %>%
@@ -111,7 +108,7 @@ us_states  = ne_states(country = "united states of america", returnclass = "sf")
   st_transform(3005)
 
 ################################################################################
-# Get map extents of the BC map
+## Get map extents of the BC map
 # Idk why it wasn't working, but i have to "make the geometries valid" because
 # there were topology gaps or something
 
@@ -127,7 +124,7 @@ bc_bbox = basins_valid %>%
   st_bbox()
 
 ################################################################################
-# Make the map
+## Make the map
 
 ggplot() +
   geom_sf(data = can_prov, fill = "grey85", colour = "grey60", linewidth = 0.25) +
