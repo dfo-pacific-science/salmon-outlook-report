@@ -14,9 +14,10 @@
 # This grid goes in the Preliminary Outlook presentation (January of each year)
 # and the written report that is also submitted at the same time.
 
-# It is easiest to not have it add to the PowerPoint/reports automatically
+# It is easiest to not have it add to the PowerPoint/reports automatically, since
+# it's a bit unpredicatable what the ideal size is for the image.
 # Instead, just figure out the exact size in the plotting window, and then save it
-# as an image. Then copy/paste into the Reports/PowerPoints as required
+# as an image. Then copy/paste into the Reports/PowerPoints as required.
 
 ################################################################################
 
@@ -209,6 +210,20 @@ smu_levels = tp_clean %>%
 # COMPUTE SEGMENTS
 
 
+
+
+TOTAL_WIDTH <- 3
+LABEL_PAD   <- 0.2
+ROW_HEIGHT  <- 0.8
+
+
+# Each SMU can have one more Outlooks
+# To draw them as side-by-side rectangles:
+# -TOTAL_WIDTH is divided evenly by the number of Outlooks
+# -Each Outlook gets a segment (seg_id) within the SMU row
+# -xmin/xmax are computed manually (not via geom_col)
+# This gives better control over spacing and alignment
+
 tp_plot = tp_clean %>%
   mutate(SMU = factor(SMU, levels = smu_levels)) %>%
   arrange(smu_area, smu_species, SMU, Outlook) %>%
@@ -241,17 +256,15 @@ mutate(
 )
 
 ################################################################################
-## Label data
+## Some SMU names are too long to fit on one line
+# Did some trial and error to see what is the max length they should be before
+# splitting into 2 lines
+
+#
+WRAP_WIDTH  = 18
 
 
-TOTAL_WIDTH <- 3
-LABEL_PAD   <- 0.2
-WRAP_WIDTH  <- 18
-ROW_HEIGHT  <- 0.8
-
-
-
-smu_labels <- tp_plot %>%
+smu_labels = tp_plot %>%
   distinct(smu_area, smu_species, SMU, row_id) %>%
   mutate(
     SMU_wrapped = str_wrap(as.character(SMU), WRAP_WIDTH)
@@ -404,4 +417,5 @@ p = ggplot(tp_plot) +
     panel.spacing.y  = unit(0.8, "lines")
   )
 
+# View the plot
 p
