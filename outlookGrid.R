@@ -168,9 +168,6 @@ mutate(
   )
 
 
-
-
-
 ################################################################################
 ## FACET ORDERING
 
@@ -209,31 +206,36 @@ smu_levels = tp_clean %>%
 ################################################################################
 # COMPUTE SEGMENTS
 
+# These variables control the physical layout of each SMU row
 
+# Total horizontal space allocated to Outlook squares per SMU
+TOTAL_WIDTH = 3
+# space between SMU text labels and Outlook squares
+LABEL_PAD   = 0.2
+# vertical height of each SMU row
+ROW_HEIGHT  = 0.8
 
+# Each SMU can have one or more Outlook (e.g.,  multiple CUs)
+# Instead of using geom_col(), rectangle positions are manually computed. This allows:
+# -Multiple Outlooks for the same SMU to appear side-by-side
+# -consistent spacing across facets
 
-TOTAL_WIDTH <- 3
-LABEL_PAD   <- 0.2
-ROW_HEIGHT  <- 0.8
-
-
-# Each SMU can have one more Outlooks
-# To draw them as side-by-side rectangles:
+# For each SMU:
 # -TOTAL_WIDTH is divided evenly by the number of Outlooks
-# -Each Outlook gets a segment (seg_id) within the SMU row
-# -xmin/xmax are computed manually (not via geom_col)
-# This gives better control over spacing and alignment
-
+# -Each Outlook is assigned a segment ID (seg_id)
+# -xmin/xmax are computed later using these segment widths
 tp_plot = tp_clean %>%
   mutate(SMU = factor(SMU, levels = smu_levels)) %>%
   arrange(smu_area, smu_species, SMU, Outlook) %>%
   group_by(smu_area, smu_species, SMU) %>%
+  # Add 3 new columns
   mutate(
-    n_outlooks = n(),
-    seg_width  = TOTAL_WIDTH / n_outlooks,
-    seg_id     = row_number()
+    n_outlooks = n(), # how many Outlooks this SMU has
+    seg_width  = TOTAL_WIDTH / n_outlooks, # width of each Outlook segment
+    seg_id     = row_number() # left-to-right position within SMU
   ) %>%
   ungroup() %>%
+  # row_id controls vertical placement of SMUs within each facet
   group_by(smu_area, smu_species) %>%
   mutate(row_id = dense_rank(SMU)) %>%
   ungroup() %>%
@@ -260,10 +262,11 @@ mutate(
 # Did some trial and error to see what is the max length they should be before
 # splitting into 2 lines
 
-#
+# WRAP_WIDTH was chosen by trial and error so labels generally fit within the
+# left margin without overlapping with the Outlook squares
 WRAP_WIDTH  = 18
 
-
+# If they exceed WRAP_LENGTH, the text will be written over 2 lines instead of 1
 smu_labels = tp_plot %>%
   distinct(smu_area, smu_species, SMU, row_id) %>%
   mutate(
@@ -273,30 +276,41 @@ smu_labels = tp_plot %>%
 ################################################################################
 # GLOBAL LABEL WIDTH
 
+# Measure the widest SMU Label (after wrapping) in millimeters
+# This lets us reserve enough horizontal space so that:
+# - no SMU label overlaps the Outlook squares
+# -all facets line up cleanly, regardless of label length
 
+# grid::stringWidth() requires a viewport to measure text size
 pushViewport(viewport())
-GLOBAL_LABEL_MM <- max(
+GLOBAL_LABEL_MM = max(
   convertUnit(stringWidth(smu_labels$SMU_wrapped),
               "mm", valueOnly = TRUE)
 )
 popViewport()
 
-MM_PER_TILE <- 20
+MM_PER_TILE = 20
 GLOBAL_LABEL_WIDTH <- GLOBAL_LABEL_MM / MM_PER_TILE + LABEL_PAD
 
 
 ################################################################################
-# RECT COORDINATES
+# Rectangle coordinates
 
+# Compute the exact x-positions for each Outlook rectangle
+# Rectangles are drawn from left to right so that:
+# -single-Outlook SMUs align with multi-Outlook SMUs
+# -segment ordering is visually consistent
 
+# xmax/xmin are the coordinate positions of the outer edges of each rectangle
 tp_plot = tp_plot %>%
   mutate(
     xmax   = GLOBAL_LABEL_WIDTH + TOTAL_WIDTH - (seg_id - 1) * seg_width,
     xmin   = xmax - seg_width,
-    x_mid  = (xmin + xmax) / 2
+    x_mid  = (xmin + xmax) / 2 # used to center the Outlook text label
   )
 
-smu_labels <- smu_labels %>%
+# SMU text labels are right-aligned just to the left of the Outlook squares
+smu_labels = smu_labels %>%
   mutate(x_label = GLOBAL_LABEL_WIDTH - LABEL_PAD)
 
 ################################################################################
@@ -315,7 +329,6 @@ outlook_labels = c(
 
 ################################################################################
 ## Make the final plot
-
 
 p = ggplot(tp_plot) +
   geom_rect(
