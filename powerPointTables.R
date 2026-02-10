@@ -62,7 +62,7 @@ tp_long <- tp_min %>%
 # ----------------------------
 # Define custom slide order
 # ----------------------------
-area_order <- c("YUKON TRANSBOUNDARY", "NORTH COAST", "SOUTH COAST", "FRASER AND INTERIOR")
+area_order = c("YUKON TRANSBOUNDARY", "NORTH COAST", "SOUTH COAST", "FRASER AND INTERIOR")
 
 species_order <- c(
   "Sockeye Lake Type",
