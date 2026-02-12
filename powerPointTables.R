@@ -5,7 +5,7 @@
 ### -------
 ### This script automates the creation of the Preliminary Outlook Presentation.
 ### It uses a PowerPoint template and generates slides for each species and area
-### using survey results from the `tabPrep` dataset.
+### using survey results from the `tabPrep` dataframe
 ###
 ### SLIDE CONTENT
 ### -------------
@@ -19,7 +19,38 @@
 ### ------------
 ### • Fraser and Interior Chinook and Sockeye: one slide per SMU
 ################################################################################
+### NOTES ABOUT MANUAL EDITING OF SLIDES
 
+### These scripts generate the tables, but some manual editing is still required.
+### It is usually faster to make these adjustments by hand than to write code for every case.
+
+### A Forecast column is added automatically. In many cases this column will need
+### to be simplified. Forecasts are often provided as full paragraphs. Dawn recommends
+### extracting only the numeric values rather than keeping long text blocks.
+### After that, reformat all forecast numbers in a consistent style
+### (for example, convert 500000 to 500,000).
+
+### In some cases it is easiest to remove unnecessary columns.
+# Remove the "Resolution" and "CU" columns if the data is structured by SMU.
+# Remove the Forecast column if no forecast information is provided.
+
+### Dawn has specific requests for the reporting order in some tables.
+# It is easiest to rearrange the order manually.
+
+# NORTH COAST Coho: order should be Nass, Skeena, Haida, Central.
+# SOUTH COAST (all species): order should be WCVI first, then the ECVI group
+# FRASER AND INTERIOR: Okanagan Sockeye and Chinook should appear together in one table.
+# This includes:
+#   1) Okanagan Sockeye Salmon
+#   2) No Designated SMU (CK-02)
+#   3) Okanagan Chinook Salmon (OKANAGAN_.X)
+# YUKON TRANSBOUNDARY (Sockeye and Chinook, if present):
+# Order from top to bottom should be Alsek, Stikine, Taku, Yukon, then Porcupine.
+
+# Maps are created as a separate process. Replace the placeholder map when the
+# final maps are done
+
+# Lastly, make font size/styling to the slides as required
 
 ################################################################################
 ## READ IN THE DATA
