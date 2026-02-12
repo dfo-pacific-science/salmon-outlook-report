@@ -14,6 +14,9 @@
 # This grid goes in the Preliminary Outlook presentation (January of each year)
 # and the written report that is also submitted at the same time.
 
+# For the final image, see page 52 in the 2026 Outlook Report:
+# https://waves-vagues.dfo-mpo.gc.ca/library-bibliotheque/41316605.pdf
+
 # It is easiest to not have it add to the PowerPoint/reports automatically, since
 # it's a bit unpredicatable what the ideal size is for the image.
 # Instead, just figure out the exact size in the plotting window, and then save it
