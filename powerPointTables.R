@@ -5,7 +5,7 @@
 ### -------
 ### This script automates the creation of the Preliminary Outlook Presentation.
 ### It uses a PowerPoint template and generates slides for each species and area
-### using survey results from the `tabPrep` dataframe
+### using survey results from the tabPrep dataframe
 ###
 ### SLIDE CONTENT
 ### -------------
@@ -15,14 +15,16 @@
 ### • Map image (placeholder, if available)
 ### • Narrative text added to slide notes
 ###
-### SPECIAL CASE
-### ------------
-### • Fraser and Interior Chinook and Sockeye: one slide per SMU
+### In general, one slide is added for area/species; however, for Fraser and
+### Interior Chinook and Sockeye: one slide is generated per SMU, since they
+### typically provide info for each CU and the tables are huge
 ################################################################################
 ### NOTES ABOUT MANUAL EDITING OF SLIDES
 
-### These scripts generate the tables, but some manual editing is still required.
+### These scripts generate the tables, but some manual editing after is still required.
 ### It is usually faster to make these adjustments by hand than to write code for every case.
+
+### For example:
 
 ### A Forecast column is added automatically. In many cases this column will need
 ### to be simplified. Forecasts are often provided as full paragraphs. Dawn recommends
@@ -49,6 +51,9 @@
 
 # Maps are created as a separate process. Replace the placeholder map when the
 # final maps are done
+
+# The outlookGrid.R script will need to be run - copy and paste the resulting
+# image into the second last slide
 
 # Lastly, make font size/styling to the slides as required
 
@@ -166,7 +171,7 @@ adjust_font = function(ft) {
 ################################################################################
 
 # Load the PPTX template with intro slides already in place
-ppt = read_pptx("draftPrelimPres.pptx")
+ppt = read_pptx("2026PreliminaryOutlookTemplate.pptx")
 
 # Map placeholder (will be replaced with final GIS map)
 fraser_map = "data/maps/fraserMap.png"
@@ -194,7 +199,7 @@ table_y = map_y
 table_x = left_margin
 map_x   = slide_w - map_width - right_margin
 
-# Shift table down for species text box
+# Shift table down for species (/area) text box
 species_height = 0.4
 species_y = map_y
 table_y = table_y + species_height
@@ -234,8 +239,7 @@ for (nm in names(table_list)) {
                                            width = table_width, height = table_height))
 
       # Add subtitle above table: "Area – Species"
-      # Note: This was previously only species; now includes area first
-      # Convert area to title case for subtitle bove table
+      # Convert area to title case for subtitle above table
       area_title = tools::toTitleCase(tolower(area))
       subtitle_text = paste0(area_title, " – ", species)
       species_text = fpar(
@@ -248,7 +252,7 @@ for (nm in names(table_list)) {
                     location = ph_location(left = table_x, top = species_y,
                                            width = table_width, height = species_height))
 
-      # Add map if exists
+      # Add placeholder map
       if (file.exists(fraser_map)) {
         ppt = ph_with(ppt,
                       value = external_img(fraser_map, width = map_width, height = map_height),
@@ -256,7 +260,7 @@ for (nm in names(table_list)) {
                                              width = map_width, height = map_height))
       }
 
-      # Add slide notes (narrative text)
+      # Add narrative text to slide notes
       if (all(c("smu_area", "smu_species", "Narrative") %in% names(tabPrep))) {
         narratives_df = tabPrep %>%
           filter(trimws(smu_area) == trimws(area),
@@ -300,7 +304,6 @@ for (nm in names(table_list)) {
                                          width = table_width, height = table_height))
 
     # Add subtitle above table: "Area – Species"
-    # This replaces the old behavior where only species was shown
     area_title = tools::toTitleCase(tolower(area))
     subtitle_text = paste0(area_title, " – ", species)
     species_text = fpar(
@@ -313,7 +316,7 @@ for (nm in names(table_list)) {
                   location = ph_location(left = table_x, top = species_y,
                                          width = table_width, height = species_height))
 
-    # Add map if available
+    # Add placeholder map
     if (file.exists(fraser_map)) {
       ppt = ph_with(ppt,
                     value = external_img(fraser_map, width = map_width, height = map_height),
@@ -321,7 +324,7 @@ for (nm in names(table_list)) {
                                            width = map_width, height = map_height))
     }
 
-    # Add slide notes (narrative text)
+    # Add the narrative text to the slide notes
     if (all(c("smu_area", "smu_species", "Narrative") %in% names(tabPrep))) {
       narratives_df = tabPrep %>%
         filter(trimws(smu_area) == trimws(area),
