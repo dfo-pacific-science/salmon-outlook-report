@@ -494,9 +494,9 @@ tabPrep =
 
   mutate(
     smu_area = case_when(
-      smu_area == "YUKON TRANSBOUNDARY" ~ "YUKON AND TRANSBOUNDARY"
-    )
-  )
+      smu_area == "YUKON TRANSBOUNDARY" ~ "YUKON AND TRANSBOUNDARY",
+      TRUE ~ smu_area)
+  ) %>%
 
   mutate(
     Outlook = case_when(
