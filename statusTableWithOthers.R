@@ -491,6 +491,13 @@ tabPrep =
       smu_species == "Pink Even" ~ "Pink",
       TRUE ~ smu_species)
   ) %>%
+
+  mutate(
+    smu_area = case_when(
+      smu_area == "YUKON TRANSBOUNDARY" ~ "YUKON AND TRANSBOUNDARY"
+    )
+  )
+
   mutate(
     Outlook = case_when(
       Name == "MIDDLE FRASER-FRASER CANYON_SP_1.3, LOWER FRASER RIVER_SP_1.3" ~ "1",
