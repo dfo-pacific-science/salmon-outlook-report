@@ -179,7 +179,7 @@ if (has_other) {
     ) %>%
     mutate(source = "other")
 } else {
-  other_prep <- tibble()
+  other_prep = tibble()
 }
 
 ################################################################################
@@ -236,7 +236,7 @@ cu_outlook_records_enriched = bind_rows(cu_outlook_records_enriched, smu_only_ro
 empty_vals = c(NA_character_, "", "N/A", "NA", "n/a", "na",
                 "No data entered", "CHECK: No data entered")
 
-tabPrep <- cu_outlook_records_enriched %>%
+tabPrep = cu_outlook_records_enriched %>%
   mutate(
     # Preserve raw values for diagnostics
     smu_raw = smu_outlook_assignment,
@@ -627,48 +627,30 @@ style_smu_table = function(big_df) {
 }
 
 ################################################################################
-#
-# make_caption = function(species, area, year = format(Sys.Date(), "%Y")) {
-#
-#   area_titleCase = area %>%
-#     tolower() %>%
-#     tools::toTitleCase() %>%
-#     gsub("\\bAnd\\b", "and", .)
-#
-#   paste0(
-#     "Summary of Outlooks, forecasts (where available), and narrative descriptions for ",
-#     species, " salmon (Oncorhynchus keta) in the ", area_titleCase,
-#     " area during the ", year, " management cycle. Values are presented for each Stock ",
-#     "Management Unit (SMU), and where applicable, for associated singular Conservation Units (CUs), ",
-#     "CU aggregations, and Hatchery or Indicator stocks."
-#   )
-#
-#
-# }
 
-make_caption <- function(species, area, year = format(Sys.Date(), "%Y")) {
+make_caption = function(species, area, year = format(Sys.Date(), "%Y")) {
   # Normalize area to Title Case and fix "And" to "and"
-  area_titleCase <- area |>
-    tolower() |>
-    tools::toTitleCase() |>
+  area_titleCase = area %>%
+    tolower() %>%
+    tools::toTitleCase() %>%
     gsub("\\bAnd\\b", "and", ., perl = TRUE)
 
   # Exact 5-species lookup
-  sci_lookup <- c(
-    Chinook = "Oncorhynchus tshawytscha",
-    Coho    = "Oncorhynchus kisutch",
-    Sockeye = "Oncorhynchus nerka",
-    Chum    = "Oncorhynchus keta",
-    Pink    = "Oncorhynchus gorbuscha"
+  sci_lookup = c(
+    chinook = "Oncorhynchus tshawytscha",
+    coho    = "Oncorhynchus kisutch",
+    sockeye = "Oncorhynchus nerka",
+    chum    = "Oncorhynchus keta",
+    pink    = "Oncorhynchus gorbuscha"
   )
 
   # Key for lookup is lowercased species name
-  sp_key <- tolower(trimws(species))
-  sci <- sci_lookup[[sp_key]]  # assumes species is valid
+  sp_key = tolower(trimws(species))
+  sci = sci_lookup[[sp_key]]  # assumes species is valid
 
   paste0(
     "Summary of Outlooks, forecasts (where available), and narrative descriptions for ",
-    species, " salmon *", sci, "* in the ", area_titleCase,
+    species, " salmon ", sci, " in the ", area_titleCase,
     " area during the ", year, " management cycle. Values are presented for each Stock ",
     "Management Unit (SMU), and where applicable, for associated singular Conservation Units (CUs), ",
     "CU aggregations, and Hatchery or Indicator stocks."
@@ -694,14 +676,38 @@ make_table = function(area, species, data = tabPrep) {
   big_df     = bind_rows(block_list)
 
   ft = style_smu_table(big_df)
-  ft = set_caption(ft, caption = make_caption(species, area))
+
+  caption_text = make_caption(species, area)
+
+  # Split caption around scientific name
+  sp_key = tolower(trimws(species))
+  sci_lookup = c(
+    chinook = "Oncorhynchus tshawytscha",
+    coho    = "Oncorhynchus kisutch",
+    sockeye = "Oncorhynchus nerka",
+    chum    = "Oncorhynchus keta",
+    pink    = "Oncorhynchus gorbuscha"
+  )
+  sci = sci_lookup[[sp_key]]
+
+  parts = strsplit(caption_text, sci)[[1]]
+
+  ft = set_caption(
+    ft,
+    caption = as_paragraph(
+      as_chunk(parts[1], props = fp_text_default(italic = TRUE)),
+      as_chunk(sci,        props = fp_text_default(italic = FALSE)),
+      as_chunk(parts[2], props = fp_text_default(italic = TRUE))
+    )
+  )
+
 
   ft
 }
 
 ################################################################################
 # Example usage (unchanged)
-#make_table("FRASER AND INTERIOR", "Chinook")
+make_table("FRASER AND INTERIOR", "Chinook")
 #make_table("SOUTH COAST", "Chinook")
 
 # End of script
