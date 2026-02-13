@@ -31,7 +31,7 @@ is performed at the CU level; however, Scotch and Seymour are reported separatel
 here, as they are part of the same CU and so have the same 4-year median and 
 benchmarks. The benchmarks need to be updated annually for cyclical stocks as each 
 cycle line has its own benchmarks.
--   Effective total spawners (ETS) was calculated to compare to the Wild Salmon Policy 
+-   Effective total spawners (ETS) was calculated to compare to the *Wild Salmon Policy* 
 (WSP) benchmarks as those benchmarks are calculated in terms of ETS (i.e., apples to apples). Grant et al. [-@grant2020] outlines how ETS is calculated; briefly *ETS = (annual_male_escapement + annual_female_escapement) \* *annual_spawn_success*, where spawn success is the spawn success of the females (based on egg retention in carcasses).
 -   Outlook category ranges from 1 to 4, with 1 being the poorest outlook/lowest return, and 
 4 being the highest/best return. The ranges are informed by the status definitions in 
