@@ -21,6 +21,7 @@ The Outlook document contains:
 
 For the 2026 Outlook, SMUs are used to describe stock aggregates that inform the development of Integrated Fisheries Management Plans (IFMPs) for salmon. This is required for implementation of the fisheries-related revisions to the *Fisheries Act*.
 
+
 For Pacific salmon, the working definition of a Stock Management Unit is a ‘group of one or more conservation units (CUs) that are managed together with the objective of achieving a joint status’, meaning harvest control rules would apply to the aggregate, at least in a coarse sense.
 
 Use of SMUs does not preclude considerations related to conserving CU-level diversity but rather is a practical aggregation of CUs for harvest planning and reporting purposes. That is, it is the scale at which harvest management plans, or better, management and assessment procedures, are developed in IFMPs. In many cases, elements of the Precautionary Approach are implemented at finer scales of organization within a SMU.
@@ -31,7 +32,7 @@ The purpose of a stock forecast or Outlook is to provide information to harvest 
 
 ### *WSP Lower Biological* and the Precautionary Approach: Lower Biological Benchmarks and Limit Reference Points
 
-For implementation of the *Wild Salmon Policy* (WSP; @DFO2005), the status of Pacific salmon CUs are assessed against biological benchmarks. These benchmarks are specific, science-based quantitative values that aim to delineate the three population status zones (further described below). The lower biological benchmark allows for substantial buffer between it and the level of abundance at which the stock would be considered at risk of extinction and is generally estimated as S~GEN~. The upper biological benchmark delineates the ‘amber’ from ‘green’ WSP status zone and is generally estimated as 0.80 SMSY. For more data-limited systems (i.e., where it is not possible to numerically estimate stock-recruit parameters), proxies for lower and upper biological benchmarks may be applied. For example, the lower and upper biological benchmarks are estimated as 25th and 60th percentiles of the long-term observed spawning abundance
+For implementation of the *Wild Salmon Policy* (WSP) [@DFO2005], the status of Pacific salmon CUs are assessed against biological benchmarks. These benchmarks are specific, science-based quantitative values that aim to delineate the three population status zones (further described below). The lower biological benchmark allows for substantial buffer between it and the level of abundance at which the stock would be considered at risk of extinction and is generally estimated as S~GEN~. The upper biological benchmark delineates the ‘amber’ from ‘green’ WSP status zone and is generally estimated as 0.80 S~MSY~. For more data-limited systems (i.e., where it is not possible to numerically estimate stock-recruit parameters), proxies for lower and upper biological benchmarks may be applied. For example, the lower and upper biological benchmarks are estimated as 25th and 60th percentiles of the long-term observed spawning abundance
 
 ```{r benchmarks, out.width = "70%", fig.cap = "Benchmarks and biological status zones for Conservation Unit assessments (DFO 2005).", echo=F}
 knitr::include_graphics("data/benchmarks.png")
@@ -50,7 +51,9 @@ Given the intent is similar between the WSP and DFO’s PA, it is practical to e
 While management targets or operational control points are often informed by biological 
 benchmarks and stock-recruit reference points (also known as limit reference points) , they also consider other objectives such as maximizing sustainable harvest, avoiding overfishing, maintaining stable access and opportunity, allocation objectives such as how catch is distributed among harvesters, etc. As such, they are tightly linked to the harvest strategy and fishery management measures.
 
+
 In some cases, the management target may be a simple trigger such as when a ‘surplus-to-escapement-target’ harvest control rule is in place. In other cases, there may be multiple management targets (or operational control points) used to adjust the harvest control rule at different levels of abundance.
+
 
 An SMU can be below its management target (and therefore subject to some level of harvest 
 restriction as per the harvest control strategy), but well above levels that represent a serious conservation concern (i.e., the LRP or lower biological benchmark [LBB]). In other situations, an SMU may be well above its target but subject to harvest restrictions because the stock rears or co-migrates in mixed-stock fishing areas with other SMUs (or CUs) that are near or below their LRP (or LBB)
@@ -60,6 +63,7 @@ restriction as per the harvest control strategy), but well above levels that rep
 ### Categorical Stock Outlooks
 
 For the Preliminary Outlook and for those SMUs for which statistical forecasts are not produced, either because the SMU is not intensively managed and/or is more data limited, categorical ‘Outlooks’ are assigned. These Outlooks are based on expert opinions qualified with information from monitoring programs. For each stock grouping, an Outlook of expected spawning abundance is assigned based on a scale of 1 to 4.
+
 
 For CUs or SMUs with references in place (i.e., either lower [LBB] and upper biological benchmarks [UBB] and/or lower reference points (LRPs) and upper stock references (USR) and target reference points (TRPs), these references are used to assign an Outlook category. For more data-limited CUs or SMUs (i.e. those without defined stock or management references), expected spawning abundance is compared to average or median abundance based on available information. SMUs for which there is insufficient data, Outlooks are noted as ‘Data Deficient’.
 
