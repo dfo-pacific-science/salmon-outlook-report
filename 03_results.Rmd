@@ -150,14 +150,14 @@ if (nrow(missing_cus) == 0) {
 
 
 
-## YUKON TRANSBOUNDARY AREA
+## YUKON AND TRANSBOUNDARY AREA
 
 ### Sockeye
 
 ```{r ytSockeyeTable}
 
 ft = tryCatch(
-  make_table("YUKON TRANSBOUNDARY", "Sockeye"),
+  make_table("YUKON AND TRANSBOUNDARY", "Sockeye"),
   error = function(e){
     print("No data for this species/area combination.")
     return(NULL)
@@ -175,7 +175,7 @@ if(!is.null(ft)){
 ```{r ytPinkTable}
 
 ft = tryCatch(
-  make_table("YUKON TRANSBOUNDARY", "Pink"),
+  make_table("YUKON AND TRANSBOUNDARY", "Pink"),
   error = function(e){
     print("No data for this species/area combination.")
     return(NULL)
@@ -194,7 +194,7 @@ if(!is.null(ft)){
 ```{r ytChinookTable}
 
 ft = tryCatch(
-  make_table("YUKON TRANSBOUNDARY", "Chinook"),
+  make_table("YUKON AND TRANSBOUNDARY", "Chinook"),
   error = function(e){
     print("No data for this species/area combination.")
     return(NULL)
@@ -212,7 +212,7 @@ if(!is.null(ft)){
 ```{r ytCohoTable}
 
 ft = tryCatch(
-  make_table("YUKON TRANSBOUNDARY", "Coho"),
+  make_table("YUKON AND TRANSBOUNDARY", "Coho"),
   error = function(e){
     print("No data for this species/area combination.")
     return(NULL)
@@ -230,7 +230,7 @@ if(!is.null(ft)){
 ```{r ytChumTable}
 
 ft = tryCatch(
-  make_table("YUKON TRANSBOUNDARY", "Chum"),
+  make_table("YUKON AND TRANSBOUNDARY", "Chum"),
   error = function(e){
     print("No data for this species/area combination.")
     return(NULL)
