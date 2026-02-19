@@ -64,7 +64,7 @@
 # Load the pre-processed survey data frame `tabPrep`
 # This contains the fields:
 # smu_area, smu_species, smu_name, Resolution, Name, Outlook, Forecast, Narrative
-source("statusTableWithOthers.R")
+source("dataPreprocessing.R")
 
 
 ################################################################################
