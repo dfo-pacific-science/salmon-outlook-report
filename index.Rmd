@@ -118,4 +118,9 @@ library(flextable)
 library(readxl)
 library(purrr)
 # add more packages here as needed
+
+
+source("createTablesForReport.R")
 ```
+
+
