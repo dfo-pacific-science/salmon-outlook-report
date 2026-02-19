@@ -10,8 +10,6 @@ library(dplyr)
 library(knitr)
 library(stringr)
 
-#source("dataPrepCode/statusTables.R")
-source("statusTableWithOthers.R")
 
 # Pull all SMUs from crosswalkList
 all_smus = crosswalkList %>%
@@ -95,7 +93,7 @@ reported_smus = cu_outlook_records_enriched %>%
 # Remove the CUs associated with the SMUs that have been reported
 reference_cus = crosswalkList %>%
   mutate(
-    CU_Code = toupper(str_trim(name)),
+    CU_Code = toupper(str_trim(cu)),
     smu_clean = str_remove(smu, "—.*$") %>% str_remove("CHECK:.*$") %>% str_trim()
   ) %>%
   filter(!smu_clean %in% reported_smus)
@@ -155,6 +153,21 @@ if (nrow(missing_cus) == 0) {
 ### Sockeye
 
 ```{r ytSockeyeTable}
+
+################################################################################
+# AREA TABLES
+#
+# For each Area × Species combination, we attempt to generate a formatted
+# SMU table using make_table().
+#
+# We wrap each call in tryCatch() so that:
+# - If no data exists for that combination,
+#   the document does NOT fail to knit.
+# - Instead, we print a clean message and continue.
+#
+# This makes the Rmd robust to partial data entry years.
+################################################################################
+
 
 ft = tryCatch(
   make_table("YUKON AND TRANSBOUNDARY", "Sockeye"),
