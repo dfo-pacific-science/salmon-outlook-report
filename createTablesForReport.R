@@ -161,6 +161,35 @@ style_smu_table = function(big_df) {
 # selectively turn italics on/off for specific parts.
 ################################################################################
 
+make_caption = function(species, area, year = format(Sys.Date(), "%Y")) {
+  # Normalize area to Title Case and fix "And" to "and"
+  area_titleCase = area %>%
+    tolower() %>%
+    tools::toTitleCase() %>%
+    gsub("\\bAnd\\b", "and", ., perl = TRUE)
+
+  # Exact 5-species lookup
+  sci_lookup = c(
+    chinook = "Oncorhynchus tshawytscha",
+    coho    = "Oncorhynchus kisutch",
+    sockeye = "Oncorhynchus nerka",
+    chum    = "Oncorhynchus keta",
+    pink    = "Oncorhynchus gorbuscha"
+  )
+
+  # Key for lookup is lowercased species name
+  sp_key = tolower(trimws(species))
+  sci = sci_lookup[[sp_key]]  # assumes species is valid
+
+  paste0(
+    "Summary of Outlooks, forecasts (where available), and narrative descriptions for ",
+    species, " salmon ", sci, " in the ", area_titleCase,
+    " area during the ", year, " management cycle. Values are presented for each Stock ",
+    "Management Unit (SMU), and where applicable, for associated singular Conservation Units (CUs), ",
+    "CU aggregations, and Hatchery or Indicator stocks."
+  )
+}
+
 ################################################################################
 # Main wrapper function.
 # This:
@@ -235,7 +264,7 @@ make_table = function(area, species, data = tabPrep) {
 ################################################################################
 # Example usage (unchanged)
 # make_table("FRASER AND INTERIOR", "Chinook")
-# make_table("SOUTH COAST", "Chinook")
+make_table("SOUTH COAST", "Chinook")
 
 # End of script
 
