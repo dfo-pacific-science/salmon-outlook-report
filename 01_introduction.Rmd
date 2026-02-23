@@ -35,13 +35,13 @@ The purpose of a stock forecast or Outlook is to provide information to harvest 
 For implementation of the *Wild Salmon Policy* (WSP) [@DFO2005], the status of Pacific salmon CUs are assessed against biological benchmarks. These benchmarks are specific, science-based quantitative values that aim to delineate the three population status zones (further described below). The lower biological benchmark allows for substantial buffer between it and the level of abundance at which the stock would be considered at risk of extinction and is generally estimated as S~GEN~. The upper biological benchmark delineates the ‘amber’ from ‘green’ WSP status zone and is generally estimated as 0.80 S~MSY~. For more data-limited systems (i.e., where it is not possible to numerically estimate stock-recruit parameters), proxies for lower and upper biological benchmarks may be applied. For example, the lower and upper biological benchmarks are estimated as 25th and 60th percentiles of the long-term observed spawning abundance
 
 ```{r benchmarks, out.width = "70%", fig.cap = "Benchmarks and biological status zones for Conservation Unit assessments (DFO 2005).", echo=F}
-knitr::include_graphics("data/benchmarks.png")
+knitr::include_graphics("figs/benchmarks.png")
 ```
 
 Under DFO’s Precautionary Approach (PA), the SMU limit reference point (LRP) is a biologically-defined reference that delineates the ‘critical zone’ from the ‘cautious zone’ for harvest management. It represents the status below which serious harm is occurring to the stock. Additionally, there may also be resultant impacts to the ecosystem, associated species and a long-term loss of harvest opportunities.
 
 ```{r precautionary, out.width = "70%", fig.cap = "Schematic of a generalized harvest strategy under DFO’s Precautionary Approach.", echo=F}
-knitr::include_graphics("data/precautionaryApproach.png")
+knitr::include_graphics("figs/precautionaryApproach.png")
 ```
 
 Given the intent is similar between the WSP and DFO’s PA, it is practical to equate the SMU LRPs with lower biological benchmarks at the CU level. However, the WSP recognizes that serious harm to species occurs when CUs are depleted or lost. Therefore, to be consistent with the WSP, LRPs at the SMU scale should consider CU-scale biodiversity. Methodological approaches for defining LRPs are being developed to ensure CU-level biodiversity is considered for both data-rich and data-limited assessment systems.
