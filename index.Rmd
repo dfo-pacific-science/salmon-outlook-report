@@ -106,7 +106,7 @@ flextable::set_flextable_defaults(
 )
 ```
 
-```{r load-libraries-user}
+```{r load-libraries-user, local = F}
 library(dplyr)
 library(ggplot2)
 library(readr)
@@ -119,8 +119,6 @@ library(readxl)
 library(purrr)
 # add more packages here as needed
 
-
-source("createTablesForReport.R")
 ```
 
 
