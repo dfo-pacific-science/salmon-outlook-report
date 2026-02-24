@@ -26,7 +26,7 @@
 
 # Read in the script that creates the tables for the PowerPoint
 # It uses the data from that
-source("powerPointTables.R")
+source("R/powerPointTables.R")
 
 ################################################################################
 ## Load required libraries
