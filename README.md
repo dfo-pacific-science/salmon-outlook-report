@@ -1,54 +1,119 @@
+---
+editor_options: 
+  markdown: 
+    wrap: 72
+---
 
 # Salmon Outlook Report
 
-**Note:** This repository is a work in progress. Instructions and code may change as development continues.
+**Note:** This repository is a work in progress. Instructions and code
+may change as development continues.
 
 ## Overview
-The Salmon Outlook is an annual process that provides categorical and numeric estimates of salmon abundance for the upcoming year by Stock Management Unit (SMU) and/or Conservation Unit (CU). These estimates help inform harvest planning decisions.
 
-This repository contains R code and supporting files designed to modernize the data flow for Salmon Outlooks by:
-- Streamlining data collection (e.g., using surveys)
-- Improving final products (e.g., reorganized tables based on new Crosswalk data, more visually engaging presentations)
-- Automating parts of the process to reduce manual work
+The Salmon Outlook is an annual process that provides categorical and
+numeric estimates of salmon abundance for the upcoming year by Stock
+Management Unit (SMU) and/or Conservation Unit (CU). These estimates
+help inform harvest planning decisions.
 
----
+This repository contains R code and supporting files as part of a
+modernized data flow for Salmon Outlooks, which includes:
+
+-   Streamlining data collection (e.g., using surveys)
+-   Improving final products (e.g.,reorganized tables based on new
+    Crosswalk data, more visually engaging presentations)
+-   Automating parts of the process to reduce manual work
+
+------------------------------------------------------------------------
 
 ## Features
-The code in this repository supports:
-1. Semi-automated presentations tailored for different audiences (executives, fisheries managers, external teams)
-2. Automated report generation using R Markdown, based on the technical report format from the `csasdown` R package
 
----
+This repository includes code that supports the following workflows:
+
+1.  Automated report generation using R Markdown, following the
+    technical report format provided by the `csasdown` R package. The
+    code is used to produce a finalized report for submission to the DFO
+    Library. See the [2026 Preliminary Outlook
+    Report](https://waves-vagues.dfo-mpo.gc.ca/library-bibliotheque/41316605.pdf)
+    for an example of the final output.
+2.  Semi‑automated creation of presentation materials for the annual
+    Preliminary Outlook Presentation held each January. The code
+    populates an existing PowerPoint template with updated tables to
+    reduce manual copying and pasting. See the [2026 Preliminary Outlook
+    Presentation](https://github.com/dfo-pacific-science/salmon-outlook-report/blob/main/PowerPoints/2026_PreliminaryPresentation_Reference.pptx)
+    for the final output.
+
+------------------------------------------------------------------------
 
 ## Data
-- Input data comes from Survey123 and is stored in the `data/` folder (currently `Test3.xlsx`).
-- Replace this test file with actual survey results when available.
-- For scripts to run correctly, the Excel file should include three sheets:
-    - `Salmon_Outlook_Report`: Outlooks + related info for SMUs
-    - `cu_outlook_records`: Outlooks + related info for CUs
-    - `other_records`: Outlooks + related info for hatchery & indicator stocks
 
----
+-   Input data comes from Survey123 and is stored in the `data/` folder
+    (currently `09Jan2026Data.xlsx`).
+-   For scripts to run correctly, the Excel file should include three
+    sheets:
+    -   `Salmon_Outlook_Report`: Outlooks + related info for SMUs
+    -   `cu_outlook_records`: Outlooks + related info for CUs
+    -   `other_records`: Outlooks + related info for hatchery &
+        indicator stocks
+-   `lookupTables.xlsx` includes the CU codes and full names, which get
+    added to the data file (currently only includes CU codes).
+-   `outlookClasses.xlsx` which contains the tabular data to generate
+    Table 1 in the Outlook Report (see p.5 in the [2026 Preliminary
+    Outlook
+    Report](https://waves-vagues.dfo-mpo.gc.ca/library-bibliotheque/41316605.pdf))
+
+------------------------------------------------------------------------
+
+## R
+
+This folder contains the R code for reading in, manipulating the Excel survey data.
+
+-   dataPreprocessing.R:
+    -   Reads in raw outlook data. Contains 3 sheets (SMU-level info, CU, and Hatchery/Indicator)
+    -   Completes error checks to ensure e.g., no duplicate submissions, missing data, Outlooks assigned to SMU and CU, etc.
+    -   Assigns resolution category (e.g., SMU, CU (aggregate), CU (singular) according to data).
+    -   Final output is 1 data frame. Gets read into table making script for Outlook Report, also used for PowerPoint creation tables.
+-   createTablesForReport.R
+    -   reads in data frame from above, creates “flextables” for each area/species. Flextables are fancy R tables used for reports. These has all the formatting, like grey headers, bold font, etc. in a make_table() function
+-   outlookGrid.R:
+    -   Creates outlook summary image for PowerPoint and final report. Outlooks shown as squares, either for entire SMU or individual CUs, coloured and numbered
+        to show summary for the SMU. Shown in a grid for each DFO area (columns) and Pacific salmon species (rows).
+    -   See page (see p.52 in the [2026 Preliminary
+    Outlook
+    Report](https://waves-vagues.dfo-mpo.gc.ca/library-bibliotheque/41316605.pdf)) for reference
+-   powerPointTables.R: 
+    -   Adds tables to existing PowerPoint template to create Preliminary Outlook Presentation
+    
+
+------------------------------------------------------------------------
 
 ## How to Use
 
 ### Generate the Report
-1. Open `Index.Rmd` in RStudio.
-2. Click **Knit** to create the report.
-   - Tables are generated by `statusTables.R` in the `data/` folder.
-   - Update this script to point to the correct data file.
+
+1.  Open `Index.Rmd` in RStudio.
+2.  Click **Knit** to create the report.
+    -   Tables are generated by `statusTables.R` in the `data/` folder.
+    -   Update this script to point to the correct data file.
 
 ### Create the PowerPoint
-1. Open `powerPointTables.R` in the `data/` folder.
-2. Run the script to:
-   - Add tables and maps from the data file
-   - Insert them into the template PowerPoint (`draftPrelimPres.pptx`)
-   - Save the new file as `updated_presentation.pptx`
 
----
+1.  Open `powerPointTables.R` in the `data/` folder.
+2.  Run the script to:
+    -   Add tables and maps from the data file
+    -   Insert them into the template PowerPoint
+        (`draftPrelimPres.pptx`)
+    -   Save the new file as `updated_presentation.pptx`
+
+------------------------------------------------------------------------
 
 ## Additional Notes
-- Connect RStudio to this GitHub repository. If you’re unfamiliar with the process, see this [UC Davis Git/GitHub Guide](https://ucd-r-davis.github.io/R-DAVIS/setting_up_git.html).
-- You may also need to follow the initial Setup instructions in the [csasdown guide](https://github.com/pbs-assess/csasdown/tree/main). Will investigate and clarify.
 
----
+-   Connect RStudio to this GitHub repository. If you’re unfamiliar with
+    the process, see this [UC Davis Git/GitHub
+    Guide](https://ucd-r-davis.github.io/R-DAVIS/setting_up_git.html).
+-   You may also need to follow the initial Setup instructions in the
+    [csasdown guide](https://github.com/pbs-assess/csasdown/tree/main).
+    Will investigate and clarify.
+
+------------------------------------------------------------------------
