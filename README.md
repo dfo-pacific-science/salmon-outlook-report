@@ -8,13 +8,14 @@
 
 The Salmon Outlook is an annual process that provides categorical and numeric estimates of salmon abundance for the upcoming year by Stock Management Unit (SMU) and/or Conservation Unit (CU). These estimates inform harvest planning decisions.
 
-This repository contains R code and supporting files used in a modernized data flow for Salmon Outlooks. The goals are to:
+This repository contains R code and supporting files used in a modernized data flow for Salmon Outlook to create reproducible work flow, and automate parts of the process.
+For example, in 2025-2026 undertook steps to:
 
 -   Streamline data collection (e.g., using Survey123)
--   Improve final products (e.g., reorganized tables based on updated crosswalk data, more consistent formatting)
--   Automate parts of the process to reduce manual work
+-   Improve final products (e.g., reorganized tables based on updated Crosswalk data, more consistent formatting)
+-   to reduce manual work
 
-The report is generated using the `csasdown` R package. This package is designed for CSAS technical reports. While the Salmon Outlook is not a true CSAS technical report, this format is the closest available template. Some manual adjustments are required after knitting (see below).
+This GitHub repository includes code to undertake those steps.
 
 ------------------------------------------------------------------------
 
@@ -28,9 +29,12 @@ This repository supports the following workflows:
     See the 2026 Preliminary Outlook Report for an example:\
     <https://waves-vagues.dfo-mpo.gc.ca/library-bibliotheque/41316605.pdf>
 
+    **Note** that this report was based on the `csasdown` R package, specifically the styling for Technical Report. 
+    While the Salmon Outlook is not a true CSAS technical report, this format is the closest available template. 
+
 2.  **Semi-automated PowerPoint creation** for the annual Preliminary Outlook Presentation (January). Tables are programmatically inserted into an existing template to reduce manual copying and pasting.
 
-    See the 2026 reference presentation:\
+    See the 2026 reference presentation for example of final output:\
     <https://github.com/dfo-pacific-science/salmon-outlook-report/blob/main/PowerPoints/2026_PreliminaryPresentation_Reference.pptx>
 
 ------------------------------------------------------------------------
@@ -48,20 +52,21 @@ The Excel file must contain three sheets:
 Additional supporting files:
 
 -   `lookupTables.xlsx`\
-    Contains CU codes and full names used to append descriptive fields.
+    Contains CU codes and full names, which get added to the tables.
 
 -   `outlookClasses.xlsx`\
     Contains tabular data used to generate Table 1 in the Outlook Report (see p.5 of the 2026 report).
 
 ------------------------------------------------------------------------
 
-## R Scripts
+## R Scripts (in R folder)
 
 These scripts handle data validation, formatting, and output creation.
+Comments describing the overall process and steps within code are provided in each script.
 
 ### `dataPreprocessing.R`
 
--   Reads in raw Outlook data (all three sheets).
+-   Reads in raw Outlook data (all three sheets) from survey123.
 -   Performs error checks (e.g., duplicate submissions, missing fields, mismatched SMU/CU assignments).
 -   Assigns resolution category (SMU, CU aggregate, or CU singular).
 -   Outputs a single cleaned data frame.
@@ -89,7 +94,8 @@ These tables are used in the final report.
 See p.52 of the 2026 report for an example:\
 <https://waves-vagues.dfo-mpo.gc.ca/library-bibliotheque/41316605.pdf>
 
-Plot sizing can be finicky depending on your graphics device. It is often easiest to generate this separately and insert manually.
+While it could be possible to automatically add these to the Report and Powerpoint, Plot sizing can be finicky depending on your R Studio plotting window.It also adds rendering time. 
+Instead, it is easiest to generate this separately and insert the images manually into the report and PowerPoint.
 
 ------------------------------------------------------------------------
 
@@ -138,10 +144,9 @@ More information on CSL files:\
 
 Contains `refs.bib`, which stores references used in the report.
 
-Only a few citations appear in the final Outlook Report. Additional references may be stored here if needed.
+Only a few citations appear in the final Outlook Report. Additional references from the csasdown generation were included as reference..
 
-If unfamiliar with `.bib` files, see:\
-<https://happygitwithr.com/>
+Note that most citation softwares will generate .bib files. If you are unfamiliar with these files, see for example, https://www.ub.uzh.ch/en/unterstuetzung-erhalten/tutorials/publizieren/How-to-Cite-in-LaTeX.html
 
 ------------------------------------------------------------------------
 
@@ -166,8 +171,6 @@ The main file is `Index.Rmd`.
 
 The order of sections is controlled by `_bookdown.yml`.
 
-Note: `csasdown` controls much of the formatting internally, which can make styling less transparent than standard R Markdown workflows.
-
 ------------------------------------------------------------------------
 
 ## How to Use
@@ -178,13 +181,9 @@ If this is your first time using `csasdown`, complete the setup instructions her
 
 <https://github.com/pbs-assess/csasdown/tree/main>
 
-It is strongly recommended to do a practice run using their example template before working with this repository. This helps confirm that:
-
--   LaTeX dependencies are installed (if needed)
--   Word templates are properly configured
--   Your system can successfully knit a basic `csasdown` document
-
-This repository assumes that setup is already working.
+It is strongly recommended to do a practice run using their example template before working with this repository.
+Follow their instructions online (e.g., using the `csasdown::draft("techreport")` command, which will create similar files.
+e.g., read through their Rmd files that are generated - helpful guidance for how to structure report, reference citations, etc.
 
 ------------------------------------------------------------------------
 
@@ -200,8 +199,8 @@ Rendering takes \~30 seconds. The output (`techreport.docx`) will appear in the 
 **Important:**\
 Because the Outlook is not a true CSAS technical report, manual edits are required after knitting. For example:
 
--   Adjusting section headings
--   Removing or modifying technical report boilerplate text
+-   Removing the automatically-generated title pages, and replacing them with what has been used in previous years.
+-   Adding the citation page as the last page to the report.
 -   Inserting finalized maps (created separately in ArcGIS)
 
 Maps should be inserted above the relevant table captions.
@@ -234,6 +233,6 @@ If unfamiliar with connecting RStudio to GitHub, see:
 
 <https://ucd-r-davis.github.io/R-DAVIS/setting_up_git.html>
 
-Additional Git/GitHub guidance:
+Additional R/Git/GitHub guidance:
 
 <https://happygitwithr.com/>
