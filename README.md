@@ -185,11 +185,16 @@ Report creates auto-generated table captions. Insert maps above each table capti
 
 ## Additional Notes
 
--   Connect RStudio to this GitHub repository. If you’re unfamiliar with
-    the process, see this [UC Davis Git/GitHub
-    Guide](https://ucd-r-davis.github.io/R-DAVIS/setting_up_git.html).
--   You may also need to follow the initial Setup instructions in the
-    [csasdown guide](https://github.com/pbs-assess/csasdown/tree/main).
-    Will investigate and clarify.
-
+-   You will need R, RStudio, Git and GitHub to connect to this repository and make future additions.
+    Various helpful online resources to do so. 
+- This site very common guide for getting started. (https://happygitwithr.com)]
+-   If you’re unfamiliar with
+The [UC Davis Git/GitHub
+    Guide](https://ucd-r-davis.github.io/R-DAVIS/setting_up_git.html) also contains helpful advice for connecting RStudio to GitHub.
+    -
+-   If you are new to using csasdown, it is strongly recommended you view and follow
+their initial setup instructions in the
+    [csasdown guide](https://github.com/pbs-assess/csasdown/tree/main). Generate the report
+    and very helpful comments throughout each of the files. If you follow their steps from a blank R project, it will generate files that I have set up already. But with sample demo, and more background on how everything fits together. E.g., tells you how to make a table, how to reference things. V helpful!!!
+At times, very specialized, and may not follow regular logic of R Markdown.Very helpufl!
 ------------------------------------------------------------------------
