@@ -184,6 +184,16 @@ if(!is.null(ft)){
 
 ```
 
+```{r ytCohoMapPlaceholder}
+  fig.cap = make_fig_caption("Coho", "YUKON AND TRANSBOUNDARY"),
+  fig.align='center', echo=FALSE}
+# Placeholder "figure" to anchor the caption with correct styling
+op <- par(mar = c(0,0,0,0))
+plot.new()
+par(op)
+```
+
+
 ### Pink
 
 ```{r ytPinkTable}
