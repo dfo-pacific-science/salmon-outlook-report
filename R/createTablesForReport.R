@@ -188,13 +188,44 @@ make_caption = function(species, area, year = format(Sys.Date(), "%Y")) {
   sci = sci_lookup[[sp_key]]  # assumes species is valid
 
   paste0(
-    "Summary of Outlooks, forecasts (where available), and narrative descriptions for ",
-    species, " salmon ", sci, " in the ", area_titleCase,
+    "Summary of Outlooks, forecasts (where available), and narrative descriptions for (",
+    species, ") salmon ", sci, " in the ", area_titleCase,
     " area during the ", year, " management cycle. Values are presented for each Stock ",
     "Management Unit (SMU), and where applicable, for associated singular Conservation Units (CUs), ",
     "CU aggregations, and Hatchery or Indicator stocks."
   )
 }
+
+# Function for making FIGURE caption
+make_fig_caption <- function(species, area, year = format(Sys.Date(), "%Y")) {
+
+  # Normalize area for consistency with your table caption function
+  area_titleCase = area %>%
+    tolower() %>%
+    tools::toTitleCase() %>%
+    gsub("\\bAnd\\b", "and", ., perl = TRUE)
+
+  # Same species → Latin lookup
+  sci_lookup = c(
+    chinook = "Oncorhynchus tshawytscha",
+    coho    = "Oncorhynchus kisutch",
+    sockeye = "Oncorhynchus nerka",
+    chum    = "Oncorhynchus keta",
+    pink    = "Oncorhynchus gorbuscha"
+  )
+
+  sp_key = tolower(trimws(species))
+  sci = sci_lookup[[sp_key]]
+
+  paste0(
+    "Figure. Map of Outlooks for ", tolower(species), " salmon (", sci, ") in the ",
+    area_titleCase, " area for the ", year, " management cycle. ",
+    "Text labels indicate Stock Management Units."
+  )
+}
+
+
+
 
 ################################################################################
 # Main wrapper function.
