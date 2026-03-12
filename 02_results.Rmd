@@ -183,16 +183,12 @@ if(!is.null(ft)){
 }
 
 ```
-
-```{r ytCohoMapPlaceholder}
-  fig.cap = make_fig_caption("Coho", "YUKON AND TRANSBOUNDARY"),
-  fig.align='center', echo=FALSE}
-# Placeholder "figure" to anchor the caption with correct styling
+```{r ytSockeyeFig, echo=FALSE, fig.align="center", out.width="100%", fig.cap=make_fig_caption("Sockeye", "YUKON AND TRANSBOUNDARY")}
+# Placeholder figure to anchor the caption with correct styling
 op <- par(mar = c(0,0,0,0))
 plot.new()
 par(op)
 ```
-
 
 ### Pink
 
@@ -212,6 +208,12 @@ if(!is.null(ft)){
 
 ```
 
+```{r ytPinkFig, echo=FALSE, fig.align="center", out.width="100%", fig.cap=make_fig_caption("Pink", "YUKON AND TRANSBOUNDARY")}
+# Placeholder figure to anchor the caption with correct styling
+op <- par(mar = c(0,0,0,0))
+plot.new()
+par(op)
+```
 
 ### Chinook
 
@@ -229,6 +231,13 @@ if(!is.null(ft)){
   ft
 }
 
+```
+
+```{r ytChinookFig, echo=FALSE, fig.align="center", out.width="100%", fig.cap=make_fig_caption("Chinook", "YUKON AND TRANSBOUNDARY")}
+# Placeholder figure to anchor the caption with correct styling
+op <- par(mar = c(0,0,0,0))
+plot.new()
+par(op)
 ```
 
 ### Coho
@@ -249,6 +258,14 @@ if(!is.null(ft)){
 
 ```
 
+```{r ytCohoFig, echo=FALSE, fig.align="center", out.width="100%", fig.cap=make_fig_caption("Coho", "YUKON AND TRANSBOUNDARY")}
+# Placeholder figure to anchor the caption with correct styling
+op <- par(mar = c(0,0,0,0))
+plot.new()
+par(op)
+```
+
+
 ### Chum
 
 ```{r ytChumTable}
@@ -267,6 +284,12 @@ if(!is.null(ft)){
 
 ```
 
+```{r ytChumFig, echo=FALSE, fig.align="center", out.width="100%", fig.cap=make_fig_caption("Chum", "YUKON AND TRANSBOUNDARY")}
+# Placeholder figure to anchor the caption with correct styling
+op <- par(mar = c(0,0,0,0))
+plot.new()
+par(op)
+```
 
 ## NORTH COAST AREA
 
@@ -287,6 +310,14 @@ if(!is.null(ft)){
 }
 ```
 
+```{r northSockeyeFig, echo=FALSE, fig.align="center", out.width="100%", fig.cap=make_fig_caption("Sockeye", "NORTH COAST")}
+# Placeholder figure to anchor the caption with correct styling
+op <- par(mar = c(0,0,0,0))
+plot.new()
+par(op)
+```
+
+
 ### Pink
 
 ```{r northPinkTable}
@@ -303,6 +334,14 @@ if(!is.null(ft)){
   ft
 }
 ```
+
+```{r northPinkFig, echo=FALSE, fig.align="center", out.width="100%", fig.cap=make_fig_caption("Pink", "NORTH COAST")}
+# Placeholder figure to anchor the caption with correct styling
+op <- par(mar = c(0,0,0,0))
+plot.new()
+par(op)
+```
+
 
 ### Chinook
 
@@ -321,6 +360,14 @@ if(!is.null(ft)){
 }
 ```
 
+```{r northChinookFig, echo=FALSE, fig.align="center", out.width="100%", fig.cap=make_fig_caption("Chinook", "NORTH COAST")}
+# Placeholder figure to anchor the caption with correct styling
+op <- par(mar = c(0,0,0,0))
+plot.new()
+par(op)
+```
+
+
 ### Coho
 
 ```{r northCohoTable}
@@ -338,9 +385,17 @@ if(!is.null(ft)){
 }
 ```
 
+```{r northCohoFig, echo=FALSE, fig.align="center", out.width="100%", fig.cap=make_fig_caption("Coho", "NORTH COAST")}
+# Placeholder figure to anchor the caption with correct styling
+op <- par(mar = c(0,0,0,0))
+plot.new()
+par(op)
+```
+
+
 ### Chum
 
-```{r northchumTable}
+```{r northChumTable}
 
 ft = tryCatch(
   make_table("NORTH COAST", "Chum"),
@@ -355,12 +410,18 @@ if(!is.null(ft)){
 }
 ```
 
+```{r northChumFig, echo=FALSE, fig.align="center", out.width="100%", fig.cap=make_fig_caption("Chum", "NORTH COAST")}
+# Placeholder figure to anchor the caption with correct styling
+op <- par(mar = c(0,0,0,0))
+plot.new()
+par(op)
+```
 
 ## SOUTH COAST AREA
 
 ### Sockeye
 
-```{r scsockeyLTTable}
+```{r scSockeyeTable}
 
 ft = tryCatch(
   make_table("SOUTH COAST", "Sockeye"),
@@ -376,6 +437,12 @@ if(!is.null(ft)){
 
 ```
 
+```{r scSockeyeFig, echo=FALSE, fig.align="center", out.width="100%", fig.cap=make_fig_caption("Sockeye", "SOUTH COAST")}
+# Placeholder figure to anchor the caption with correct styling
+op <- par(mar = c(0,0,0,0))
+plot.new()
+par(op)
+```
 
 ### Pink
 
@@ -393,6 +460,14 @@ if(!is.null(ft)){
   ft
 }
 
+```
+
+
+```{r scPinkFig, echo=FALSE, fig.align="center", out.width="100%", fig.cap=make_fig_caption("Pink", "SOUTH COAST")}
+# Placeholder figure to anchor the caption with correct styling
+op <- par(mar = c(0,0,0,0))
+plot.new()
+par(op)
 ```
 
 ### Chinook
@@ -414,6 +489,15 @@ if(!is.null(ft)){
 
 ```
 
+```{r scChinookFig, echo=FALSE, fig.align="center", out.width="100%", fig.cap=make_fig_caption("Chinook", "SOUTH COAST")}
+# Placeholder figure to anchor the caption with correct styling
+op <- par(mar = c(0,0,0,0))
+plot.new()
+par(op)
+```
+
+
+
 ### Coho
 
 ```{r scCohoTable}
@@ -431,6 +515,14 @@ if(!is.null(ft)){
 }
 
 ```
+
+```{r scSCohoFig, echo=FALSE, fig.align="center", out.width="100%", fig.cap=make_fig_caption("Coho", "SOUTH COAST")}
+# Placeholder figure to anchor the caption with correct styling
+op <- par(mar = c(0,0,0,0))
+plot.new()
+par(op)
+```
+
 
 
 ### Chum
@@ -452,6 +544,14 @@ if(!is.null(ft)){
 
 ```
 
+```{r scChumFig, echo=FALSE, fig.align="center", out.width="100%", fig.cap=make_fig_caption("Chum", "SOUTH COAST")}
+# Placeholder figure to anchor the caption with correct styling
+op <- par(mar = c(0,0,0,0))
+plot.new()
+par(op)
+```
+
+
 ## FRASER AND INTERIOR AREA
 
 ### Sockeye
@@ -471,6 +571,14 @@ if(!is.null(ft)){
 }
 ```
 
+```{r fiaSockeyeFig, echo=FALSE, fig.align="center", out.width="100%", fig.cap=make_fig_caption("Sockeye", "FRASER AND INTERIOR")}
+# Placeholder figure to anchor the caption with correct styling
+op <- par(mar = c(0,0,0,0))
+plot.new()
+par(op)
+```
+
+
 ### Pink
 
 ```{r fiaPinkEvenTable}
@@ -486,6 +594,13 @@ ft = tryCatch(
 if(!is.null(ft)){
   ft
 }
+```
+
+```{r fiaPinkFig, echo=FALSE, fig.align="center", out.width="100%", fig.cap=make_fig_caption("Pink", "FRASER AND INTERIOR")}
+# Placeholder figure to anchor the caption with correct styling
+op <- par(mar = c(0,0,0,0))
+plot.new()
+par(op)
 ```
 
 ### Chinook
@@ -506,6 +621,15 @@ if(!is.null(ft)){
 
 ```
 
+```{r fiaChinookFig, echo=FALSE, fig.align="center", out.width="100%", fig.cap=make_fig_caption("Chinook", "FRASER AND INTERIOR")}
+# Placeholder figure to anchor the caption with correct styling
+op <- par(mar = c(0,0,0,0))
+plot.new()
+par(op)
+```
+
+
+
 ### Coho
 
 ```{r fiaCohoTable}
@@ -523,6 +647,14 @@ if(!is.null(ft)){
 }
 
 ```
+
+```{r fiaCohoFig, echo=FALSE, fig.align="center", out.width="100%", fig.cap=make_fig_caption("Coho", "FRASER AND INTERIOR")}
+# Placeholder figure to anchor the caption with correct styling
+op <- par(mar = c(0,0,0,0))
+plot.new()
+par(op)
+```
+
 
 ### Chum
 
@@ -542,7 +674,12 @@ if(!is.null(ft)){
 
 ```
 
-
+```{r fiaChumFig, echo=FALSE, fig.align="center", out.width="100%", fig.cap=make_fig_caption("Chum", "FRASER AND INTERIOR")}
+# Placeholder figure to anchor the caption with correct styling
+op <- par(mar = c(0,0,0,0))
+plot.new()
+par(op)
+```
 
 
 
