@@ -1,23 +1,25 @@
 ################################################################################
+# SMU Table Builder and Caption Formatting Functions
 
+# Created by: Stephen Finnis
 
+# This script assembles the tables used in the report and applies the correct
+# formatting (e.g., grey headers, bold names, etc.)
+# Also includes functions for creating the table and figure captions with
+# scientific names included
 
-
-
-
+################################################################################
 
 source("R/dataPreprocessing.R")
-
 
 ################################################################################
 ### Table building and styling functions
 
-# Each SMU gets its own “block” consisting of:
+# Each SMU gets its own block consisting of:
 #  1) a grey SMU label row
 #  2) the narrative text
 #  3) a column header row
 #  4) the actual data rows
-
 
 build_block = function(df_smu) {
   smu  = unique(df_smu$smu_name)
@@ -77,22 +79,16 @@ style_smu_table = function(big_df) {
   idx_label  = which(big_df$Resolution == "SMU" & big_df$Name == "Narrative")
 
   # Identify the row that acts as an internal column header.
-  # In this table design, we are not using the native flextable header.
-  # Instead, one row in the body acts as the header row.
   idx_header = which(big_df$Resolution == "Resolution")
 
-  # We want a thicker line *before* each new SMU block,
-  # but not before the very first one.
-  # So we take all SMU start rows except the first,
-  # and subtract 1 to place the border on the row above.
+  # Want a thicker line *before* each new SMU block, but not before the very first one.
+  # Take all SMU start rows except the first, and subtract 1 to place the border on the row above.
   idx_separators = idx_label[-1] - 1
 
   # Create the flextable object from the prepared data frame.
   ft = flextable(big_df)
 
-  # We intentionally delete the default header.
-  # This gives us full control over formatting,
-  # since we are treating one body row as the header instead.
+  # Intentionally delete the default header to have greater control over formatting,
   ft = delete_part(ft, part = "header")
 
   # Start from a clean slate: remove all default borders.
@@ -117,8 +113,8 @@ style_smu_table = function(big_df) {
   # Add vertical internal borders between columns.
   ft = border_inner_v(ft, fp_border(width = 1))
 
-  # Now add thin horizontal borders to all other rows.
-  # We exclude the rows that already received thick separators.
+  # Add thin horizontal borders to all other rows.
+  # Exclude the rows that already received thick separators.
   all_rows  = seq_len(nrow(big_df))
   thin_rows = setdiff(all_rows, idx_separators)
 
