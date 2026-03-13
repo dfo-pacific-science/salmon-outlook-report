@@ -42,90 +42,7 @@ library(grid)
 
 tp_clean = tp_long %>%
 
-
-group_by(SMU) %>%
-  mutate(
-    CU = case_when(
-      SMU == "MIDDLE GEORGIA STRAIT CHINOOK SALMON" & row_number() == 1 ~
-        "MGS CHINOOK – PLACEHOLDER A",
-      SMU == "MIDDLE GEORGIA STRAIT CHINOOK SALMON" & row_number() == 2 ~
-        "MGS CHINOOK – PLACEHOLDER B",
-      SMU == "MIDDLE GEORGIA STRAIT CHINOOK SALMON" & row_number() == 3 ~
-        "MGS CHINOOK – PLACEHOLDER C",
-      TRUE ~ CU
-    ),
-    Outlook = case_when(
-      SMU == "MIDDLE GEORGIA STRAIT CHINOOK SALMON" & row_number() == 1 ~ "DD",
-      SMU == "MIDDLE GEORGIA STRAIT CHINOOK SALMON" & row_number() == 2 ~ "1 to 2",
-      SMU == "MIDDLE GEORGIA STRAIT CHINOOK SALMON" & row_number() == 3 ~ "4",
-      TRUE ~ Outlook
-    )
-  ) %>%
-  ungroup() %>%
-
-  # =========================
-# SPLIT FINICKY SMUs / CUs
 # =========================
-{
-  base <- .
-
-  # ---- HAIDA GWAII PINK SALMON ----
-  haida_template <- base %>%
-    filter(SMU == "HAIDA GWAII PINK SALMON") %>%
-    slice(1) %>%
-    select(-CU, -Outlook, -Resolution)
-
-  haida_split <- bind_rows(
-    haida_template %>%
-      mutate(
-        CU = "EAST HAIDA GWAII",
-        Resolution = "CU (singular)",
-        Outlook = "4"
-      ),
-    haida_template %>%
-      mutate(
-        CU = "NORTH HAIDA GWAII, WEST HAIDA GWAII",
-        Resolution = "CU (aggregate)",
-        Outlook = "DD"
-      )
-  )
-
-  # ---- CENTRAL COAST PINK SALMON ----
-  central_template <- base %>%
-    filter(SMU == "CENTRAL COAST PINK SALMON") %>%
-    slice(1) %>%
-    select(-CU, -Outlook, -Resolution)
-
-  central_coast_split <- bind_rows(
-    central_template %>%
-      mutate(
-        CU = "HECATE LOWLANDS, HECATE STRAIT-FJORDS",
-        Resolution = "CU (aggregate)",
-        Outlook = "4"
-      ),
-    central_template %>%
-      mutate(
-        CU = "HOMATHKO-KLINAKLINI-SMITH-RIVERS-BELLA-COOLA-DEAN",
-        Resolution = "CU (singular)",
-        Outlook = "DD"
-      )
-  )
-
-  # ---- REMOVE ORIGINALS + ADD SPLITS ----
-  base %>%
-    filter(
-      !SMU %in% c(
-        "HAIDA GWAII PINK SALMON",
-        "CENTRAL COAST PINK SALMON"
-      )
-    ) %>%
-    bind_rows(
-      haida_split,
-      central_coast_split
-    )
-} %>%
-
-  # =========================
 # STANDARD CLEANING
 # =========================
 mutate(
@@ -140,26 +57,10 @@ mutate(
     TRUE ~ smu_species
   )
 ) %>%
-
-  mutate(
-    Outlook = case_when(
-      CU == "MIDDLE FRASER-FRASER CANYON_SP_1.3, LOWER FRASER RIVER_SP_1.3" ~ "1",
-      CU == "MIDDLE FRASER RIVER_SP_1.3, NORTH THOMPSON_SP_1.3" ~ "2",
-      CU == "MIDDLE FRASER RIVER-PORTAGE_FA_1.3, LOWER FRASER RIVER-UPPER PITT_SU_1.3" ~ "1",
-      CU == "MIDDLE FRASER RIVER_SU_1.3, NORTH THOMPSON_SU_1.3" ~ "2 to 3",
-      TRUE ~ as.character(Outlook)
-    )
-  ) %>%
   filter(
     CU != "CK-02",
     CU != "OKANAGAN_0.X"
   )  %>%
-
-  filter(
-    !(smu_area == "SOUTH COAST" &
-        smu_species == "Sockeye" &
-        SMU == "NO DESIGNATED SMU")
-  ) %>%
   mutate(
     SMU = if_else(
       smu_area == "FRASER AND INTERIOR" &
@@ -176,7 +77,7 @@ mutate(
 
 # This is the preferred order for Areas (so results are North --> South)
 area_levels = c(
-  "YUKON TRANSBOUNDARY",
+  "YUKON AND TRANSBOUNDARY",
   "NORTH COAST",
   "SOUTH COAST",
   "FRASER AND INTERIOR"
