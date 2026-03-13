@@ -102,10 +102,7 @@ area_order = c("YUKON TRANSBOUNDARY", "NORTH COAST", "SOUTH COAST", "FRASER AND 
 # • Some species are lake type or river type sockeye
 # • Pink Even is not used for North Coast
 species_order = c(
-  "Sockeye Lake Type",
-  "Sockeye River Type",
   "Sockeye",
-  "Pink Even",
   "Pink",
   "Chinook",
   "Coho",
