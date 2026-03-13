@@ -18,14 +18,6 @@
 # - Resolution determines the output structure
 # - CHECK rows indicate data issues that need manual review
 
-# Notes:
-# This script is
-
-
-
-
-
-
 
 ################################################################################
 ### LOAD LIBRARIES
@@ -67,7 +59,7 @@ hatcheryIndicator = read_excel(
 # Required sheets: Salmon_Outlook_Report (SMU), cu_outlook_records (CU)
 # Optional: other_records (Hatchery/Indicator stocks)
 
-dummyPath = "data/09Jan2026Data.xlsx"  # <--- ENTER FILE PATH HERE
+dummyPath = "data/01Mar2026Data.xlsx"  # <--- ENTER FILE PATH HERE
 
 # Get sheet names
 sheet_names = readxl::excel_sheets(dummyPath)
@@ -395,13 +387,9 @@ tabPrep =
       smu_species %in% c("Sockeye Lake Type", "Sockeye River Type") ~ "Sockeye",
       smu_species == "Pink Even" ~ "Pink",
       TRUE ~ smu_species
-    ),
-    smu_area = case_when(
-      smu_area == "YUKON TRANSBOUNDARY" ~ "YUKON AND TRANSBOUNDARY",
-      TRUE ~ smu_area
     )
   ) %>%
-  # Fix specific Outlook anomalies
+  ## I just couldn't get this error fixed. For these FIA CUs, explicitly define the Outlook
   mutate(
     Outlook = case_when(
       Name == "MIDDLE FRASER-FRASER CANYON_SP_1.3, LOWER FRASER RIVER_SP_1.3" ~ "1",
