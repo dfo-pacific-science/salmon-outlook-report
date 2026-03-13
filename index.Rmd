@@ -1,6 +1,7 @@
 ---
 english_title: |
-  Title Here (*Latin Species Name*)
+  Note: This title page information does not apply. Replace these first few pages
+  with an appropriate title page for the Salmon Outlook Report.
 french_title: |
   Titre ici (*Nom latin de l'espèce*)
 
@@ -86,11 +87,6 @@ opts_chunk$set(
   fig.asp = 1 / 1.618, # golden ratio; adjust here or by chunk if desired
   dpi = 200 # adjust to taste; larger = higher resolution but larger file size
 )
-```
-
-```{r load-libraries-csasdown}
-library(csasdown2) # for new_appendix(), current_appendix(), appendix_table_caption()
-library(flextable) # recommended package for adding tables
 ```
 
 ```{r table-settings}
