@@ -77,6 +77,44 @@ Additional supporting files:
 
 ------------------------------------------------------------------------
 
+## Data Validation and CHECK Flags
+
+Several automated validation checks are built into the workflow. These
+checks are designed to catch potential data issues before the final
+report or presentation is produced.
+
+Examples of issues that may be flagged include:
+- Duplicate submissions
+- Missing outlook categories
+- Outlooks assigned to both an SMU and CU
+
+When a potential issue is detected, the scripts insert the word
+**"CHECK"** into the relevant output table or text.
+
+### Important
+
+After rendering the report, **search the document for the word
+"CHECK"**.
+
+Any occurrence indicates a potential issue that should be reviewed in
+the underlying Excel data file (e.g., `09Jan2026Data.xlsx`).
+
+These flags are intentionally visible in the output so that problems are
+not missed during the review process.
+
+### Using Older Data Files
+
+If an outdated version of the Survey123 export is used (for example, an
+older `.xlsx` file saved before data corrections were made), the report
+may contain additional **CHECK** flags. Consider testing this out to see the 
+kinds of issues that were flagged and corrected.
+
+Always confirm that the most recent version of the Excel file is being
+used before generating final outputs.
+
+------------------------------------------------------------------------
+
+
 ## R Scripts (in `R/` folder)
 
 These scripts handle data validation, formatting, and output creation.
@@ -187,6 +225,8 @@ formatting expectations.
    variable).
 3. Open `Index.Rmd` in RStudio.
 4. Click **Knit**.
+5. After the report is generated, search the document for the word
+   **CHECK**.
 
 Rendering takes ~30 seconds. The output (`techreport.docx`) will appear
 in the `_book` folder.
@@ -197,9 +237,10 @@ Some final, manual edits will be required after knitting. For example:
 - Removing the automatically generated title pages and replacing them
   with the format used in previous years.
 - Adding the citation page as the final page of the report.
-- Inserting finalized maps (created separately in ArcGIS).
+- Inserting finalized maps (created separately in ArcGIS). Currently blank images
+are created as placeholders that need to be replaced.
 
-Maps should be inserted above the relevant table captions.
+Maps should be inserted above the relevant figure captions.
 
 ------------------------------------------------------------------------
 
