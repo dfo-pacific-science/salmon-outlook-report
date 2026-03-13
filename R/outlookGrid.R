@@ -30,47 +30,24 @@ source("R/powerPointTables.R")
 
 ################################################################################
 ## Load required libraries
-
 library(dplyr)
 library(ggplot2)
 library(stringr)
 library(grid)
 
 ################################################################################
-## Make edits to the data
-# Ideally this would be
+## Make a few edits to the data
 
 tp_clean = tp_long %>%
 
-# =========================
-# STANDARD CLEANING
-# =========================
+# Make some edits to the data frame
 mutate(
+  # Remove the word "SALMON" from the SMU name
   SMU = str_remove(SMU, regex("\\bSALMON\\b", ignore_case = TRUE)),
-  SMU = str_remove(SMU, regex("\\p{Pd}\\s*CHECK:?\\s*.*$", ignore_case = TRUE)),
   SMU = str_squish(SMU),
-  Outlook = recode(Outlook, "Data Deficient" = "DD"),
-
-  smu_species = case_when(
-    smu_species %in% c("Sockeye Lake Type", "Sockeye River Type") ~ "Sockeye",
-    smu_species == "Pink Even" ~ "Pink",
-    TRUE ~ smu_species
-  )
-) %>%
-  filter(
-    CU != "CK-02",
-    CU != "OKANAGAN_0.X"
-  )  %>%
-  mutate(
-    SMU = if_else(
-      smu_area == "FRASER AND INTERIOR" &
-        smu_species == "Chinook" &
-        SMU == "NO DESIGNATED SMU",
-      "NO DESIGNATED SMU*",
-      SMU
-    )
-  )
-
+  # Change "Data Deficient" to "DD" for display over top of grid cells
+  Outlook = recode(Outlook, "Data Deficient" = "DD")
+)
 
 ################################################################################
 ## FACET ORDERING
@@ -100,8 +77,6 @@ tp_clean = tp_clean %>%
   )
 
 # Extract the SMU names for later plotting
-
-
 smu_levels = tp_clean %>%
   distinct(SMU) %>% # Get unique SMu names
   arrange(SMU) %>% # Sort them alphabetically
