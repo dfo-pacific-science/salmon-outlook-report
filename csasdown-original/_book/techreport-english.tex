@@ -1,0 +1,701 @@
+%%%%% Set up %%%%%
+
+% Set document style and font size
+\documentclass[12pt]{article}\usepackage[]{graphicx}\usepackage[]{color}
+%% maxwidth is the original width if it is less than linewidth
+%% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+\makeatletter
+\def\maxwidth{ %
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}
+\newcommand{\hlnum}[1]{\textcolor[rgb]{0.686,0.059,0.569}{#1}}%
+\newcommand{\hlstr}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
+\newcommand{\hlcom}[1]{\textcolor[rgb]{0.678,0.584,0.686}{\textit{#1}}}%
+\newcommand{\hlopt}[1]{\textcolor[rgb]{0,0,0}{#1}}%
+\newcommand{\hlstd}[1]{\textcolor[rgb]{0.345,0.345,0.345}{#1}}%
+\newcommand{\hlkwa}[1]{\textcolor[rgb]{0.161,0.373,0.58}{\textbf{#1}}}%
+\newcommand{\hlkwb}[1]{\textcolor[rgb]{0.69,0.353,0.396}{#1}}%
+\newcommand{\hlkwc}[1]{\textcolor[rgb]{0.333,0.667,0.333}{#1}}%
+\newcommand{\hlkwd}[1]{\textcolor[rgb]{0.737,0.353,0.396}{\textbf{#1}}}%
+\let\hlipl\hlkwb
+
+\usepackage{framed}
+\makeatletter
+\newenvironment{kframe}{%
+ \def\at@end@of@kframe{}%
+ \ifinner\ifhmode%
+  \def\at@end@of@kframe{\end{minipage}}%
+  \begin{minipage}{\columnwidth}%
+ \fi\fi%
+ \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
+ \colorbox{shadecolor}{##1}\hskip-\fboxsep
+     % There is no \\@totalrightmargin, so:
+     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
+ \MakeFramed {\advance\hsize-\width
+   \@totalleftmargin\z@ \linewidth\hsize
+   \@setminipage}}%
+ {\par\unskip\endMakeFramed%
+ \at@end@of@kframe}
+\makeatother
+
+\definecolor{shadecolor}{rgb}{.97, .97, .97}
+\definecolor{messagecolor}{rgb}{0, 0, 0}
+\definecolor{warningcolor}{rgb}{1, 0, 1}
+\definecolor{errorcolor}{rgb}{1, 0, 0}
+\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
+
+\usepackage{alltt}
+
+% File path to resources (style file etc)
+\newcommand{\locRepo}{csas-style}
+
+% Style file for DFO Technical Reports
+\usepackage{\locRepo/tech-report}
+
+% header-includes from R markdown entry
+\usepackage{float}
+
+%%%%% Variables %%%%%
+
+% New definitions: Title, year, report number, authors
+% Protect lower case words (i.e., species names) in \Addlcwords{}, in "TechReport.sty"
+\newcommand{\trTitle}{Title Here (\emph{Latin Species Name})}
+\newcommand{\trYear}{2022}
+\newcommand{\trReportNum}{nnn}
+\newcommand{\trDOI}{\#\#.\#\#\#\#/xxxxx}
+% Optional
+\newcommand{\trAuthFootA}{Email: \link{mailto:First.Author@dfo-mpo.gc.ca}{\nolinkurl{First.Author@dfo-mpo.gc.ca}} \textbar{} telephone: (250) 756-5555}
+\newcommand{\trAuthsLong}{First. M. Last\textsuperscript{1} and Alex B. Smith\textsuperscript{2}}
+\newcommand{\trAuthsBack}{Last, F.M. and Smith, A.B.}
+
+% New definition: Address
+\newcommand{\trAddy}{\textsuperscript{1}Pacific Biological Station\\
+Fisheries and Oceans Canada, 3190 Hammond Bay Road\\
+Nanaimo, British Columbia, V9T 6N7, Canada\\
+\textsuperscript{2}Far, far away\\
+Another Galaxy}
+
+% Abstract
+\newcommand{\trAbstract}{Here is the abstract text. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.}
+
+% Resume (i.e., French abstract)
+\newcommand{\trResume}{Voici le résumé. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.}
+
+\newcommand{\trCitationFrench}{Last, F.M. et Smith, A.B. 2022. Titre ici (Nom d'espèce latin). Rapp. tech. can. sci. halieut. aquat. nnn~: v + 18 p.~\url{https://doi.org/\#\#.\#\#\#\#/xxxxx}}
+
+\newcommand{\trISBN}{}
+
+\DeclareGraphicsExtensions{.png,.pdf}
+%%%%% Start %%%%%
+
+% Start the document
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+
+% commands and environments needed by pandoc snippets
+% extracted from the output of `pandoc -s`
+%% Make R markdown code chunks work
+\usepackage{array}
+\usepackage{amssymb,amsmath}
+\usepackage{color}
+\usepackage{fancyvrb}
+
+% From default template:
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\},formatcom=\color[rgb]{0.00,0.00,0.00}}
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textit{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textit{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textit{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textit{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\begin{document}
+
+%%%% Front matter %%%%%
+
+% Add the first few pages
+\frontmatter
+
+%%%%% Drafts %%%%%
+
+%\linenumbers  % Line numbers
+%\onehalfspacing  % Extra space between lines
+\renewcommand{\headrulewidth}{0.5pt}  % Header line
+\renewcommand{\footrulewidth}{0.5pt}  % footer line
+%\pagestyle{fancy}\fancyhead[c]{Draft: Do not cite or circulate}  % Header text
+
+\newcommand{\lt}{\ensuremath <}
+\newcommand{\gt}{\ensuremath >}
+
+%Defines cslreferences environment
+%Required by pandoc 2.8
+%Copied from https://github.com/rstudio/rmarkdown/issues/1649
+% % \newlength{\cslhangindent}
+% \setlength{\cslhangindent}{1.5em}
+% \newenvironment{cslreferences}%
+%   {}%
+%   {\par}
+% 
+%%%%% Main document %%%%%
+\hypertarget{sec:introduction}{%
+\section{Introduction}\label{sec:introduction}}
+
+Welcome to report generation using \texttt{csasdown}. Included in this example document are many useful bits of information on how to write a reproducible report document using the \texttt{csasdown} package, which is based on \link{https://rmarkdown.rstudio.com/}{Rmarkdown} and \link{https://bookdown.org/}{Bookdown}. The information given in this example document should be used with all three \texttt{csasdown} document types: Research Document (\texttt{resdoc}), Science Response (\texttt{sr}), and Technical Report (\texttt{techreport}).
+
+If you get stuck on anything, read the \texttt{csasdown} \link{https://github.com/pbs-assess/csasdown/blob/master/README.md}{README} carefully and all the \link{https://github.com/pbs-assess/csasdown/wiki}{Wiki pages}. There are many tips and tricks located in those pages.
+
+Inserting a hyperlink in Rmarkdown is easy, just look at the code for the paragraph above. It is located in \textbf{01\_introduction.Rmd}
+
+Include references in the \textbf{bib/refs.bib} file in the same format as the example that is already in the file. This is called \emph{BiBLaTeX} format. Once you have added the reference, you can cite it using Rmarkdown in the following ways:
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+
+\item
+  In parentheses: \texttt{{[}@edwards2013{]}} - renders as: (\protect\hyperlink{ref-edwards2013}{Edwards et al.~2014})
+\item
+  Inline: \texttt{@edwards2013} - renders as: Edwards et al. (\protect\hyperlink{ref-edwards2013}{2014})
+\item
+  Without author: \texttt{{[}-@edwards2013{]}} - renders as: (\protect\hyperlink{ref-edwards2013}{2014})
+\end{enumerate}
+Some references: Swain and Benoît (\protect\hyperlink{ref-swainbenoit2015}{2015}).
+
+Note that the year part of the citation is clickable and will take you directly to the reference in the References section.
+
+Here is an example equation with the code used to generate it. Note that \texttt{csasdown} automatically numbers it on the right-hand side of the page. It does this consecutively throughout the document sections, but appendices are each numbered on their own, e.g.~A.1, A.2, \ldots{} for Appendix A, and B.1, B.2, \ldots{} for Appendix B.
+\begin{verbatim}
+\begin{equation}
+  1 + 1
+  \label{eq:test}
+\end{equation}
+\end{verbatim}
+\begin{equation}
+  1 + 1
+  \label{eq:test}
+\end{equation}
+A reference can be included anywhere in the text, to refer to a section or appendix. For the first appendix in this document, the code looks like this: \texttt{\textbackslash{}@ref(app:first-appendix)}. Adding that code inline will create a clickable link in the output file: See Appendix~\ref{app:first-appendix}.
+
+The code inside the parentheses comes from the tag after the header for the section. For the appendix, the whole header line looks like:
+
+\texttt{\#\ THE\ FIRST\ APPENDIX\ \{\#app:first-appendix\}}
+
+Everything in the curly braces except for the hash sign is the tag you use to reference a section.
+
+This section's header line looks like this:
+
+\texttt{\#\ Introduction\ \{\#sec:introduction\}}
+
+And can be referenced like this: \texttt{\textbackslash{}@ref(sec:introduction)} which renders to this: Section~\ref{sec:introduction}.
+
+A reference to the equation above looks like this: \texttt{\textbackslash{}@ref(eq:test)} and renders to this: Figure~\ref{eq:test}. The labels for any type of reference (except for bibliography citations) are shown in Table~\ref{tab:ref-tab}.
+\begin{longtable}[]{@{}rr@{}}
+\caption{\label{tab:ref-tab}Reference types and their Rmarkdown reference codes.}\tabularnewline
+\toprule\noalign{}
+Reference type & Rmarkdown code \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+Reference type & Rmarkdown code \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Section & \texttt{\textbackslash{}@ref(sec:section-label)} \\
+Subsection & \texttt{\textbackslash{}@ref(subsec:subsection-label)} \\
+Appendix & \texttt{\textbackslash{}@ref(app:appendix-label)} \\
+Equation & \texttt{\textbackslash{}@ref(eq:equation-label)} \\
+Figure & \texttt{\textbackslash{}@ref(fig:figure-label)} \\
+Table & \texttt{\textbackslash{}@ref(tab:table-label)} \\
+\end{longtable}
+\hypertarget{methods}{%
+\section{Methods}\label{methods}}
+
+To render the document in French, simply open \texttt{index.Rmd} and change this:
+\begin{verbatim}
+output:
+ csasdown::techreport_pdf:
+   french: false
+\end{verbatim}
+to this:
+\begin{verbatim}
+output:
+ csasdown::techreport_pdf:
+   french: true
+\end{verbatim}
+and render as usual. You can switch back and forth at any time to see the changes in the examples. If you develop your document with this in mind you will save yourself a lot of work when you receive the translations and it's time to publish the French version. Try it now, and once in awhile when you are developing your document.
+\begin{quote}
+\emph{Note that Technical Reports are not required to be in both languages, but Science Reponses and Research Documents are.}
+\end{quote}
+Here is a simple figure plotted in a \texttt{knitr} code chunk. Look at the code (\texttt{02\_methods.Rmd}) to see how all figure and table captions should be written to permit easy migration to French.
+
+
+
+
+\begin{figure}[H]
+
+{\centering \pdftooltip{\includegraphics[width=6in]{knitr-figs-pdf/testfig-1}}{Figure \ref{fig:testfig}} 
+
+}
+
+\caption{Test figure with a caption will be numbered automatically.}\label{fig:testfig}
+\end{figure}
+Here are two ways to make the same example data frame and simple \texttt{csas\_table()} calls for each:
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{d }\OtherTok{\textless{}{-}} \FunctionTok{structure}\NormalTok{(}\FunctionTok{list}\NormalTok{(}
+  \AttributeTok{Year =} \FunctionTok{c}\NormalTok{(}\StringTok{"2018"}\NormalTok{, }\StringTok{"2019"}\NormalTok{, }\StringTok{"2020"}\NormalTok{), }
+  \StringTok{\textasciigrave{}}\AttributeTok{Value 1}\StringTok{\textasciigrave{}} \OtherTok{=} \FunctionTok{c}\NormalTok{(}\FloatTok{1.12}\NormalTok{, }\FloatTok{2.32}\NormalTok{, }\FloatTok{3.67}\NormalTok{), }
+  \StringTok{\textasciigrave{}}\AttributeTok{Value 2}\StringTok{\textasciigrave{}} \OtherTok{=} \FunctionTok{c}\NormalTok{(}\FloatTok{31.9}\NormalTok{, }\FloatTok{2.8}\NormalTok{, }\FloatTok{112.2}\NormalTok{)), }
+  \AttributeTok{row.names =} \FunctionTok{c}\NormalTok{(}\ConstantTok{NA}\NormalTok{, }\SpecialCharTok{{-}}\NormalTok{3L), }\AttributeTok{class =} \StringTok{"data.frame"}\NormalTok{)}
+  \FunctionTok{names}\NormalTok{(d) }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\FunctionTok{en2fr}\NormalTok{(}\StringTok{"Year"}\NormalTok{),}
+                 \FunctionTok{paste0}\NormalTok{(}\FunctionTok{en2fr}\NormalTok{(}\StringTok{"Value"}\NormalTok{), }\DecValTok{1}\NormalTok{),}
+                 \FunctionTok{paste0}\NormalTok{(}\FunctionTok{en2fr}\NormalTok{(}\StringTok{"Value"}\NormalTok{), }\DecValTok{2}\NormalTok{))}
+\NormalTok{csasdown}\SpecialCharTok{::}\FunctionTok{csas\_table}\NormalTok{(d,}
+  \AttributeTok{align =} \FunctionTok{c}\NormalTok{(}\StringTok{"c"}\NormalTok{, }\StringTok{"r"}\NormalTok{, }\StringTok{"r"}\NormalTok{),}
+  \AttributeTok{caption =} \FunctionTok{ifelse}\NormalTok{(}\FunctionTok{fr}\NormalTok{(),}
+                   \StringTok{"French goes here"}\NormalTok{,}
+                   \StringTok{"Test table (data is d) with a caption will be numbered automatically."}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+\begin{longtable}[]{@{}crr@{}}
+\caption{\label{tab:testtab}Test table (data is d) with a caption will be numbered automatically.}\tabularnewline
+\toprule\noalign{}
+Année & Valeur1 & Valeur2 \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+Année & Valeur1 & Valeur2 \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+2018 & 1.12 & 31.9 \\
+2019 & 2.32 & 2.8 \\
+2020 & 3.67 & 112.2 \\
+\end{longtable}
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{d1 }\OtherTok{\textless{}{-}} \FunctionTok{tribble}\NormalTok{(}
+  \SpecialCharTok{\textasciitilde{}}\NormalTok{Year, }\SpecialCharTok{\textasciitilde{}}\StringTok{\textasciigrave{}}\AttributeTok{Value 1}\StringTok{\textasciigrave{}}\NormalTok{, }\SpecialCharTok{\textasciitilde{}}\StringTok{\textasciigrave{}}\AttributeTok{Value 2}\StringTok{\textasciigrave{}}\NormalTok{,}
+   \DecValTok{2018}\NormalTok{,       }\FloatTok{1.12}\NormalTok{,       }\FloatTok{31.9}\NormalTok{,}
+   \DecValTok{2019}\NormalTok{,       }\FloatTok{2.32}\NormalTok{,        }\FloatTok{2.8}\NormalTok{,}
+   \DecValTok{2020}\NormalTok{,       }\FloatTok{3.67}\NormalTok{,      }\FloatTok{112.2}\NormalTok{)}
+\FunctionTok{names}\NormalTok{(d1) }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\FunctionTok{en2fr}\NormalTok{(}\StringTok{"Year"}\NormalTok{),}
+               \FunctionTok{paste0}\NormalTok{(}\FunctionTok{en2fr}\NormalTok{(}\StringTok{"Value"}\NormalTok{), }\DecValTok{1}\NormalTok{),}
+               \FunctionTok{paste0}\NormalTok{(}\FunctionTok{en2fr}\NormalTok{(}\StringTok{"Value"}\NormalTok{), }\DecValTok{2}\NormalTok{))}
+\NormalTok{csasdown}\SpecialCharTok{::}\FunctionTok{csas\_table}\NormalTok{(d1,}
+  \AttributeTok{align =} \FunctionTok{c}\NormalTok{(}\StringTok{"c"}\NormalTok{, }\StringTok{"r"}\NormalTok{, }\StringTok{"r"}\NormalTok{),}
+  \AttributeTok{caption =} \FunctionTok{ifelse}\NormalTok{(}\FunctionTok{fr}\NormalTok{(),}
+                   \StringTok{"French goes here"}\NormalTok{,}
+                   \StringTok{"Test table (data is d1) with a caption will be numbered automatically."}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+\begin{longtable}[]{@{}crr@{}}
+\caption{\label{tab:testtab2}Test table (data is d1) with a caption will be numbered automatically.}\tabularnewline
+\toprule\noalign{}
+Année & Valeur1 & Valeur2 \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+Année & Valeur1 & Valeur2 \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+2018 & 1.12 & 31.9 \\
+2019 & 2.32 & 2.8 \\
+2020 & 3.67 & 112.2 \\
+\end{longtable}
+Notice the difference in how the English and French captions are generated for tables compared to the way they are generated for figures.
+
+To reference the tables and figures, just place code like this for tables: \texttt{\textbackslash{}@ref(tab:testtab)} inline in text (\texttt{testtab} is the knitr code chunk name) and like this for figures: \texttt{\textbackslash{}@ref(fig:testfig)}. Note the difference in the tag preceeding the colon in those code snippets, \texttt{tab} for table references and \texttt{fig} for figure references (See Table~\ref{tab:ref-tab} for all types). Here are the table references so far in this document: Table~\ref{tab:testtab} and Table~\ref{tab:testtab2}, and the figure reference: Figure~\ref{fig:testfig}. The numbers are clickable.
+
+Next we show a more complicated table with grouped rows and text wrapping. The code becomes more difficult when you want to make non-trivial tables, so it is recommended to think about how to keep tables as simple as possible to avoid this kind of code if you're not comfortable with it.
+
+The code below works like this:
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+
+\item
+  \texttt{read\_csv(file.path("data",\ "multirow.csv"))} - reads data in from the data file
+\item
+  \texttt{mutate\_all(function(x)\{gsub("\textbackslash{}\textbackslash{}\textbackslash{}\textbackslash{}n",\ "\textbackslash{}n",\ x)\})} - changes \texttt{\textbackslash{}\textbackslash{}n} to \texttt{\textbackslash{}n} in all columns. Even though the data file contains only \texttt{\textbackslash{}n}, the \texttt{readr::read\_csv()} function changes these to \texttt{\textbackslash{}\textbackslash{}n}. The extra backslashes are required to escape the two, so four are needed
+\item
+  \texttt{mutate\_all(kableExtra::linebreak)} - replaces \texttt{\textbackslash{}n}'s in all columns with a special LaTeX command that causes newlines to be created
+\item
+  \texttt{mutate\_all(function(x)\{gsub("\%",\ "\textbackslash{}\textbackslash{}\textbackslash{}\textbackslash{}\%",\ x)\})} - replaces percent signs with an escaped version in all columns, as they are special characters in LaTeX
+\item
+  \texttt{mutate\_all(function(x)\{gsub("emph\textbackslash{}\textbackslash{}\{",\ "\textbackslash{}\textbackslash{}\textbackslash{}\textbackslash{}emph\textbackslash{}\textbackslash{}\{",\ x)\})} - replaces \texttt{emph\{} with an escaped version in all columns so that LaTeX can run it as its own command \texttt{emph\{\}} (italicization)
+\item
+  Remove all NA's from the grouping column, replacing them with empty strings so \texttt{NA} doesn't appear in the output table
+\item
+  \texttt{csas\_table()} command - makes the table from the input data
+\item
+  The 5 \texttt{kableExtra::row\_spec(XX,\ hline\_after\ =\ TRUE)} commands - insert a horizontal line across the whole table after each group.
+\item
+  The lines with \texttt{kableExtra::row\_spec(1,\ extra\_latex\_after\ =\ "\textbackslash{}\textbackslash{}cmidrule(l)\{2-2\}")\ \textbar{}\textgreater{}} commands - insert a horizontal line across the second column only (\texttt{\{2-2\}} signifies the column range)
+\item
+  The 2 \texttt{kableExtra::column\_spec(XX,\ width\ =\ "XXem")} commands - change the width of the column to a set value. This has the effect of wrapping the text so it doesn't run off the page
+\end{enumerate}
+Understanding how this table works will take you a long way in LaTex table generation. For example you could make any text bold that you want by using \texttt{\textbackslash{}textbf\{\}} instead of \texttt{\textbackslash{}emph\{\}}. To do that, you would just change the \texttt{emph} in the data file (\texttt{multirow.csv}) to \texttt{textbf} and add a the following new line into the code below, right before or after the line that deals with \texttt{emph}:
+
+\texttt{mutate\_all(function(x)\{gsub("textbf\textbackslash{}\textbackslash{}\{",\ "\textbackslash{}\textbackslash{}\textbackslash{}\textbackslash{}textbf\textbackslash{}\textbackslash{}\{",\ x)\})\ \textbar{}\textgreater{}}
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{read\_csv}\NormalTok{(}\FunctionTok{file.path}\NormalTok{(}\StringTok{"data"}\NormalTok{, }\StringTok{"multirow.csv"}\NormalTok{)) }\SpecialCharTok{|\textgreater{}} 
+  \FunctionTok{mutate\_all}\NormalTok{(}\ControlFlowTok{function}\NormalTok{(x)\{}\FunctionTok{gsub}\NormalTok{(}\StringTok{"}\SpecialCharTok{\textbackslash{}\textbackslash{}\textbackslash{}\textbackslash{}}\StringTok{n"}\NormalTok{, }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{, x)\}) }\SpecialCharTok{|\textgreater{}} 
+  \FunctionTok{mutate\_all}\NormalTok{(kableExtra}\SpecialCharTok{::}\NormalTok{linebreak) }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{mutate\_all}\NormalTok{(}\ControlFlowTok{function}\NormalTok{(x)\{}\FunctionTok{gsub}\NormalTok{(}\StringTok{"\%"}\NormalTok{, }\StringTok{"}\SpecialCharTok{\textbackslash{}\textbackslash{}\textbackslash{}\textbackslash{}}\StringTok{\%"}\NormalTok{, x)\}) }\SpecialCharTok{|\textgreater{}} 
+  \FunctionTok{mutate\_all}\NormalTok{(}\ControlFlowTok{function}\NormalTok{(x)\{}\FunctionTok{gsub}\NormalTok{(}\StringTok{"emph}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{\{"}\NormalTok{, }\StringTok{"}\SpecialCharTok{\textbackslash{}\textbackslash{}\textbackslash{}\textbackslash{}}\StringTok{emph}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{\{"}\NormalTok{, x)\}) }\SpecialCharTok{|\textgreater{}} 
+  \FunctionTok{mutate}\NormalTok{(}\StringTok{\textasciigrave{}}\AttributeTok{Overarching goal}\StringTok{\textasciigrave{}} \OtherTok{=} \FunctionTok{ifelse}\NormalTok{(}\FunctionTok{is.na}\NormalTok{(}\StringTok{\textasciigrave{}}\AttributeTok{Overarching goal}\StringTok{\textasciigrave{}}\NormalTok{),}
+                                     \StringTok{""}\NormalTok{,}
+                                     \StringTok{\textasciigrave{}}\AttributeTok{Overarching goal}\StringTok{\textasciigrave{}}\NormalTok{)) }\SpecialCharTok{|\textgreater{}} 
+  \FunctionTok{csas\_table}\NormalTok{(}\AttributeTok{format =} \StringTok{"latex"}\NormalTok{,}
+             \AttributeTok{escape =} \ConstantTok{FALSE}\NormalTok{,}
+             \AttributeTok{font\_size =} \DecValTok{11}\NormalTok{,}
+             \AttributeTok{bold\_header =} \ConstantTok{FALSE}\NormalTok{,}
+             \AttributeTok{caption =} \FunctionTok{ifelse}\NormalTok{(}\FunctionTok{fr}\NormalTok{(),}
+                              \StringTok{"French goes here"}\NormalTok{,}
+                              \StringTok{"Goals and performance metrics"}\NormalTok{)) }\SpecialCharTok{|\textgreater{}}
+\NormalTok{  kableExtra}\SpecialCharTok{::}\FunctionTok{row\_spec}\NormalTok{(}\DecValTok{1}\NormalTok{, }\AttributeTok{extra\_latex\_after =} \StringTok{"}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{cmidrule(l)\{2{-}2\}"}\NormalTok{) }\SpecialCharTok{|\textgreater{}} 
+\NormalTok{  kableExtra}\SpecialCharTok{::}\FunctionTok{row\_spec}\NormalTok{(}\DecValTok{2}\NormalTok{, }\AttributeTok{extra\_latex\_after =} \StringTok{"}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{cmidrule(l)\{2{-}2\}"}\NormalTok{) }\SpecialCharTok{|\textgreater{}} 
+\NormalTok{  kableExtra}\SpecialCharTok{::}\FunctionTok{row\_spec}\NormalTok{(}\DecValTok{3}\NormalTok{, }\AttributeTok{extra\_latex\_after =} \StringTok{"}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{cmidrule(l)\{2{-}2\}"}\NormalTok{) }\SpecialCharTok{|\textgreater{}} 
+\NormalTok{  kableExtra}\SpecialCharTok{::}\FunctionTok{row\_spec}\NormalTok{(}\DecValTok{4}\NormalTok{, }\AttributeTok{hline\_after =} \ConstantTok{TRUE}\NormalTok{) }\SpecialCharTok{|\textgreater{}} 
+\NormalTok{  kableExtra}\SpecialCharTok{::}\FunctionTok{row\_spec}\NormalTok{(}\DecValTok{5}\NormalTok{, }\AttributeTok{extra\_latex\_after =} \StringTok{"}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{cmidrule(l)\{2{-}2\}"}\NormalTok{) }\SpecialCharTok{|\textgreater{}} 
+\NormalTok{  kableExtra}\SpecialCharTok{::}\FunctionTok{row\_spec}\NormalTok{(}\DecValTok{6}\NormalTok{, }\AttributeTok{extra\_latex\_after =} \StringTok{"}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{cmidrule(l)\{2{-}2\}"}\NormalTok{) }\SpecialCharTok{|\textgreater{}} 
+\NormalTok{  kableExtra}\SpecialCharTok{::}\FunctionTok{row\_spec}\NormalTok{(}\DecValTok{7}\NormalTok{, }\AttributeTok{extra\_latex\_after =} \StringTok{"}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{cmidrule(l)\{2{-}2\}"}\NormalTok{) }\SpecialCharTok{|\textgreater{}} 
+\NormalTok{  kableExtra}\SpecialCharTok{::}\FunctionTok{row\_spec}\NormalTok{(}\DecValTok{8}\NormalTok{, }\AttributeTok{extra\_latex\_after =} \StringTok{"}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{cmidrule(l)\{2{-}2\}"}\NormalTok{) }\SpecialCharTok{|\textgreater{}} 
+\NormalTok{  kableExtra}\SpecialCharTok{::}\FunctionTok{row\_spec}\NormalTok{(}\DecValTok{9}\NormalTok{, }\AttributeTok{extra\_latex\_after =} \StringTok{"}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{cmidrule(l)\{2{-}2\}"}\NormalTok{) }\SpecialCharTok{|\textgreater{}} 
+\NormalTok{  kableExtra}\SpecialCharTok{::}\FunctionTok{row\_spec}\NormalTok{(}\DecValTok{10}\NormalTok{, }\AttributeTok{hline\_after =} \ConstantTok{TRUE}\NormalTok{) }\SpecialCharTok{|\textgreater{}} 
+\NormalTok{  kableExtra}\SpecialCharTok{::}\FunctionTok{row\_spec}\NormalTok{(}\DecValTok{11}\NormalTok{, }\AttributeTok{extra\_latex\_after =} \StringTok{"}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{cmidrule(l)\{2{-}2\}"}\NormalTok{) }\SpecialCharTok{|\textgreater{}} 
+\NormalTok{  kableExtra}\SpecialCharTok{::}\FunctionTok{row\_spec}\NormalTok{(}\DecValTok{12}\NormalTok{, }\AttributeTok{extra\_latex\_after =} \StringTok{"}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{cmidrule(l)\{2{-}2\}"}\NormalTok{) }\SpecialCharTok{|\textgreater{}} 
+\NormalTok{  kableExtra}\SpecialCharTok{::}\FunctionTok{row\_spec}\NormalTok{(}\DecValTok{13}\NormalTok{, }\AttributeTok{extra\_latex\_after =} \StringTok{"}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{cmidrule(l)\{2{-}2\}"}\NormalTok{) }\SpecialCharTok{|\textgreater{}} 
+\NormalTok{  kableExtra}\SpecialCharTok{::}\FunctionTok{row\_spec}\NormalTok{(}\DecValTok{14}\NormalTok{, }\AttributeTok{extra\_latex\_after =} \StringTok{"}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{cmidrule(l)\{2{-}2\}"}\NormalTok{) }\SpecialCharTok{|\textgreater{}} 
+\NormalTok{  kableExtra}\SpecialCharTok{::}\FunctionTok{row\_spec}\NormalTok{(}\DecValTok{15}\NormalTok{, }\AttributeTok{hline\_after =} \ConstantTok{TRUE}\NormalTok{) }\SpecialCharTok{|\textgreater{}} 
+\NormalTok{  kableExtra}\SpecialCharTok{::}\FunctionTok{row\_spec}\NormalTok{(}\DecValTok{16}\NormalTok{, }\AttributeTok{hline\_after =} \ConstantTok{TRUE}\NormalTok{) }\SpecialCharTok{|\textgreater{}} 
+\NormalTok{  kableExtra}\SpecialCharTok{::}\FunctionTok{row\_spec}\NormalTok{(}\DecValTok{17}\NormalTok{, }\AttributeTok{extra\_latex\_after =} \StringTok{"}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{cmidrule(l)\{2{-}2\}"}\NormalTok{) }\SpecialCharTok{|\textgreater{}} 
+\NormalTok{  kableExtra}\SpecialCharTok{::}\FunctionTok{row\_spec}\NormalTok{(}\DecValTok{18}\NormalTok{, }\AttributeTok{extra\_latex\_after =} \StringTok{"}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{cmidrule(l)\{2{-}2\}"}\NormalTok{) }\SpecialCharTok{|\textgreater{}} 
+\NormalTok{  kableExtra}\SpecialCharTok{::}\FunctionTok{row\_spec}\NormalTok{(}\DecValTok{19}\NormalTok{, }\AttributeTok{hline\_after =} \ConstantTok{TRUE}\NormalTok{) }\SpecialCharTok{|\textgreater{}} 
+\NormalTok{  kableExtra}\SpecialCharTok{::}\FunctionTok{column\_spec}\NormalTok{(}\DecValTok{1}\NormalTok{, }\AttributeTok{width =} \StringTok{"15em"}\NormalTok{) }\SpecialCharTok{|\textgreater{}}
+\NormalTok{  kableExtra}\SpecialCharTok{::}\FunctionTok{column\_spec}\NormalTok{(}\DecValTok{2}\NormalTok{, }\AttributeTok{width =} \StringTok{"30em"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+\begingroup\fontsize{11}{13}\selectfont \begingroup\fontsize{11}{13}\selectfont  
+\begin{longtable}[t]{>{\raggedright\arraybackslash}p{15em}>{\raggedright\arraybackslash}p{30em}} \caption{\label{tab:multi-row-table}Goals and performance metrics}\\ \toprule Overarching goal & Performance metrics\\ \midrule \endfirsthead \multicolumn{2}{l}{\textit{... Continued from previous page}} \\ \hline \caption*{}\\ \toprule Overarching goal & Performance metrics\\ \midrule \endhead \hline \multicolumn{2}{l}{\textit{Continued on next page ...}} \\ \endfoot \bottomrule \endlastfoot Rebuild depleted CUs\newline (These performance metrics infer a relatively monotonic trajectory towards a rebuilding target) & Probability that all red-status CUs rebuild to above their lower rebuilding thresholds (e.g. lower WSP benchmark) within a given time frame.\\
+\cmidrule(l){2-2}  & Probability that any one (or a specified proportion of) red-status CU(s) rebuilds to above its lower rebuilding threshold within a given time frame.\\
+\cmidrule(l){2-2}  & Proportion of red-status CUs that rebuild to above their lower rebuilding thresholds with a specified probability within a given time frame. (Median over MC trials and 95\% CIs)\\
+\cmidrule(l){2-2}  & Number of years required to achieve lower rebuilding thresholds for one (a proportion of or all) red-listed CU(s) with a specific probability. (Median over MC trials and 95\% CIs)\\
+\midrule Minimize risk of loss\newline (These metrics can be duplicated for numerous rebuilding and target thresholds) & Proportion of years that all CUs are above a quasi-extirpation threshold across the modelled time period. (Median over MC trials and 95\% CIs)\\
+\cmidrule(l){2-2}  & Proportion of years where all CUs are above their lower rebuilding thresholds within the modelled time period. (Median over MC trials and 95\% CIs)\\
+\cmidrule(l){2-2}  & Proportion of years where at least one (or a specified \% of) CU(s) is(are) above their lower rebuilding thresholds within the modelled time period. (Median over MC trials and 95\% CIs)\\
+\cmidrule(l){2-2}  & Proportion of years where all CUs remain above their lower (or upper) rebuilding threshold across the modelled time period. (Median over MC trials and 95\% CIs)\\
+\cmidrule(l){2-2}  & Mean spawner abundances over the modelled time-period (or most recent generation) relative to lower rebuilding threshold. (Median over MC trials and 95\% CIs)\\
+\cmidrule(l){2-2}  & Variation in spawner abundances: CV of (or average \% change between years in) spawner abundances over the modelled time period. (Median value over MC trials and 95\% CIs) (suggested as indicator of extinction risk by Wainwright and Waples 1998)\\
+\midrule Avoid COSEWIC listing & Short-term trends in spawner biomass over the last three generations. (Median over MC trials and 95\% CIs) \emph{COSEWIC Criterion A}\\
+\cmidrule(l){2-2}  & Probability that short-term trends in abundances are > 30\% (COSEWIC threshold) in the most recent time period. \emph{COSEWIC Criterion A}\\
+\cmidrule(l){2-2}  & Proportion of years where the short-term trend metrics < 30\% for all CUs (or specified \% of CUs). (Median over MC trials and 95\% CIs) \emph{COSEWIC Criterion A}\\
+\cmidrule(l){2-2}  & Proportion of years where the short-term trend is stationary or positive and abundances are greater than 10 thousand. \emph{COSEWIC Criterion C}\\
+\cmidrule(l){2-2}  & Proportion of years where all CUs are above COSEWIC small population size thresholds; across the entire sampling period. (Median over MC trials and 95\% CIs). \emph{COSEWIC Criterion D}\\
+\midrule Maintain exploitation rates below sustainable levels & Mean exploitation rate relative to current $U_{MSY}$ for over the modelled time period. (Median value over MC trials and 95\% CIs)\\
+\midrule Maximize catch and stability in catch & Proportion of years that mean catch for the CU-aggregate is above a minimum acceptable level over the entire sampling period; in the short term (first 1-2 generations); or in the long term (last 1-2 generations). (Median value over MC trials and 95\% CIs)\\
+\cmidrule(l){2-2}  & Mean catch over the entire sampling period; in the short term (first 1-2 generations); or in the long term (last 1-2 generations); for totals and segregated into different fisheries (e.g. mixed-CU vs. terminal). (Median value over MC trials and 95\% CIs)\\
+\cmidrule(l){2-2}  & Catch variability: CV of (or average \% change between years in) catch over the sampling period; for totals and segregated into different fisheries (e.g. mixed vs. terminal). (Median value over MC trials and 95\% CIs)\\
+\midrule Allocate catch to terminal vs. mixed-CU fisheries & Proportion of catch in mixed-CU vs terminal fisheries averaged over the entire sampling period (Median value over MC trials and 95\% CIs)\\* \end{longtable}
+
+\endgroup{} \endgroup{}
+
+While building complex tables you must take an iterative approach once you've made the basic table and want to add detailed elements: add one element; test; fix errors; fix logic/design issues; repeat. In the construction of Table~\ref{tab:multi-row-table}, one line of code at a time was added with the results checked and made sure to be correct before adding the next line of code.
+
+On the following pages we have an example of a long and wide table which is in landscape mode. This is accomplished by setting \texttt{landscape\ =\ TRUE} in the \texttt{csas\_table()} call. You can change the font size if the table it still too large and overlaps the header and footer lines.
+
+\clearpage
+\begin{landscapepage}
+\begingroup\fontsize{8}{10}\selectfont \begingroup\fontsize{8}{10}\selectfont  \begin{longtable}[t]{rrrrrrrrrrrrrrrr} \caption{\label{tab:widelong}A long and wide table}\\ \toprule Year & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12 & 13 & 14 & 15\\ \midrule \endfirsthead \multicolumn{16}{l}{\textit{... Continued from previous page}} \\ \hline \caption*{}\\ \toprule Year & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12 & 13 & 14 & 15\\ \midrule \endhead \hline \multicolumn{16}{l}{\textit{Continued on next page ...}} \\ \endfoot \bottomrule \endlastfoot 1 & 19.7652 & 20.9023 & 22.1998 & 19.3213 & 19.5164 & 22.2347 & 19.0130 & 20.7674 & 19.3620 & 18.9894 & 19.1576 & 20.1532 & 21.2560 & 20.3548 & 20.9991\\ 2 & 20.0243 & 18.8688 & 17.8444 & 19.1279 & 22.1469 & 19.3555 & 21.1910 & 20.9742 & 19.0753 & 18.9990 & 19.6674 & 19.0286 & 19.3187 & 19.4657 & 18.9361\\ 3 & 19.2760 & 20.2939 & 20.1049 & 19.2511 & 20.6856 & 19.4211 & 20.3944 & 20.6519 & 19.3131 & 19.5000 & 20.5651 & 20.8709 & 20.0445 & 21.0496 & 20.4090\\ 4 & 21.4225 & 19.0127 & 19.0390 & 20.5196 & 19.0619 & 19.3085 & 20.0771 & 21.3971 & 21.9054 & 18.3306 & 19.2856 & 18.9422 & 19.3502 & 21.4327 & 20.6457\\ 5 & 22.0009 & 20.1225 & 21.5062 & 18.9951 & 20.8167 & 19.3680 & 20.6132 & 21.6536 & 18.8911 & 18.7024 & 20.4282 & 20.0973 & 22.0714 & 21.2105 & 20.8281\\ 6 & 22.0563 & 20.1716 & 20.2046 & 19.7030 & 18.6386 & 21.3642 & 20.6033 & 19.1582 & 20.2587 & 21.3067 & 20.2900 & 20.7794 & 20.3110 & 20.3293 & 19.9115\\ 7 & 21.5287 & 20.7445 & 19.8650 & 20.0585 & 19.6958 & 19.6547 & 19.3808 & 18.3078 & 19.5168 & 20.4462 & 18.1097 & 20.2265 & 19.6801 & 20.8937 & 20.8520\\ 8 & 20.0383 & 18.4401 & 21.1747 & 19.1114 & 20.5217 & 20.2613 & 20.5301 & 19.8584 & 19.8086 & 20.4763 & 20.0457 & 20.8575 & 20.3696 & 20.1798 & 19.6484\\ 9 & 19.2732 & 19.2081 & 20.3932 & 21.1155 & 20.6516 & 19.4326 & 20.3362 & 22.4999 & 21.0946 & 21.2371 & 20.4254 & 20.2407 & 19.5908 & 19.5454 & 18.8269\\ 10 & 17.9627 & 20.1077 & 18.1460 & 19.0756 & 19.1199 & 22.1810 & 21.0706 & 20.6566 & 20.9640 & 20.2205 & 19.3723 & 19.4121 & 20.0412 & 20.0390 & 21.8564\\ 11 & 20.7036 & 20.7665 & 18.1669 & 18.4664 & 22.9201 & 20.0417 & 18.8909 & 19.3673 & 21.9692 & 18.7445 & 20.0563 & 19.8331 & 19.5611 & 18.8562 & 20.2704\\ 12 & 20.8568 & 17.1266 & 19.5054 & 19.4398 & 19.2231 & 21.1406 & 20.7186 & 19.4260 & 19.2092 & 20.3294 & 21.9503 & 19.8801 & 19.8014 & 20.3592 & 21.4903\\ 13 & 20.7242 & 20.8125 & 20.8740 & 19.6077 & 19.3211 & 21.6791 & 19.6491 & 19.1830 & 20.8602 & 19.1698 & 19.7042 & 20.7598 & 19.8918 & 19.1766 & 20.3020\\ 14 & 21.0948 & 19.5386 & 18.3629 & 19.7292 & 20.3953 & 20.3245 & 23.0501 & 20.0250 & 19.5798 & 21.7093 & 20.0699 & 20.5788 & 19.9397 & 20.0073 & 19.2701\\ 15 & 20.7684 & 19.3915 & 20.2469 & 20.5238 & 20.6283 & 19.2473 & 19.5377 & 20.8707 & 18.4851 & 20.9476 & 20.0493 & 21.0870 & 19.8154 & 21.2919 & 20.4792\\ 16 & 20.2392 & 20.8146 & 21.5595 & 21.1514 & 22.0754 & 19.8222 & 21.6327 & 20.6364 & 20.4034 & 21.0750 & 21.1231 & 20.1524 & 19.8275 & 20.3834 & 20.6233\\ 17 & 21.0880 & 18.8921 & 22.4557 & 20.8577 & 19.1460 & 19.8788 & 20.4033 & 19.8727 & 19.6128 & 20.5696 & 20.8208 & 20.2314 & 20.1559 & 19.3678 & 20.6742\\ 18 & 21.0071 & 18.6558 & 21.2456 & 19.9583 & 22.0050 & 20.1272 & 18.3947 & 19.9757 & 21.8574 & 19.3141 & 19.2803 & 18.8741 & 19.3396 & 19.9245 & 20.7906\\ 19 & 19.7117 & 21.3649 & 20.1835 & 18.7391 & 18.9973 & 18.8658 & 18.8452 & 21.1540 & 19.4677 & 22.1370 & 18.3178 & 20.3759 & 19.7708 & 20.9356 & 18.8754\\ 20 & 19.5047 & 20.2710 & 20.6772 & 20.5257 & 19.7406 & 22.5867 & 20.1785 & 19.0920 & 20.6797 & 20.1469 & 20.1998 & 19.7579 & 19.2304 & 21.6725 & 19.3987\\ 21 & 20.9404 & 19.9495 & 19.7105 & 18.0798 & 20.5744 & 18.5228 & 20.5143 & 20.1885 & 18.3974 & 20.5131 & 20.6846 & 18.7122 & 20.6239 & 21.2055 & 21.6141\\ 22 & 18.8972 & 18.9819 & 19.7756 & 20.4970 & 19.8493 & 18.0322 & 19.8163 & 19.6111 & 19.2612 & 20.2418 & 20.2477 & 20.3107 & 20.0994 & 17.3408 & 19.4929\\ 23 & 20.0581 & 19.2670 & 18.9785 & 19.3742 & 20.7450 & 19.2614 & 19.7328 & 19.1291 & 19.0801 & 19.7129 & 20.5083 & 18.7154 & 20.1083 & 19.2756 & 19.9589\\ 24 & 20.3147 & 19.2752 & 19.6433 & 20.3396 & 20.6218 & 18.8110 & 20.1072 & 20.4708 & 19.1080 & 19.5230 & 20.0072 & 21.0809 & 19.8515 & 19.6444 & 19.5019\\ 25 & 20.0648 & 20.5677 & 17.5355 & 19.3245 & 19.4028 & 18.7264 & 18.8348 & 18.9400 & 19.7276 & 19.2452 & 21.6640 & 21.7419 & 19.4303 & 20.0677 & 17.1533\\ 26 & 20.1344 & 21.0274 & 17.6169 & 22.2123 & 19.6289 & 19.4616 & 18.1844 & 21.7900 & 19.6539 & 21.7941 & 20.5372 & 20.0141 & 21.1416 & 18.5644 & 18.8554\\ 27 & 20.6175 & 17.8626 & 18.1747 & 20.0455 & 20.5711 & 18.9482 & 20.7158 & 19.8992 & 20.6532 & 20.1588 & 20.3584 & 20.3226 & 20.2220 & 20.4334 & 19.7757\\ 28 & 20.3995 & 19.1958 & 19.5152 & 18.4273 & 19.9379 & 19.6038 & 19.4799 & 19.6976 & 20.6931 & 18.0112 & 20.1604 & 18.1289 & 20.7577 & 20.5042 & 21.5148\\ 29 & 20.8654 & 20.8236 & 20.5254 & 19.3941 & 20.7326 & 18.1743 & 19.6802 & 20.5132 & 20.9062 & 20.6083 & 19.1943 & 18.9964 & 22.3119 & 20.7534 & 20.4146\\ 30 & 19.6705 & 18.9514 & 20.1680 & 20.0828 & 19.5163 & 20.5516 & 19.8270 & 20.5730 & 19.7513 & 20.2321 & 19.6062 & 20.2261 & 19.0456 & 19.8107 & 19.0482\\ 31 & 19.8101 & 17.8897 & 20.7512 & 19.9696 & 20.1170 & 20.6975 & 20.8319 & 21.7186 & 18.8715 & 20.5865 & 19.8942 & 19.8067 & 20.3840 & 19.1529 & 17.9635\\ 32 & 18.6843 & 20.8164 & 20.5925 & 20.6127 & 18.8455 & 20.6202 & 19.8469 & 20.0677 & 20.6445 & 20.8232 & 19.2924 & 19.4989 & 20.2074 & 19.1524 & 20.1977\\ 33 & 19.0195 & 16.5901 & 20.7754 & 20.5736 & 19.9121 & 20.8475 & 19.6943 & 18.1522 & 18.5803 & 19.5636 & 22.6605 & 19.2728 & 18.8878 & 20.9065 & 18.6301\\ 34 & 20.9526 & 19.5753 & 19.7807 & 20.2900 & 18.5702 & 18.8122 & 21.1060 & 20.0757 & 20.4357 & 19.5254 & 19.9038 & 20.3122 & 20.1800 & 19.4320 & 20.1210\\ 35 & 19.7129 & 20.3454 & 19.9504 & 19.7594 & 20.3702 & 20.1007 & 19.4142 & 19.5496 & 19.7749 & 20.1306 & 21.0531 & 19.3961 & 19.2178 & 19.7540 & 19.4376\\ 36 & 20.5527 & 19.8484 & 19.8637 & 19.1909 & 21.4433 & 20.7984 & 21.1140 & 21.4223 & 21.3886 & 19.5105 & 21.0868 & 19.2439 & 19.7283 & 20.4913 & 19.3552\\ 37 & 19.5135 & 21.5958 & 18.2055 & 20.5470 & 20.5968 & 20.1657 & 19.0361 & 19.9042 & 18.5148 & 21.0927 & 21.7831 & 18.9872 & 20.0829 & 17.7525 & 17.9608\\ 38 & 19.2804 & 21.4375 & 19.1928 & 19.5293 & 18.8909 & 20.4299 & 19.6675 & 22.1481 & 19.1067 & 20.9650 & 20.7822 & 18.7193 & 20.2455 & 20.5597 & 19.9040\\ 39 & 20.5017 & 18.9519 & 20.0377 & 19.5826 & 20.2291 & 20.2640 & 21.5939 & 20.0034 & 20.8744 & 19.8547 & 20.6478 & 18.8267 & 20.2169 & 19.4223 & 19.2816\\ 40 & 18.7839 & 22.1299 & 22.5395 & 18.6523 & 20.0914 & 17.8185 & 20.1323 & 19.8112 & 19.9936 & 20.3617 & 22.2571 & 19.2119 & 20.1416 & 19.1717 & 22.7693\\ 41 & 20.3021 & 20.9414 & 20.3532 & 20.6692 & 18.5197 & 19.8436 & 20.0503 & 19.8474 & 19.5510 & 19.4767 & 19.1621 & 20.6556 & 18.9643 & 21.1434 & 20.8103\\ 42 & 20.2444 & 22.4567 & 20.2658 & 17.9570 & 19.2638 & 19.8492 & 19.2711 & 19.3156 & 19.4824 & 19.1406 & 19.4987 & 19.6070 & 20.6758 & 19.2029 & 18.8139\\ 43 & 20.3895 & 19.1160 & 20.2645 & 19.4524 & 20.4916 & 20.4233 & 19.2915 & 19.3528 & 20.5555 & 21.0298 & 18.9181 & 20.4570 & 17.8497 & 22.6213 & 19.8525\\ 44 & 19.9953 & 19.0394 & 20.2076 & 20.3843 & 20.4414 & 21.4425 & 18.7392 & 19.1018 & 20.6927 & 19.5946 & 19.3440 & 20.6497 & 21.0176 & 22.1401 & 19.0851\\ 45 & 18.8175 & 19.9209 & 20.1830 & 21.2295 & 19.9475 & 21.2730 & 20.5390 & 19.3686 & 20.0191 & 21.2258 & 20.9761 & 20.2871 & 19.8778 & 19.2640 & 18.8463\\* \end{longtable} \endgroup{} \endgroup{}
+
+
+\end{landscapepage}
+\clearpage
+
+It is often useful to group certain rows of a table that share the same information. This can be achieved using the \texttt{kableExtra::collapse\_rows} and \texttt{kableExtra::group\_rows} and \texttt{kableExtra::pack\_rows}.
+
+\hypertarget{results}{%
+\section{Results}\label{results}}
+
+You can add new knitr code chunks with figure and tables in any section. csasdown links all these \texttt{.Rmd} files together into one large file. Keep track of your file order insertion follow the order in \texttt{\_bookdown.yml}.
+
+Here's another plot for fun:
+
+
+
+
+\begin{figure}[htb]
+
+{\centering \pdftooltip{\includegraphics[width=6in]{knitr-figs-pdf/batman-1}}{Figure \ref{fig:batman}} 
+
+}
+
+\caption{Batman!}\label{fig:batman}
+\end{figure}
+Note that this figure is numbered consecutively even though the first figure appears in a different file and section. The figures, tables, and equations are numbered \textbf{after} all the files are stitched together by \texttt{csasdown}.
+
+\hypertarget{discussion}{%
+\section{Discussion}\label{discussion}}
+
+To highlight the power of \texttt{csasdown} for French compilation we use the companion translation package \link{https://github.com/pbs-assess/rosettafish}{rosettafish} along with some non-classified herring data. Render the document in French to see how every aspect of the document can be controlled in both languages.
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{d }\OtherTok{\textless{}{-}}\NormalTok{ readr}\SpecialCharTok{::}\FunctionTok{read\_csv}\NormalTok{(}\FunctionTok{file.path}\NormalTok{(}\StringTok{"data"}\NormalTok{, }\StringTok{"herring.csv"}\NormalTok{))}
+
+\NormalTok{firstup }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(x)\{}
+  \FunctionTok{substr}\NormalTok{(x, }\DecValTok{1}\NormalTok{, }\DecValTok{1}\NormalTok{) }\OtherTok{\textless{}{-}} \FunctionTok{toupper}\NormalTok{(}\FunctionTok{substr}\NormalTok{(x, }\DecValTok{1}\NormalTok{, }\DecValTok{1}\NormalTok{))}
+\NormalTok{  x}
+\NormalTok{\}}
+
+\NormalTok{firstlower }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(x)\{}
+  \FunctionTok{substr}\NormalTok{(x, }\DecValTok{1}\NormalTok{, }\DecValTok{1}\NormalTok{) }\OtherTok{\textless{}{-}} \FunctionTok{toupper}\NormalTok{(}\FunctionTok{substr}\NormalTok{(x, }\DecValTok{1}\NormalTok{, }\DecValTok{1}\NormalTok{))}
+\NormalTok{  x}
+\NormalTok{\}}
+
+\NormalTok{input\_data\_table }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(tab,}
+                             \AttributeTok{cap =} \StringTok{""}\NormalTok{,}
+\NormalTok{                             ...)\{}
+  \CommentTok{\# Source column}
+\NormalTok{  tab}\SpecialCharTok{$}\NormalTok{Source }\OtherTok{\textless{}{-}} \FunctionTok{en2fr}\NormalTok{(tab}\SpecialCharTok{$}\NormalTok{Source, }\AttributeTok{allow\_missing =} \ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{  tmp }\OtherTok{\textless{}{-}}\NormalTok{ tab}\SpecialCharTok{$}\NormalTok{Source}
+\NormalTok{  nonbracs }\OtherTok{\textless{}{-}}\NormalTok{ stringr}\SpecialCharTok{::}\FunctionTok{str\_extract}\NormalTok{(tmp, }\StringTok{"[(}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{w+ ) ]+(?= +}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{()"}\NormalTok{)}
+\NormalTok{  bracs }\OtherTok{\textless{}{-}}\NormalTok{ stringr}\SpecialCharTok{::}\FunctionTok{str\_extract}\NormalTok{(tmp, }\StringTok{"(?\textless{}=}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{()}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{w+(?=}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{))"}\NormalTok{)}
+  \ControlFlowTok{if}\NormalTok{(}\SpecialCharTok{!}\FunctionTok{all}\NormalTok{(}\FunctionTok{is.na}\NormalTok{(bracs) }\SpecialCharTok{==} \FunctionTok{is.na}\NormalTok{(nonbracs)))\{}
+    \FunctionTok{alert}\NormalTok{(}\StringTok{"The match of bracketed items in the Source "}\NormalTok{,}
+          \StringTok{"column of the Input data table was incorrect."}\NormalTok{)}
+\NormalTok{  \}}
+\NormalTok{  tmp[}\SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(bracs)] }\OtherTok{\textless{}{-}} \FunctionTok{paste0}\NormalTok{(}\FunctionTok{en2fr}\NormalTok{(}\FunctionTok{firstup}\NormalTok{(nonbracs[}\SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(nonbracs)])),}
+                               \StringTok{" ("}\NormalTok{,}
+                               \FunctionTok{firstlower}\NormalTok{(}\FunctionTok{en2fr}\NormalTok{(}\FunctionTok{firstup}\NormalTok{(bracs[}\SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(bracs)]))), }\StringTok{")"}\NormalTok{)}
+\NormalTok{  tab}\SpecialCharTok{$}\NormalTok{Source }\OtherTok{\textless{}{-}}\NormalTok{ tmp}
+  
+  \CommentTok{\# Data column}
+\NormalTok{  tmp }\OtherTok{\textless{}{-}} \FunctionTok{strsplit}\NormalTok{(tab}\SpecialCharTok{$}\NormalTok{Data, }\StringTok{": *"}\NormalTok{)}
+\NormalTok{  tmp }\OtherTok{\textless{}{-}} \FunctionTok{lapply}\NormalTok{(tmp, }\ControlFlowTok{function}\NormalTok{(x)\{}
+\NormalTok{    j }\OtherTok{\textless{}{-}} \FunctionTok{firstup}\NormalTok{(x)}
+\NormalTok{    j }\OtherTok{\textless{}{-}} \FunctionTok{en2fr}\NormalTok{(j, }\AttributeTok{allow\_missing =} \ConstantTok{TRUE}\NormalTok{)}
+    \ControlFlowTok{if}\NormalTok{(}\FunctionTok{length}\NormalTok{(j) }\SpecialCharTok{\textgreater{}} \DecValTok{1}\NormalTok{)\{}
+\NormalTok{      j }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(j[}\DecValTok{1}\NormalTok{], }\FunctionTok{tolower}\NormalTok{(j[}\SpecialCharTok{{-}}\DecValTok{1}\NormalTok{]))}
+\NormalTok{      j }\OtherTok{\textless{}{-}} \FunctionTok{paste}\NormalTok{(j, }\AttributeTok{collapse =} \StringTok{": "}\NormalTok{)}
+\NormalTok{    \}}
+\NormalTok{    j}
+\NormalTok{  \})}
+\NormalTok{  tab}\SpecialCharTok{$}\NormalTok{Data }\OtherTok{\textless{}{-}} \FunctionTok{unlist}\NormalTok{(tmp)}
+  
+  \CommentTok{\# Years column}
+  \ControlFlowTok{if}\NormalTok{(}\FunctionTok{fr}\NormalTok{())\{}
+\NormalTok{    tmp }\OtherTok{\textless{}{-}}\NormalTok{ tab}\SpecialCharTok{$}\NormalTok{Years}
+\NormalTok{    tmp }\OtherTok{\textless{}{-}} \FunctionTok{strsplit}\NormalTok{(tab}\SpecialCharTok{$}\NormalTok{Years, }\StringTok{" *to *"}\NormalTok{)}
+\NormalTok{    tmp }\OtherTok{\textless{}{-}} \FunctionTok{lapply}\NormalTok{(tmp, }\ControlFlowTok{function}\NormalTok{(x)\{}
+      \FunctionTok{paste0}\NormalTok{(}\StringTok{"De "}\NormalTok{, x[}\DecValTok{1}\NormalTok{], }\StringTok{" \textbackslash{}U00E0 "}\NormalTok{, x[}\DecValTok{2}\NormalTok{])}
+\NormalTok{    \})}
+\NormalTok{    tab}\SpecialCharTok{$}\NormalTok{Years }\OtherTok{\textless{}{-}} \FunctionTok{unlist}\NormalTok{(tmp)}
+\NormalTok{  \}}
+  
+  \FunctionTok{names}\NormalTok{(tab) }\OtherTok{\textless{}{-}} \FunctionTok{en2fr}\NormalTok{(}\FunctionTok{names}\NormalTok{(tab))}
+  \FunctionTok{csas\_table}\NormalTok{(tab,}
+             \AttributeTok{format =} \StringTok{"latex"}\NormalTok{,}
+             \AttributeTok{bold\_header =} \ConstantTok{FALSE}\NormalTok{,}
+             \AttributeTok{caption =}\NormalTok{ cap,}
+\NormalTok{             ...)}
+\NormalTok{\}}
+\FunctionTok{input\_data\_table}\NormalTok{(d)}
+\end{Highlighting}
+\end{Shaded}
+\begin{longtable}[t]{lll} \caption{\label{tab:herring}}\\ \toprule Source & Données & Années\\ \midrule \endfirsthead \multicolumn{3}{l}{\textit{... Continued from previous page}} \\ \hline \caption*{}\\ \toprule Source & Données & Années\\ \midrule \endhead \hline \multicolumn{3}{l}{\textit{Continued on next page ...}} \\ \endfoot \bottomrule \endlastfoot Pêche au hareng rogué au filet maillant & Prise & 1972 to 2019\\ Pêche au hareng rogué à la senne & Prise & 1972 to 2019\\ Autres pêches & Prise & 1951 to 2019\\ Pêche d'essai (Senne) & Biologique: nombre selon l’âge & 1975 to 2019\\ Pêche d'essai (Senne) & Biologique: poids selon l’âge & 1975 to 2019\\ Pêche au hareng rogué à la senne & Biologique: nombre selon l’âge & 1972 to 2019\\ Pêche au hareng rogué à la senne & Biologique: poids selon l’âge & 1972 to 2019\\ Pêche au hareng rogué au filet maillant & Biologique: nombre selon l’âge & 1972 to 2019\\ Autres pêches & Biologique: nombre selon l’âge & 1951 to 2019\\ Autres pêches & Biologique: poids selon l’âge & 1951 to 2019\\ Relevé en surface & Abondance: indice du frai & 1951 to 1987\\ Relevé de plongée & Abondance: indice du frai & 1988 to 2019\\* \end{longtable}
+
+The code above appears quite complex at first, but essentially the data file is read in, and each column is translated with some rules, and finally the column names are translated. The \texttt{rosettafish} package has an English-French dictionary for DFO nationwide that you can contribute to by going to the GitHub repository for \link{https://github.com/pbs-assess/rosettafish}{rosettafish} and reading the README which tells you how.
+
+When you choose how you want to present your table, you may (should) choose a simpler data format. This particular one has words which may or may not be inside parentheses in the \texttt{Source} column, and words which may be separated by colons in the \texttt{Data} column. Those are all parsed out in the function which makes the code complex. The \texttt{Years} column is also complex because it contains the word ``to'', e.g.~\texttt{1972\ to\ 2019} which when translated to French becomes \texttt{De\ 1972\ à\ 2019} which is difficult to write code for. If you chose to have two columns for the year range instead (\texttt{Start\ year} and \texttt{End\ year}) and two columns to represent where the data came from (\texttt{Data\ type} and \texttt{Data}) this function would be much simpler. The next code chunk does exactly this.
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{d }\OtherTok{\textless{}{-}}\NormalTok{ readr}\SpecialCharTok{::}\FunctionTok{read\_csv}\NormalTok{(}\FunctionTok{file.path}\NormalTok{(}\StringTok{"data"}\NormalTok{, }\StringTok{"herring{-}simple.csv"}\NormalTok{))}
+\NormalTok{input\_data\_table }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(tab,}
+                             \AttributeTok{cap =} \StringTok{""}\NormalTok{,}
+\NormalTok{                             ...)\{}
+  \CommentTok{\# Source column}
+\NormalTok{  tab}\SpecialCharTok{$}\NormalTok{Source }\OtherTok{\textless{}{-}} \FunctionTok{en2fr}\NormalTok{(tab}\SpecialCharTok{$}\NormalTok{Source, }\AttributeTok{allow\_missing =} \ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{  tab}\SpecialCharTok{$}\StringTok{\textasciigrave{}}\AttributeTok{Data type}\StringTok{\textasciigrave{}} \OtherTok{\textless{}{-}} \FunctionTok{en2fr}\NormalTok{(tab}\SpecialCharTok{$}\StringTok{\textasciigrave{}}\AttributeTok{Data type}\StringTok{\textasciigrave{}}\NormalTok{, }\AttributeTok{allow\_missing =} \ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{  tab}\SpecialCharTok{$}\NormalTok{Data }\OtherTok{\textless{}{-}} \FunctionTok{en2fr}\NormalTok{(tab}\SpecialCharTok{$}\NormalTok{Data, }\AttributeTok{allow\_missing =} \ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{  tab}\SpecialCharTok{$}\NormalTok{Data[}\FunctionTok{is.na}\NormalTok{(tab}\SpecialCharTok{$}\NormalTok{Data)] }\OtherTok{\textless{}{-}} \StringTok{"{-}{-}"}
+  \FunctionTok{names}\NormalTok{(tab) }\OtherTok{\textless{}{-}} \FunctionTok{en2fr}\NormalTok{(}\FunctionTok{names}\NormalTok{(tab))}
+
+  \FunctionTok{csas\_table}\NormalTok{(tab,}
+             \AttributeTok{format =} \StringTok{"latex"}\NormalTok{,}
+             \AttributeTok{bold\_header =} \ConstantTok{FALSE}\NormalTok{,}
+             \AttributeTok{caption =}\NormalTok{ cap,}
+             \AttributeTok{font\_size =} \DecValTok{10}\NormalTok{,}
+\NormalTok{             ...)}
+\NormalTok{\}}
+\FunctionTok{input\_data\_table}\NormalTok{(d)}
+\end{Highlighting}
+\end{Shaded}
+\begingroup\fontsize{10}{12}\selectfont \begingroup\fontsize{10}{12}\selectfont  
+\begin{longtable}[t]{lllll} \caption{\label{tab:herring-simple}}\\ \toprule Source & Type de données & Données & Année de début & Fin de l'année\\ \midrule \endfirsthead \multicolumn{5}{l}{\textit{... Continued from previous page}} \\ \hline \caption*{}\\ \toprule Source & Type de données & Données & Année de début & Fin de l'année\\ \midrule \endhead \hline \multicolumn{5}{l}{\textit{Continued on next page ...}} \\ \endfoot \bottomrule \endlastfoot Pêche au hareng rogué au filet maillant & Prise & -- & 1972 & 2019\\ Pêche au hareng rogué à la senne & Prise & -- & 1972 & 2019\\ Autres pêches & Prise & -- & 1951 & 2019\\ Pêche d'essai & Biologique & Nombre selon l’âge & 1975 & 2019\\ Pêche d'essai & Biologique & Poids selon l’âge & 1975 & 2019\\ Pêche au hareng rogué à la senne & Biologique & Nombre selon l’âge & 1972 & 2019\\ Pêche au hareng rogué à la senne & Biologique & Poids selon l’âge & 1972 & 2019\\ Pêche au hareng rogué au filet maillant & Biologique & Nombre selon l’âge & 1972 & 2019\\ Autres pêches & Biologique & Nombre selon l’âge & 1951 & 2019\\ Autres pêches & Biologique & Poids selon l’âge & 1951 & 2019\\ Relevé en surface & Abondance & Indice du frai & 1951 & 1987\\ Relevé de plongée & Abondance & Indice du frai & 1988 & 2019\\* \end{longtable}
+
+\endgroup{} \endgroup{}
+
+Clearly, this code is much simpler. The \texttt{font\_size} argument had to be added to the \texttt{csas\_table()} call to make the table fit on the page, as there are now two extra columns.
+
+The first time this code was run for the French version though, an error was issued:
+\begin{quote}
+\emph{Error: The following terms are not in the translation database: Data type, Start year, End year}
+\end{quote}
+This means that \texttt{rosettafish} has no idea what the French translation is for these column names. At this point, we would either change the names of the columns in the data file and code to something \texttt{rosettafish} knows about, or add the translation of our terms into \texttt{rosettafish}. That is what we have done, so this should compile for you with a correct translation. In your workflow, once you have added your translation and re-installed the \texttt{rosettafish} package, your terms will be recognized and translated. A great online translator for this is \link{https://www.deepl.com/en/home}{DeepTL}.
+
+\begin{appendices}
+\counterwithin{figure}{section}
+\counterwithin{table}{section}
+\counterwithin{equation}{section}
+
+\clearpage
+
+\section{THE FIRST APPENDIX}
+\label{app:first-appendix}
+
+Appendices can be in one file, or if they are larger than a couple of pages you should add a new file for each new appendix. In the first appendix, you \textbf{must} include two special lines of code at the top to tell \texttt{csasdown} that you are now numbering sections as appendices. Look in \texttt{05\_appendices.Rmd} to see these. The last line of your last appendix \textbf{must} be another special line of code which tells \texttt{csasdown} to end the appendices sections. In this document it can be found at the end of \texttt{05\_appendices.Rmd}.
+
+Figures and tables will now be prepended with the appendix letter:
+
+
+
+
+\begin{figure}[htb]
+
+{\centering \pdftooltip{\includegraphics[width=6in]{knitr-figs-pdf/test1-1}}{Figure \ref{fig:test1}} 
+
+}
+
+\caption{English version of the test1 figure caption}\label{fig:test1}
+\end{figure}
+\begin{longtable}[]{@{}lr@{}}
+\caption{\label{tab:test2}English verion of the test2 table caption}\tabularnewline
+\toprule\noalign{}
+x & y \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+x & y \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+a & 1 \\
+a & 2 \\
+b & 3 \\
+\end{longtable}
+Here's an equation. Note that it is automatically given a label on the right side of the page as in the main document, but it has the appendix letter before it. Each appendix will have its own set of equations starting at 1.
+\begin{equation}
+  1 + 1
+  \label{eq:test2}
+\end{equation}
+See Equation~\ref{eq:test2} for the example equation.
+
+See Figure~\ref{fig:test1} for the example appendix figure.
+
+See Table~\ref{tab:test2} for the example appendix table.
+
+\clearpage
+
+\section{THE SECOND APPENDIX, FOR FUN}
+\label{app:second-appendix}
+
+The label \texttt{\#app:} in the appendix section headers tell \texttt{csasdown} to start a new appendix, and the next letter in the alphabet will be used for the appendix, and prepended to figure and table names. For example, this appendix's whole section header looks like:
+
+\texttt{\#\ THE\ SECOND\ APPENDIX,\ FOR\ FUN\ \{\#app:second-appendix\}}
+
+To illustrate the new labeling of appendices, here are a table and figure:
+
+
+
+
+\begin{figure}[htb]
+
+{\centering \pdftooltip{\includegraphics[width=6in]{knitr-figs-pdf/test1b-1}}{Figure \ref{fig:test1b}} 
+
+}
+
+\caption{English version of the test1b figure caption}\label{fig:test1b}
+\end{figure}
+\begin{longtable}[]{@{}lr@{}}
+\caption{\label{tab:test2b}English verion of the test2b table caption}\tabularnewline
+\toprule\noalign{}
+x & y \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+x & y \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+a & 1 \\
+a & 2 \\
+b & 3 \\
+\end{longtable}
+And references to them\ldots{}
+
+See Figure~\ref{fig:test1b} for the example appendix figure.
+
+See Table~\ref{tab:test2b} for the example appendix table.
+
+\end{appendices}
+
+\clearpage
+
+\hypertarget{references}{%
+\section{References}\label{references}}
+
+\noindent \vspace{-2em} \setlength{\parindent}{-0.2in} \setlength{\leftskip}{0.2in} \setlength{\parskip}{8pt}
+
+\hypertarget{refs}{}
+\begin{CSLReferences}{1}{0}
+\leavevmode{\hypertarget{ref-edwards2013}{}}%
+Edwards, A.M., Haigh, R., and Starr, P.J. 2014. Pacific {Ocean Perch} ({\emph{Sebastes alutus}}) stock assessment for the north and west coasts of {Haida Gwaii, British Columbia}. DFO Can. Sci. Advis. Sec. Res. Doc. 2013/092. vi + 126~p.
+
+\leavevmode{\hypertarget{ref-francis2011}{}}%
+Francis, R.I.C.C. 2011. Data weighting in statistical fisheries stock assessment models. Can. J. Fish. Aquat. Sci. 68(6): 1124--1138.
+
+\leavevmode{\hypertarget{ref-swainbenoit2015}{}}%
+Swain, D.P., and Benoît, H.P. 2015. Extreme increases in natural mortality prevent recovery of collapsed fish populations in a {N}orthwest {A}tlantic ecosystem. Mar. Ecol. Prog. Ser. 519: 165--182.
+
+\end{CSLReferences}
+\end{document}
