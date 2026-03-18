@@ -36,7 +36,7 @@ if (nrow(missing_smus) == 0) {
   )
   ft <- flextable::set_caption(
     ft,
-    caption = "Missing SMUs grouped by Area and Species. Use this table to see if there is any missing data that biologists need to submit (i.e., they forgot to submit data for a certain SMU). Note that Odd Year or Even Year Pink data may show up. However, they may not be applicable to the current year, and can be ignored (e.g., there will be no odd year Pink data in 2026). Once you are happy with all the entries, you can turn off this table from showing up in the report, and re-knit the document. This ensures the table numbers in the rest of the document are accurate. You can prevent this table from showing up by going to the 02_results.Rmd file and on line 3 of the code change results = T to results = F in the section that is in between the curly brackets. Doing this tells R Markdown not to include the table in the final output."
+    caption = "Missing SMUs grouped by Area and Species."
   )
   ft = flextable::autofit(ft)
   ft = flextable::set_table_properties(ft, layout = "autofit")
@@ -55,7 +55,7 @@ if (nrow(missing_smus) == 0) {
   )
   ft <- flextable::set_caption(
     ft,
-    caption = "Missing SMUs grouped by Area and Species"
+    caption = "Use this table to see if there is any missing data that biologists need to submit (i.e., they forgot to submit data for a certain SMU). Note that Odd Year or Even Year Pink data may show up. However, they may not be applicable to the current year, and can be ignored (e.g., there will be no odd year Pink data in 2026). Once you are happy with all the entries, you can turn off this table from showing up in the report, and re-knit the document. This ensures the table numbers in the rest of the document are accurate. You can prevent this table from showing up by going to the 02_results.Rmd file and on line 3 of the code change results = T to results = F in the section that is in between the curly brackets. Doing this tells R Markdown not to include the table in the final output."
   )
   ft = flextable::autofit(ft)
   ft = flextable::set_table_properties(ft, layout = "autofit")
@@ -114,7 +114,7 @@ if (nrow(missing_cus) == 0) {
 
   ft <- flextable::set_caption(
     ft,
-    caption = "Missing CUs (Area, Species, Code, Name). Note that CUs belonging to SMUs that have already been reported are excluded. See the table above for similar warnings and instructions for not including this table in the final version of the report."
+    caption = "Missing CUs (Area, Species, Code, Name). Note that CUs belonging to SMUs that have already been reported are excluded."
   )
 
   ft = flextable::autofit(ft)
@@ -138,7 +138,7 @@ if (nrow(missing_cus) == 0) {
 
   ft <- flextable::set_caption(
     ft,
-    caption = "Missing CUs (Area, Species, Code, Name). Note that CUs belonging to SMUs that have already been reported are excluded."
+    caption = "Missing CUs (Area, Species, Code, Name). Note that CUs belonging to SMUs that have already been reported are excluded. See the table above for similar warnings and instructions for not including this table in the final version of the report."
   )
 
   ft = flextable::autofit(ft)
