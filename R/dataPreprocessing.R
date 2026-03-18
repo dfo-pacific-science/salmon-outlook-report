@@ -59,13 +59,13 @@ hatcheryIndicator = read_excel(
 # Required sheets: Salmon_Outlook_Report (SMU), cu_outlook_records (CU)
 # Optional: other_records (Hatchery/Indicator stocks)
 
-dummyPath = "data/01Mar2026Data.xlsx"  # <--- ENTER FILE PATH HERE
+dataPath = "data/01Mar2026Data.xlsx"  # <--- ENTER FILE PATH HERE
 
 # Get sheet names
-sheet_names = readxl::excel_sheets(dummyPath)
+sheet_names = readxl::excel_sheets(dataPath)
 
 # Read all sheets into a named list of data frames
-df_list = map(sheet_names, ~ read_excel(dummyPath, sheet = .x)) %>%
+df_list = map(sheet_names, ~ read_excel(dataPath, sheet = .x)) %>%
   set_names(sheet_names)
 
 # Assign each sheet to the global environment as its own data frame
