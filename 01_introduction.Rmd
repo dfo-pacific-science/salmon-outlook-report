@@ -1,7 +1,7 @@
 # Introduction {#sec:introduction}
 
 ## PURPOSE
-
+hi amelia!!
 The purpose of this document is to provide an ‘outlook’ of expected abundance of Pacific salmon in 2026 to inform the harvest planning process.
 
 The Outlook provides either an expected abundance for those stocks with statistical forecasts or a categorical abundance expectation based on expert opinion. The categorical outlook and the statistical forecast can be at the Stock Management Unit (SMU), Conservation Unit (CU) or even finer level.
