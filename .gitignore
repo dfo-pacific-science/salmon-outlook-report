@@ -12,6 +12,8 @@ knitr-figs-pdf
 reference-materials
 models*
 
+_book
+
 techreport.Rmd
 techreport.tex
 
