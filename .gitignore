@@ -3,9 +3,6 @@
 .RData
 .DS_Store
 
-updated_presentation.pptx
-
-_book
 csas-style
 knitr-cache-docx
 knitr-cache-pdf
@@ -24,7 +21,6 @@ techreport.tex
 *.knit.md
 *.log
 *.pdf
-*.png
 *.rda
 *.rds
 *.Rproj
