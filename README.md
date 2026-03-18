@@ -173,12 +173,49 @@ you'll need to add more, there are various online guides that provide more infor
 
 ## _book
 
-After knitting the report, the technical report Word document is
-generated here as:
+After you knit the report, the technical report Word file is generated here as:
 
 `techreport.docx`
 
+This folder is intentionally ignored by Git (`_book` is listed in `.gitignore`), so it will **not** appear on GitHub.  
+The reason is that Word documents can be large, and it's generally discouraged to commit large, auto‑generated files.
+
+The folder will still appear locally on your computer, and you can open the generated report there.
+
+
 ------------------------------------------------------------------------
+
+## figs
+
+This folder contains the .png files used in the R Markdown report (Figures 1 and 2).
+It also includes a placeholder map that is inserted into the PowerPoint version of the report.
+The placeholder map will need to be replaced with the final maps once they are available.
+
+------------------------------------------------------------------------
+
+## .gitignore
+
+This file lists folders and file types that should not be uploaded to GitHub.
+Most of the entries are automatically created by the `csasdown` package and can safely be left as‑is.
+The .gitignore file is also useful if you want to keep certain files private, such as raw data.
+If needed, you can add your data/ folder to .gitignore (it’s currently fine to include it since all data here is public).
+The files listed in .gitignore will still exist on your local computer, but they will not be tracked by Git or uploaded to GitHub.
+If you ever want to customize the ignore rules, there are many online resources explaining how .gitignore works.
+
+------------------------------------------------------------------------
+
+## _bookdown.yml
+
+This file tells bookdown the order of your .Rmd files and which ones should be included in the final report.
+If you add a new .Rmd file (such as a new appendix), you need to list it here so it appears in the final document.
+Note:
+You’ll often find online advice saying you can change fonts, spacing, margins, or other formatting by editing YAML settings.
+This typically does not work with `csasdown`.
+The package uses its own formatting templates, and most visual settings are controlled behind the scenes. As a result, changes you make in _bookdown.yml or other YAML headers may have no effect.
+If you need formatting changes that `csasdown` doesn’t expose, you may need to check the package documentation or ask the `csasdown` maintainers, since some settings can’t be adjusted in the usual bookdown/R Markdown way.
+
+------------------------------------------------------------------------
+
 
 ## R Markdown Files
 
